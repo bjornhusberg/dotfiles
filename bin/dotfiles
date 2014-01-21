@@ -40,7 +40,7 @@ function calculateChecksum() {
   export checksum="$password"
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
-  for file in $(find $dotfiles_dir ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
     file=${file:${#dotfiles_dir}}
     file_checksum=$(shasum -a 256 "$dotfiles_dir/$file")
     checksum="$checksum${file_checksum:0:64}"
@@ -63,7 +63,7 @@ function diffFiles() {
   result=0
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
-  for file in $(find $dotfiles_dir ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
     file=${file:${#dotfiles_dir}}
     isUpdated $file
     if [[ "$?" != "0" ]]; then
@@ -119,7 +119,7 @@ function deleteFiles() {
 function commit() {
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
-  for file in $(find $dotfiles_dir ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
     file=${file:${#dotfiles_dir}}
     isUpdated $file
     if [[ "$?" != "0" ]]; then
@@ -133,7 +133,7 @@ function commit() {
 function update() {
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
-  for file in $(find $dotfiles_dir ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
     file=${file:${#dotfiles_dir}}
     isUpdated $file
     if [[ "$?" != "0" ]]; then
