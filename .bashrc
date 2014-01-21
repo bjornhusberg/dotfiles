@@ -30,10 +30,8 @@ elif [ $OSTYPE == "darwin13" ]; then
 fi
 
 
-# Dropbox shell sync
-if [ -d ~/Dropbox ]; then
-  shell
-fi
+# Dotfiles sync
+dotfiles
 
 # Dev environment
 if [ -f ~/.devenv ]; then
