@@ -1,0 +1,221 @@
+#!/bin/bash
+
+dotfiles_dir="$HOME/.dotfiles"
+dotfiles_checksum_file="$dotfiles_dir/.dotfiles.md5"
+
+if [ ! -d "$dotfiles_dir" ]; then
+  echo "Initializing dotfiles."
+  mkdir -p "$dotfiles_dir"
+  pushd . > /dev/null
+  cd "$dotfiles_dir"
+  git clone git@github.com:bjornhusberg/dotfiles.git "$dotfiles_dir"
+  popd > /dev/null
+fi
+
+function repositoryPull() {
+  pushd . > /dev/null
+  cd "$dotfiles_dir"
+  git pull origin master
+  popd > /dev/null
+}
+
+function repositoryPush() {
+  pushd . > /dev/null
+  cd "$dotfiles_dir"
+  git add --all .
+  git commit -m "Dotfiles update from $HOSTNAME"
+  git push origin master
+  popd > /dev/null
+}
+
+function readPassword() {
+  stty -echo
+  read -p "Password: " password; echo
+  stty echo
+}
+
+function calculateChecksum() {
+  export checksum="$password"
+  OLDIFS=$IFS
+  IFS=$(echo -en "\n\b")
+  for file in $(find $dotfiles_dir ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+    file=${file:${#dotfiles_dir}}
+    file_checksum=$(shasum -a 256 "$dotfiles_dir/$file")
+    checksum="$checksum${file_checksum:0:64}"
+  done
+  IFS=$OLDIFS
+  checksum=$(echo "$checksum" | shasum -a 256)
+}
+
+function isUpdated() {
+  if [[ ! -f "$HOME$1" ]]; then
+    return 1
+  elif [[ "$HOME$1" -ot "$dotfiles_dir$1"  
+       || "$HOME$1" -nt "$dotfiles_dir$1" ]]; then
+    return 1
+  fi
+  return 0
+}
+
+function diffFiles() {
+  result=0
+  OLDIFS=$IFS
+  IFS=$(echo -en "\n\b")
+  for file in $(find $dotfiles_dir ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+    file=${file:${#dotfiles_dir}}
+    isUpdated $file
+    if [[ "$?" != "0" ]]; then
+      if [ "$1" == "diff" ]; then
+        if [[ ! -f "$HOME$file" ]]; then
+          echo "Missing file: $file"
+        else
+          diff "$dotfiles_dir$file" "$HOME$file"
+        fi
+      else
+        diff -q -N "$dotfiles_dir$file" "$HOME$file" > /dev/null
+      fi
+      if [ "$?" != "0" ]; then
+        result=1
+      fi
+    fi
+  done
+  IFS=$OLDIFS
+  return $result
+}
+
+function addFiles() {
+  while (( "$#" )); do
+    file="/$1"
+    if [ -f "$HOME$file" ]; then
+      if [ ! -f "$dotfiles_dir$file" ]; then
+        echo "Adding $file"
+        rmdir "$dotfiles_dir$file" 2> /dev/null
+        cp -p "$HOME$file" "$dotfiles_dir$file"
+      else
+        echo "File already exists: $file"
+      fi
+    else
+      echo "File not found: $file"
+    fi
+    shift
+  done
+}
+
+function deleteFiles() {
+  while (( "$#" )); do
+    file="$1"
+    if [ -f "$dotfiles_dir$file" ]; then
+      echo "Deleting $file"
+      rm "$dotfiles_dir$file"
+    else
+      echo "File not found: $file"
+    fi
+    shift
+  done
+}
+
+function commit() {
+  OLDIFS=$IFS
+  IFS=$(echo -en "\n\b")
+  for file in $(find $dotfiles_dir ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+    file=${file:${#dotfiles_dir}}
+    isUpdated $file
+    if [[ "$?" != "0" ]]; then
+      echo "Committing file $file"
+      cp -p "$HOME$file" "$dotfiles_dir$file"
+    fi
+  done
+  IFS=$OLDIFS
+}
+
+function update() {
+  OLDIFS=$IFS
+  IFS=$(echo -en "\n\b")
+  for file in $(find $dotfiles_dir ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+    file=${file:${#dotfiles_dir}}
+    isUpdated $file
+    if [[ "$?" != "0" ]]; then
+      echo "Updating $file"
+      rm -f "$HOME$file"
+      rmdir "$HOME$file" 2> /dev/null
+      cp -p "$dotfiles_dir$file" "$HOME$file"
+    fi
+  done
+  IFS=$OLDIFS
+}
+
+function updateChecksum() {
+  calculateChecksum
+  echo "$checksum" > "$dotfiles_checksum_file"
+}
+
+function getDotfilesChecksum() {
+  dotfiles_checksum=$(cat "$dotfiles_checksum_file")
+}
+
+function verifyChecksum() {
+  calculateChecksum
+  getDotfilesChecksum
+  if [ "$checksum" != "$dotfiles_checksum" ]; then
+    echo "*** CHECKSUM VERIFICATION FAILED ***"
+    exit 1
+  fi
+}
+
+command="$1"
+shift
+
+if [ "$command" = "update" ]; then
+  repositoryPull
+  diffFiles diff
+  echo "Overwriting local dotfiles. Enter password or press Ctrl-C to abort now!"
+  readPassword
+  verifyChecksum
+  update
+elif [ "$command" = "commit" ]; then
+  diffFiles diff
+  echo "Overwriting remote dotfiles. Enter password or press Ctrl-C to abort now!"
+  readPassword
+  verifyChecksum
+  commit
+  updateChecksum
+  repositoryPush
+elif [ "$command" = "add" ]; then
+  echo "Overwriting remote dotfiles. Enter password or press Ctrl-C to abort now!"
+  readPassword
+  verifyChecksum
+  addFiles "$@"
+  updateChecksum
+  repositoryPush
+elif [ "$command" = "delete" ]; then
+  echo "Deleting remote dotfiles. Enter password or press Ctrl-C to abort now!"
+  readPassword
+  verifyChecksum
+  deleteFiles "$@"
+  updateChecksum
+  repositoryPush
+elif [ "$command" = "checksum" ]; then
+  echo "Updating remote dotfiles checksum. Enter password or press Ctrl-C to abort now!"
+  readPassword
+  updateChecksum
+  repositoryPush
+elif [[ "$command" = "" || "$command" = "diff" ]]; then
+  repositoryPull
+  diffFiles "$command"
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles are out of sync! [V]iew, [U]pdate, [C]ommit, [I]gnore?"
+    read -n 1 choice
+    echo
+    if [[ "$choice" == "v" || "$choice" == "V" ]]; then
+      $0 diff
+    elif [[ "$choice" == "u" || "$choice" == "U" ]]; then
+      $0 update
+    elif [[ "$choice" == "c" || "$choice" == "C" ]]; then
+      $0 commit
+    fi
+  fi  
+else
+  echo "Usage: $0 [diff|update|commit|add|delete|checksum]"
+  exit 1
+fi
+
