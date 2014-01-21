@@ -1,0 +1,15 @@
+[submodule "lib/index"]
+	path = lib/index
+	url = git@github.com:bjornhusberg/index.git
+[submodule "lib/shell"]
+	path = lib/shell
+	url = git@github.com:bjornhusberg/shell.git
+[submodule "lib/wallpaper"]
+	path = lib/wallpaper
+	url = git@github.com:bjornhusberg/wallpaper.git
+[submodule "lib/arkivera"]
+	path = lib/arkivera
+	url = git@github.com:bjornhusberg/arkivera.git
+[submodule "lib/colorant"]
+	path = lib/colorant
+	url = git@github.com:bjornhusberg/colorant.git
