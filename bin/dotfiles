@@ -45,8 +45,9 @@ function repositoryPush() {
   fi
   pushd . > /dev/null
   cd "$dotfiles_dir"
-  git commit -m "$comment"
-  git push origin master
+  git commit -a -m "$comment"
+  git submodule foreach git commit -a -m "$comment"
+  git push --recurse-submodules=on-demand
   popd > /dev/null
 }
 
