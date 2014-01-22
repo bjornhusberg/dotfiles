@@ -17,24 +17,11 @@ if [ ! -d "$dotfiles_dir" ]; then
   command="pull"
 fi
 
-function repositoryAdd() {
-  pushd . > /dev/null
-  cd "$dotfiles_dir"
-  git add "$1"
-  popd > /dev/null
-}
-
-function repositoryRemove() {
-  pushd . > /dev/null
-  cd "$dotfiles_dir"
-  git rm "$1"
-  popd > /dev/null
-}
-
 function repositoryPull() {
   pushd . > /dev/null
   cd "$dotfiles_dir"
   git pull -q origin master
+  git submodule foreach git -q pull origin master
   popd > /dev/null
 }
 
@@ -48,13 +35,13 @@ function repositoryPush() {
   for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
     pushd . > /dev/null
     cd "$submodule"
-    git add .
-    git commit -a -m "$comment"
+    git add -A .
+    git commit -m "$comment"
     git push
     popd > /dev/null
     git add "$submodule"
   done
-  git add .
+  git add -A .
   git commit -m "$comment"
   git push
   popd > /dev/null
@@ -121,7 +108,6 @@ function addFile() {
       echo "Adding $file"
       rmdir "$dotfiles_dir/$file" 2> /dev/null
       cp -p "$HOME/$file" "$dotfiles_dir/$file"
-      repositoryAdd "$file"
     else
       echo "File already exists: $file"
     fi
@@ -134,7 +120,6 @@ function deleteFile() {
   if [ -f "$dotfiles_dir/$file" ]; then
     echo "Deleting $file"
     rm "$dotfiles_dir/$file"
-    repositoryRemove "$file"
   else
     echo "File not found: $file"
   fi
