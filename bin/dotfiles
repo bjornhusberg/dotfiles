@@ -4,7 +4,7 @@ dotfiles_dir="$HOME/.dotfiles"
 dotfiles_checksum_file="$dotfiles_dir/.dotfiles.md5"
 
 command="$1"
-file="$2"
+attribute="$2"
 
 if [ ! -d "$dotfiles_dir" ]; then
   echo "Initializing dotfiles."
@@ -39,9 +39,13 @@ function repositoryPull() {
 }
 
 function repositoryPush() {
+  comment="$1"
+  if [ "$comment" == "" ]; then
+    comment="Dotfile updates from $HOSTNAME"
+  fi
   pushd . > /dev/null
   cd "$dotfiles_dir"
-  git commit -m "Dotfiles update from $HOSTNAME"
+  git commit -m "$comment"
   git push origin master
   popd > /dev/null
 }
@@ -192,29 +196,29 @@ elif [ "$command" = "push" ]; then
   verifyChecksum
   commitFiles
   updateChecksum
-  repositoryPush
+  repositoryPush "$parameter"
 elif [ "$command" = "add" ]; then
   echo "Overwriting remote dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
   repositoryPull
   verifyChecksum
-  addFile "$file"
+  addFile "$parameter"
   updateChecksum
-  repositoryPush
+  repositoryPush "Added $parameter"
 elif [ "$command" = "rm" ]; then
   echo "Deleting remote dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
   repositoryPull
   verifyChecksum
-  deleteFile "$file"
+  deleteFile "$parameter"
   updateChecksum
-  repositoryPush
+  repositoryPush "Removed $parameter"
 elif [ "$command" = "checksum" ]; then
   echo "Updating remote dotfiles checksum. Enter password or press Ctrl-C to abort now!"
   readPassword
   repositoryPull
   updateChecksum
-  repositoryPush
+  repositoryPush "Updated checksum"
 elif [ "$command" = "diff" ]; then
   repositoryPull
   diffFiles "true"
