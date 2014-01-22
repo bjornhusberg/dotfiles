@@ -3,6 +3,9 @@
 dotfiles_dir="$HOME/.dotfiles"
 dotfiles_checksum_file="$dotfiles_dir/.dotfiles.md5"
 
+command="$1"
+file="$2"
+
 if [ ! -d "$dotfiles_dir" ]; then
   echo "Initializing dotfiles."
   mkdir -p "$dotfiles_dir"
@@ -11,6 +14,7 @@ if [ ! -d "$dotfiles_dir" ]; then
   git clone git@github.com:bjornhusberg/dotfiles.git .
   git submodule update --init
   popd > /dev/null
+  command="pull"
 fi
 
 function repositoryAdd() {
@@ -97,37 +101,29 @@ function diffFiles() {
   return $result
 }
 
-function addFiles() {
-  while (( "$#" )); do
-    file="/$1"
-    if [ -f "$HOME$file" ]; then
-      if [ ! -f "$dotfiles_dir$file" ]; then
-        echo "Adding $file"
-        rmdir "$dotfiles_dir$file" 2> /dev/null
-        cp -p "$HOME$file" "$dotfiles_dir$file"
-        repositoryAdd "$dotfiles_dir$file"
-      else
-        echo "File already exists: $file"
-      fi
+function addFile() {
+  if [ -f "$HOME/$file" ]; then
+    if [ ! -f "$dotfiles_dir/$file" ]; then
+      echo "Adding $file"
+      rmdir "$dotfiles_dir/$file" 2> /dev/null
+      cp -p "$HOME/$file" "$dotfiles_dir/$file"
+      repositoryAdd "$file"
     else
-      echo "File not found: $file"
+      echo "File already exists: $file"
     fi
-    shift
-  done
+  else
+    echo "File not found: $file"
+  fi
 }
 
-function deleteFiles() {
-  while (( "$#" )); do
-    file="$1"
-    if [ -f "$dotfiles_dir$file" ]; then
-      echo "Deleting $file"
-      rm "$dotfiles_dir$file"
-      repositoryRemove "$dotfiles_dir$file"
-    else
-      echo "File not found: $file"
-    fi
-    shift
-  done
+function deleteFile() {
+  if [ -f "$dotfiles_dir/$file" ]; then
+    echo "Deleting $file"
+    rm "$dotfiles_dir/$file"
+    repositoryRemove "$file"
+  else
+    echo "File not found: $file"
+  fi
 }
 
 function commitFiles() {
@@ -180,9 +176,6 @@ function verifyChecksum() {
   fi
 }
 
-command="$1"
-shift
-
 if [ "$command" = "pull" ]; then
   repositoryPull
   diffFiles "true"
@@ -204,7 +197,7 @@ elif [ "$command" = "add" ]; then
   readPassword
   repositoryPull
   verifyChecksum
-  addFiles "$@"
+  addFile "$file"
   updateChecksum
   repositoryPush
 elif [ "$command" = "rm" ]; then
@@ -212,7 +205,7 @@ elif [ "$command" = "rm" ]; then
   readPassword
   repositoryPull
   verifyChecksum
-  deleteFiles "$@"
+  deleteFile "$file"
   updateChecksum
   repositoryPush
 elif [ "$command" = "checksum" ]; then
@@ -234,4 +227,5 @@ else
   echo "Usage: $0 [diff|pull|push|add|rm|checksum] files ..."
   exit 1
 fi
+
 
