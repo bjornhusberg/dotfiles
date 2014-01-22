@@ -180,7 +180,6 @@ if [ ! -d "$dotfiles_dir" ]; then
   popd > /dev/null
   verifyChecksum
   updateFiles
-  exit
 elif [ "$command" = "pull" ]; then
   repositoryPull
   diffFiles "true"
