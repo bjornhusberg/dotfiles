@@ -6,21 +6,6 @@ dotfiles_checksum_file="$dotfiles_dir/.dotfiles.md5"
 command="$1"
 parameter="$2"
 
-if [ ! -d "$dotfiles_dir" ]; then
-  echo "Initializing dotfiles."
-  mkdir -p "$dotfiles_dir"
-  pushd . > /dev/null
-  cd "$dotfiles_dir"
-  git clone git@github.com:bjornhusberg/dotfiles.git .
-  git submodule update --init --recursive
-  popd > /dev/null
-  echo "Overwriting local dotfiles. Enter password or press Ctrl-C to abort now!"
-  readPassword
-  verifyChecksum
-  updateFiles
-  exit
-fi
-
 function repositoryPull() {
   pushd . > /dev/null
   cd "$dotfiles_dir"
@@ -184,7 +169,19 @@ function verifyChecksum() {
   fi
 }
 
-if [ "$command" = "pull" ]; then
+if [ ! -d "$dotfiles_dir" ]; then
+  echo "Initializing dotfiles. Enter password or press Ctrl-C to abort now!"
+  readPassword
+  mkdir -p "$dotfiles_dir"
+  pushd . > /dev/null
+  cd "$dotfiles_dir"
+  git clone git@github.com:bjornhusberg/dotfiles.git .
+  git submodule update --init --recursive
+  popd > /dev/null
+  verifyChecksum
+  updateFiles
+  exit
+elif [ "$command" = "pull" ]; then
   repositoryPull
   diffFiles "true"
   echo "Overwriting local dotfiles. Enter password or press Ctrl-C to abort now!"
