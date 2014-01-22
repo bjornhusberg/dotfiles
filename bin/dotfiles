@@ -36,14 +36,20 @@ function repositoryPush() {
     pushd . > /dev/null
     cd "$submodule"
     git add -A .
-    git commit -m "$comment"
-    git push
+    status=$(git status --porcelain)
+    if [ "$status" != "" ]; then
+      git commit -m "$comment"
+      git push
+    fi
     popd > /dev/null
     git add "$submodule"
   done
   git add -A .
-  git commit -m "$comment"
-  git push
+  status=$(git status --porcelain)
+  if [ "$status" != "" ]; then
+    git commit -m "$comment"
+    git push
+  fi
   popd > /dev/null
 }
 
