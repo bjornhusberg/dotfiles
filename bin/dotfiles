@@ -47,6 +47,7 @@ function repositoryPush() {
   cd "$dotfiles_dir"
   for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
     pushd . > /dev/null
+    cd "$submodule"
     git add .
     git commit -a -m "$comment"
     git push
