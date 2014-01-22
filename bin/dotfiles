@@ -4,7 +4,7 @@ dotfiles_dir="$HOME/.dotfiles"
 dotfiles_checksum_file="$dotfiles_dir/.dotfiles.md5"
 
 command="$1"
-attribute="$2"
+parameter="$2"
 
 if [ ! -d "$dotfiles_dir" ]; then
   echo "Initializing dotfiles."
