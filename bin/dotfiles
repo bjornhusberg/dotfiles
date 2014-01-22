@@ -14,17 +14,30 @@ if [ ! -d "$dotfiles_dir" ]; then
   popd > /dev/null
 fi
 
+function repositoryAdd() {
+  pushd . > /dev/null
+  cd "$dotfiles_dir"
+  git add "$1"
+  popd > /dev/null
+}
+
+function repositoryRemove() {
+  pushd . > /dev/null
+  cd "$dotfiles_dir"
+  git rm "$1"
+  popd > /dev/null
+}
+
 function repositoryPull() {
   pushd . > /dev/null
   cd "$dotfiles_dir"
-  git pull origin master
+  git pull -q origin master
   popd > /dev/null
 }
 
 function repositoryPush() {
   pushd . > /dev/null
   cd "$dotfiles_dir"
-  git add --all .
   git commit -m "Dotfiles update from $HOSTNAME"
   git push origin master
   popd > /dev/null
@@ -42,6 +55,7 @@ function calculateChecksum() {
   IFS=$(echo -en "\n\b")
   for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
     file=${file:${#dotfiles_dir}}
+    echo $file
     file_checksum=$(shasum -a 256 "$dotfiles_dir/$file")
     checksum="$checksum${file_checksum:0:64}"
   done
@@ -67,7 +81,7 @@ function diffFiles() {
     file=${file:${#dotfiles_dir}}
     isUpdated $file
     if [[ "$?" != "0" ]]; then
-      if [ "$1" == "diff" ]; then
+      if [ "$1" == "true" ]; then
         if [[ ! -f "$HOME$file" ]]; then
           echo "Missing file: $file"
         else
@@ -93,6 +107,7 @@ function addFiles() {
         echo "Adding $file"
         rmdir "$dotfiles_dir$file" 2> /dev/null
         cp -p "$HOME$file" "$dotfiles_dir$file"
+        repositoryAdd "$file"
       else
         echo "File already exists: $file"
       fi
@@ -109,6 +124,7 @@ function deleteFiles() {
     if [ -f "$dotfiles_dir$file" ]; then
       echo "Deleting $file"
       rm "$dotfiles_dir$file"
+      repositoryRemove "$file"
     else
       echo "File not found: $file"
     fi
@@ -116,7 +132,7 @@ function deleteFiles() {
   done
 }
 
-function commit() {
+function commitFiles() {
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
   for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
@@ -125,12 +141,13 @@ function commit() {
     if [[ "$?" != "0" ]]; then
       echo "Committing file $file"
       cp -p "$HOME$file" "$dotfiles_dir$file"
+      repositoryAdd ".$file"
     fi
   done
   IFS=$OLDIFS
 }
 
-function update() {
+function updateFiles() {
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
   for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
@@ -167,31 +184,34 @@ function verifyChecksum() {
 command="$1"
 shift
 
-if [ "$command" = "update" ]; then
+if [ "$command" = "pull" ]; then
   repositoryPull
-  diffFiles diff
+  diffFiles "true"
   echo "Overwriting local dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
   verifyChecksum
   update
-elif [ "$command" = "commit" ]; then
-  diffFiles diff
+elif [ "$command" = "push" ]; then
+  diffFiles "true"
   echo "Overwriting remote dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
+  repositoryPull
   verifyChecksum
-  commit
+  commitFiles
   updateChecksum
   repositoryPush
 elif [ "$command" = "add" ]; then
   echo "Overwriting remote dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
+  repositoryPull
   verifyChecksum
   addFiles "$@"
   updateChecksum
   repositoryPush
-elif [ "$command" = "delete" ]; then
+elif [ "$command" = "rm" ]; then
   echo "Deleting remote dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
+  repositoryPull
   verifyChecksum
   deleteFiles "$@"
   updateChecksum
@@ -199,25 +219,20 @@ elif [ "$command" = "delete" ]; then
 elif [ "$command" = "checksum" ]; then
   echo "Updating remote dotfiles checksum. Enter password or press Ctrl-C to abort now!"
   readPassword
+  repositoryPull
   updateChecksum
   repositoryPush
-elif [[ "$command" = "" || "$command" = "diff" ]]; then
+elif [ "$command" = "diff" ]; then
   repositoryPull
-  diffFiles "$command"
+  diffFiles "true"
+elif [  "$command" = "" ]; then
+  repositoryPull
+  diffFiles "false"
   if [ "$?" != "0" ]; then
-    echo "Dotfiles are out of sync! [V]iew, [U]pdate, [C]ommit, [I]gnore?"
-    read -n 1 choice
-    echo
-    if [[ "$choice" == "v" || "$choice" == "V" ]]; then
-      $0 diff
-    elif [[ "$choice" == "u" || "$choice" == "U" ]]; then
-      $0 update
-    elif [[ "$choice" == "c" || "$choice" == "C" ]]; then
-      $0 commit
-    fi
-  fi  
+    echo "Dotfiles are out of sync!"
+  fi
 else
-  echo "Usage: $0 [diff|update|commit|add|delete|checksum]"
+  echo "Usage: $0 [diff|pull|push|add|rm|checksum] files ..."
   exit 1
 fi
 
