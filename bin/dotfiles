@@ -12,7 +12,7 @@ if [ ! -d "$dotfiles_dir" ]; then
   pushd . > /dev/null
   cd "$dotfiles_dir"
   git clone git@github.com:bjornhusberg/dotfiles.git .
-  git submodule update --init
+  git submodule update --init --recursive
   popd > /dev/null
   command="pull"
 fi
@@ -21,7 +21,7 @@ function repositoryPull() {
   pushd . > /dev/null
   cd "$dotfiles_dir"
   git pull -q origin master
-  git submodule foreach git -q pull origin master
+  git submodule update -q --recursive
   popd > /dev/null
 }
 
