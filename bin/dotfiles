@@ -51,6 +51,7 @@ function repositoryPush() {
     git commit -a -m "$comment"
     git push
     popd > /dev/null
+    git add "$submodule"
   done
   git add .
   git commit -m "$comment"
