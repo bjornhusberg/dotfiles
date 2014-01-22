@@ -32,6 +32,7 @@ fi
 
 # Dotfiles sync
 dotfiles &
+disown
 
 # Dev environment
 if [ -f ~/.devenv ]; then
