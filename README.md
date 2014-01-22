@@ -4,4 +4,7 @@ dotfiles
 My git-hosted dotfiles
 
 
-*Work In Progress*
+Install:
+```bash
+sh -c "`curl -fsSL https://raw.github.com/bjornhusberg/dotfiles/master/bin/dotfiles`"
+```
