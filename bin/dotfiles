@@ -45,9 +45,16 @@ function repositoryPush() {
   fi
   pushd . > /dev/null
   cd "$dotfiles_dir"
-  git commit -a -m "$comment"
-  git submodule foreach git commit -a -m "$comment"
-  git push --recurse-submodules=on-demand
+  for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
+    pushd . > /dev/null
+    git add .
+    git commit -a -m "$comment"
+    git push
+    popd > /dev/null
+  done
+  git add .
+  git commit -m "$comment"
+  git push
   popd > /dev/null
 }
 
@@ -140,7 +147,6 @@ function commitFiles() {
     if [[ "$?" != "0" ]]; then
       echo "Committing file $file"
       cp -p "$HOME$file" "$dotfiles_dir$file"
-      repositoryAdd "$dotfiles_dir$file"
     fi
   done
   IFS=$OLDIFS
