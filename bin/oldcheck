@@ -1,0 +1,18 @@
+#!/bin/bash
+
+FILENAME=check_$(date +%Y_%m_%d_%H_%M).txt
+
+if [ "$1" == "fast" ]; then
+
+find . -type f -not -name ".DS_Store" -and -not -name "check_*" -print0 | xargs -0 -I % ls -l % | sed 's/^[^ ][^ ]* [ ]*[^ ][^ ]* [ ]*[^ ][^ ]* [ ]*[^ ][^ ]* [ ]*\([0-9]*\) [ ]*[^ ][^ ]* [ ]*[^ ][^ ]* [ ]*[^ ][^ ]* [ ]*\(.*\)$/\2 \1 0/' | tee $FILENAME.tmp
+
+else
+
+find . -type f -not -name ".DS_Store" -and -not -name "check_*" -print0 | xargs -0 cksum | sed 's/^\([0-9][0-9]*\) \([0-9][0-9]*\) \(.*\)$/\3 \2 \1/' | tee $FILENAME.tmp
+
+fi
+
+sort $FILENAME.tmp > $FILENAME
+rm $FILENAME.tmp
+
+
