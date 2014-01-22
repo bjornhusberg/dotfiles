@@ -14,7 +14,11 @@ if [ ! -d "$dotfiles_dir" ]; then
   git clone git@github.com:bjornhusberg/dotfiles.git .
   git submodule update --init --recursive
   popd > /dev/null
-  command="pull"
+  echo "Overwriting local dotfiles. Enter password or press Ctrl-C to abort now!"
+  readPassword
+  verifyChecksum
+  updateFiles
+  exit
 fi
 
 function repositoryPull() {
