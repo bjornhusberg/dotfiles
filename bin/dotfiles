@@ -51,8 +51,8 @@ function readPassword() {
 function calculateChecksum() {
   export checksum="$password"
   OLDIFS=$IFS
-  IFS=$(echo -en "\n\b")
-  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" | sort); do
+  IFS="$(echo -en "\n\b")"
+  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
     echo "Before: $file ($dotfiles_dir)"
     file="${file:${#dotfiles_dir}}"
     echo "After: $file"
