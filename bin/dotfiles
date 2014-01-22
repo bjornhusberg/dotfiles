@@ -150,6 +150,7 @@ function updateFiles() {
     if [[ "$?" != "0" ]]; then
       echo "Updating $file"
       rm -f "$HOME$file"
+      mkdir -p "$HOME$file" 2> /dev/null
       rmdir "$HOME$file" 2> /dev/null
       cp -p "$dotfiles_dir$file" "$HOME$file"
     fi
