@@ -189,7 +189,7 @@ if [ "$command" = "pull" ]; then
   echo "Overwriting local dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
   verifyChecksum
-  update
+  updateFiles
 elif [ "$command" = "push" ]; then
   diffFiles "true"
   echo "Overwriting remote dotfiles. Enter password or press Ctrl-C to abort now!"
