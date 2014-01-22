@@ -53,7 +53,7 @@ function calculateChecksum() {
   export checksum="$password"
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
-  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md"); do
     file=${file:${#dotfiles_dir}}
     file_checksum=$(shasum -a 256 "$dotfiles_dir/$file")
     checksum="$checksum${file_checksum:0:64}"
@@ -76,7 +76,7 @@ function diffFiles() {
   result=0
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
-  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md"); do
     file=${file:${#dotfiles_dir}}
     isUpdated $file
     if [[ "$?" != "0" ]]; then
@@ -106,7 +106,7 @@ function addFiles() {
         echo "Adding $file"
         rmdir "$dotfiles_dir$file" 2> /dev/null
         cp -p "$HOME$file" "$dotfiles_dir$file"
-        repositoryAdd "$file"
+        repositoryAdd "$dotfiles_dir$file"
       else
         echo "File already exists: $file"
       fi
@@ -123,7 +123,7 @@ function deleteFiles() {
     if [ -f "$dotfiles_dir$file" ]; then
       echo "Deleting $file"
       rm "$dotfiles_dir$file"
-      repositoryRemove "$file"
+      repositoryRemove "$dotfiles_dir$file"
     else
       echo "File not found: $file"
     fi
@@ -134,13 +134,13 @@ function deleteFiles() {
 function commitFiles() {
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
-  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md"); do
     file=${file:${#dotfiles_dir}}
     isUpdated $file
     if [[ "$?" != "0" ]]; then
       echo "Committing file $file"
       cp -p "$HOME$file" "$dotfiles_dir$file"
-      repositoryAdd ".$file"
+      repositoryAdd "$dotfiles_dir$file"
     fi
   done
   IFS=$OLDIFS
@@ -149,7 +149,7 @@ function commitFiles() {
 function updateFiles() {
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
-  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5"); do
+  for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md"); do
     file=${file:${#dotfiles_dir}}
     isUpdated $file
     if [[ "$?" != "0" ]]; then
@@ -165,6 +165,7 @@ function updateFiles() {
 function updateChecksum() {
   calculateChecksum
   echo "$checksum" > "$dotfiles_checksum_file"
+  repositoryAdd "$dotfiles_checksum_file"
 }
 
 function getDotfilesChecksum() {
