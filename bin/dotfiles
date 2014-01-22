@@ -198,7 +198,7 @@ elif [ "$command" = "push" ]; then
   updateChecksum
   repositoryPush "$parameter"
 elif [ "$command" = "add" ]; then
-  echo "Overwriting remote dotfiles. Enter password or press Ctrl-C to abort now!"
+  echo "Adding dotfile: $parameter. Enter password or press Ctrl-C to abort now!"
   readPassword
   repositoryPull
   verifyChecksum
@@ -206,7 +206,7 @@ elif [ "$command" = "add" ]; then
   updateChecksum
   repositoryPush "Added $parameter"
 elif [ "$command" = "rm" ]; then
-  echo "Deleting remote dotfiles. Enter password or press Ctrl-C to abort now!"
+  echo "Deleting dotfile: $parameter. Enter password or press Ctrl-C to abort now!"
   readPassword
   repositoryPull
   verifyChecksum
@@ -214,7 +214,7 @@ elif [ "$command" = "rm" ]; then
   updateChecksum
   repositoryPush "Removed $parameter"
 elif [ "$command" = "checksum" ]; then
-  echo "Updating remote dotfiles checksum. Enter password or press Ctrl-C to abort now!"
+  echo "Updating dotfiles checksum. Enter password or press Ctrl-C to abort now!"
   readPassword
   repositoryPull
   updateChecksum
