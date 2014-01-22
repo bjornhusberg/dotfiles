@@ -63,7 +63,7 @@ function calculateChecksum() {
     checksum="$checksum${file_checksum:0:64}"
   done
   IFS=$OLDIFS
-  checksum=$(echo "$checksum" | shasum -a 256)
+  checksum=$(echo "$checksum" | shasum -b -a 256)
 }
 
 function isUpdated() {
