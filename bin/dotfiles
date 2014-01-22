@@ -59,7 +59,6 @@ function calculateChecksum() {
   for file in $(find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" | sort); do
     file=${file:${#dotfiles_dir}}
     file_checksum=$(shasum -b -a 256 "$dotfiles_dir/$file" | awk '{print $1}')
-    echo "$file: $file_checksum"
     checksum="$checksum${file_checksum:0:64}"
   done
   IFS=$OLDIFS
