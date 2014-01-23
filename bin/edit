@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $OSTYPE == "cygwin" ]; then
+
+  path=""
+  if [ "$1" != "" ]; then
+    path=$(cygpath $1)
+  fi
+  nohup /c/Program\ Files/Sublime\ Text\ 2/sublime_text.exe $path > /dev/null 2>&1 &
+
+elif [ $OSTYPE == "darwin13" ]; then
+
+  /Applications/Sublime\ Text\ 2.app/Contents/SharedSupport/bin/subl $1
+
+fi

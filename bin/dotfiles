@@ -123,7 +123,8 @@ function addFile() {
   if [ -f "$HOME/$file" ]; then
     if [ ! -f "$dotfiles_dir/$file" ]; then
       echo "Adding $file"
-      rmdir "$dotfiles_dir/$file" 2> /dev/null
+      directory=$(dirname "$dotfiles_dir/$file")
+      mkdir -p "$directory" 2> /dev/null
       cp -p "$HOME/$file" "$dotfiles_dir/$file"
     else
       echo "File already exists: $file"
@@ -161,8 +162,8 @@ function updateFiles() {
     if [[ "$?" != "0" ]]; then
       echo "Updating $file"
       rm -f "$HOME$file"
-      mkdir -p "$HOME$file" 2> /dev/null
-      rmdir "$HOME$file" 2> /dev/null
+      directory=$(dirname "$HOME$file")
+      mkdir -p "$directory" 2> /dev/null
       cp -p "$dotfiles_dir$file" "$HOME$file"
     fi
   done
