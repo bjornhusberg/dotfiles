@@ -18,9 +18,9 @@ function repositoryCheck() {
   pushd . > /dev/null
   cd "$dotfiles_dir"
   git remote update 2>&1 > /dev/null
-  status=$(git status -uno --porcelain)
+  status=$(git status --porcelain --branch)
   popd > /dev/null
-  if [ "$status" == "" ]; then
+  if [ "$status" == "## master" ]; then
     return 0
   else
     return 1
