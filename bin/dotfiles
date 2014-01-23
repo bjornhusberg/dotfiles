@@ -72,27 +72,31 @@ function isUpdated() {
 }
 
 function diffFiles() {
-  result=0
   OLDIFS=$IFS
   IFS=$(echo -en "\n\b")
-  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
-    file="${file:${#dotfiles_dir}}"
-    isUpdated $file
-    if [[ "$?" != "0" ]]; then
-      if [ "$1" == "true" ]; then
-        if [[ ! -f "$HOME$file" ]]; then
-          echo "Missing file: $file"
-        else
-          diff "$dotfiles_dir$file" "$HOME$file"
+  result=$(
+    find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" \
+    ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | {
+      while read -d $'\0' file; do
+        file="${file:${#dotfiles_dir}}"
+        isUpdated $file
+        if [[ "$?" != "0" ]]; then
+          if [ "$1" == "true" ]; then
+            if [[ ! -f "$HOME$file" ]]; then
+              echo "Missing file: $file" >&2
+            else
+              diff "$dotfiles_dir$file" "$HOME$file" >&2
+            fi
+          else
+            diff -q -N "$dotfiles_dir$file" "$HOME$file" 2>&1 > /dev/null
+          fi
+          if [ "$?" != "0" ]; then
+            echo 1
+          fi
         fi
-      else
-        diff -q -N "$dotfiles_dir$file" "$HOME$file" > /dev/null
-      fi
-      if [ "$?" != "0" ]; then
-        result=1
-      fi
-    fi
-  done
+      done
+    }
+  )
   IFS=$OLDIFS
   return $result
 }
@@ -181,6 +185,11 @@ if [ ! -d "$dotfiles_dir" ]; then
   verifyChecksum
   updateFiles
 elif [ "$command" = "pull" ]; then
+  diffFiles "true"
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles contain local changes."
+    exit
+  fi
   repositoryPull
   diffFiles "true"
   echo "Overwriting local dotfiles. Enter password or press Ctrl-C to abort now!"
@@ -189,6 +198,10 @@ elif [ "$command" = "pull" ]; then
   updateFiles
 elif [ "$command" = "push" ]; then
   diffFiles "true"
+  if [ "$?" == "0" ]; then
+    echo "Nothing to do."
+    exit
+  fi
   echo "Overwriting remote dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
   repositoryPull
