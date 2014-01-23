@@ -1,0 +1,4 @@
+#!/bin/bash
+echo $1 > ~/.devenv
+source ~/.profile
+cd $DEVENV_HOME

@@ -119,6 +119,7 @@ function diffFiles() {
 }
 
 function addFile() {
+  file="$1"
   if [ -f "$HOME/$file" ]; then
     if [ ! -f "$dotfiles_dir/$file" ]; then
       echo "Adding $file"
@@ -133,6 +134,7 @@ function addFile() {
 }
 
 function deleteFile() {
+  file="$1"
   if [ -f "$dotfiles_dir/$file" ]; then
     echo "Deleting $file"
     rm "$dotfiles_dir/$file"
