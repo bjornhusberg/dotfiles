@@ -201,10 +201,11 @@ elif [ "$command" = "pull" ]; then
     echo "Dotfiles contain local changes."
     exit
   fi
-  repositoryPull
-  diffFiles "true"
   echo "Overwriting local dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
+  verifyChecksum
+  repositoryPull
+  diffFiles "true"
   verifyChecksum
   updateFiles
 elif [ "$command" = "push" ]; then
