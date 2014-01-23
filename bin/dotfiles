@@ -14,6 +14,19 @@ function repositoryPull() {
   popd > /dev/null
 }
 
+function repositoryCheck() {
+  pushd . > /dev/null
+  cd "$dotfiles_dir"
+  git remote update > /dev/null
+  status=$(git status -uno --porcelain)
+  popd > /dev/null
+  if [ "$status" == "" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 function repositoryPush() {
   comment="$1"
   if [ "$comment" == "" ]; then
@@ -200,43 +213,44 @@ elif [ "$command" = "push" ]; then
     echo "Nothing to do."
     exit
   fi
-  echo "Overwriting remote dotfiles. Enter password or press Ctrl-C to abort now!"
+  repositoryCheck
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles need to be merged."
+    exit
+  fi
+  echo "Pushing dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
-  repositoryPull
-  verifyChecksum
   commitFiles
   updateChecksum
   repositoryPush "$parameter"
 elif [ "$command" = "add" ]; then
   echo "Adding dotfile: $parameter. Enter password or press Ctrl-C to abort now!"
   readPassword
-  repositoryPull
   verifyChecksum
   addFile "$parameter"
   updateChecksum
-  repositoryPush "Added $parameter"
 elif [ "$command" = "rm" ]; then
   echo "Deleting dotfile: $parameter. Enter password or press Ctrl-C to abort now!"
   readPassword
-  repositoryPull
   verifyChecksum
   deleteFile "$parameter"
   updateChecksum
-  repositoryPush "Removed $parameter"
 elif [ "$command" = "checksum" ]; then
   echo "Updating dotfiles checksum. Enter password or press Ctrl-C to abort now!"
   readPassword
-  repositoryPull
   updateChecksum
-#  repositoryPush "Updated checksum"
 elif [ "$command" = "diff" ]; then
-  repositoryPull
   diffFiles "true"
 elif [  "$command" = "" ]; then
-  repositoryPull
   diffFiles "false"
   if [ "$?" != "0" ]; then
-    echo "Dotfiles are out of sync!"
+    echo "Dotfiles need to be pushed!"
+    exit
+  fi
+  repositoryCheck
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles need to be pulled!"
+    exit
   fi
 else
   echo "Usage: $0 [diff|pull|push|add|rm|checksum] files ..."
