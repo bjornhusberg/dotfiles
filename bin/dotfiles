@@ -2,7 +2,7 @@
 
 dotfiles_dir="$HOME/.dotfiles"
 dotfiles_checksum_file="$dotfiles_dir/.dotfiles.md5"
-
+ 
 command="$1"
 parameter="$2"
 
