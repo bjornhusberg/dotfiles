@@ -49,9 +49,6 @@ function readPassword() {
 }
 
 function calculateChecksum() {
-  export checksum="$password"
-  OLDIFS=$IFS
-  IFS="$(echo -en "\n\b")"
   checksum=$(
     find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" \
     ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | {
@@ -62,8 +59,9 @@ function calculateChecksum() {
       done
     }
   )
-  IFS=$OLDIFS
-  checksum=$(echo "$checksum" | shasum -b -a 256)
+  checksum=$(echo "$password$checksum" | shasum -b -a 256)
+  checksum=${checksum:0:64}
+  export checksum
 }
 
 function isUpdated() {
@@ -77,8 +75,6 @@ function isUpdated() {
 }
 
 function diffFiles() {
-  OLDIFS=$IFS
-  IFS=$(echo -en "\n\b")
   result=$(
     find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" \
     ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | {
@@ -102,8 +98,11 @@ function diffFiles() {
       done
     }
   )
-  IFS=$OLDIFS
-  return $result
+  if [ "$result" != "" ]; then
+    return 1
+  else
+    return 0
+  fi
 }
 
 function addFile() {
@@ -130,8 +129,6 @@ function deleteFile() {
 }
 
 function commitFiles() {
-  OLDIFS=$IFS
-  IFS=$(echo -en "\n\b")
   find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
     isUpdated $file
@@ -140,12 +137,9 @@ function commitFiles() {
       cp -p "$HOME$file" "$dotfiles_dir$file"
     fi
   done
-  IFS=$OLDIFS
 }
 
 function updateFiles() {
-  OLDIFS=$IFS
-  IFS=$(echo -en "\n\b")
   find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
     isUpdated $file
@@ -157,7 +151,6 @@ function updateFiles() {
       cp -p "$dotfiles_dir$file" "$HOME$file"
     fi
   done
-  IFS=$OLDIFS
 }
 
 function updateChecksum() {
@@ -235,7 +228,7 @@ elif [ "$command" = "checksum" ]; then
   readPassword
   repositoryPull
   updateChecksum
-  repositoryPush "Updated checksum"
+#  repositoryPush "Updated checksum"
 elif [ "$command" = "diff" ]; then
   repositoryPull
   diffFiles "true"
