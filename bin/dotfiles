@@ -99,10 +99,10 @@ function diffFiles() {
             if [[ ! -f "$HOME$file" ]]; then
               echo "Missing file: $file" >&2
             else
-              diff "$dotfiles_dir$file" "$HOME$file" >&2
+              diff "$HOME$file" "$dotfiles_dir$file" >&2
             fi
           else
-            diff -q -N "$dotfiles_dir$file" "$HOME$file" 2>&1 > /dev/null
+            diff -q -N "$HOME$file" "$dotfiles_dir$file" 2>&1 > /dev/null
           fi
           if [ "$?" != "0" ]; then
             echo 1
