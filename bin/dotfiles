@@ -220,6 +220,7 @@ elif [ "$command" = "push" ]; then
   fi
   echo "Pushing dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
+  verifyChecksum
   commitFiles
   updateChecksum
   repositoryPush "$parameter"
