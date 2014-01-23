@@ -1,18 +1,21 @@
 #!/usr/bin/env ruby
 
 require "sqlite3"
+require "pathname"
 
 unless ARGV.length == 1
   puts "Usage: wallpaper <filename>"
   exit
 end
 
+filename = Pathname.new(ARGV[0]).realpath.to_s
 
-DB_LOC = File.join(ENV["HOME"], "Library/Application Support/Dock/desktoppicture.db")
-DB = SQLite3::Database.new(DB_LOC)
+puts filename
 
-DB.execute("SELECT ROWID,value FROM data").each do |(rowid,path)|
-  DB.execute("UPDATE data SET value=? WHERE ROWID=?",[ARGV[0],rowid])  
+db = SQLite3::Database.new(File.join(ENV["HOME"], "Library/Application Support/Dock/desktoppicture.db"))
+
+db.execute("SELECT ROWID,value FROM data").each do |(rowid, path)|
+  db.execute("UPDATE data SET value=? WHERE ROWID=?",[filename, rowid])  
 end
 
 `killall Dock`
