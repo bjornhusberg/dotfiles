@@ -115,29 +115,39 @@ function diffFiles() {
 }
 
 function addFile() {
-  file="$1"
-  if [ -f "$HOME/$file" ]; then
-    if [ ! -f "$dotfiles_dir/$file" ]; then
-      echo "Adding $file"
-      directory=$(dirname "$dotfiles_dir/$file")
-      mkdir -p "$directory" 2> /dev/null
-      cp -p "$HOME/$file" "$dotfiles_dir/$file"
-    else
-      echo "File already exists: $file"
-    fi
-  else
-    echo "File not found: $file"
+  file=$(abspath "$1")
+  if [ "${file:0:${#HOME}}" != "$HOME" ]; then
+    echo "File not in home directory: $file"
+    return
   fi
+  if [ ! -f "$file" ]; then
+    echo "File not found: $file"
+    return
+  fi
+  file="${file:(${#HOME}+1)}"
+  if [ -f "$dotfiles_dir/$file" ]; then
+    echo "File already exists: $file"
+    return
+  fi
+  echo "Adding $file"
+  directory=$(dirname "$dotfiles_dir/$file")
+  mkdir -p "$directory" 2> /dev/null
+  cp -p "$HOME/$file" "$dotfiles_dir/$file"
 }
 
 function deleteFile() {
-  file="$1"
-  if [ -f "$dotfiles_dir/$file" ]; then
-    echo "Deleting $file"
-    rm "$dotfiles_dir/$file"
-  else
-    echo "File not found: $file"
+  file=$(abspath "$1")
+  if [ "${file:0:${#HOME}}" != "$HOME" ]; then
+    echo "File not in home directory: $file"
+    return
   fi
+  file="${file:(${#HOME}+1)}"
+  if [ ! -f "$dotfiles_dir/$file" ]; then
+    echo "File not found: $file"
+    return
+  fi
+  echo "Deleting $file"
+  rm "$dotfiles_dir/$file"
 }
 
 function commitFiles() {
