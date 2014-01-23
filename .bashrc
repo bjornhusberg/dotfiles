@@ -10,25 +10,10 @@ alias ant=colorant
 
 if [ $OSTYPE == "cygwin" ]; then
 
-  function fn_cygwin_edit {
-    path=""
-    if [ "$1" != "" ]; then
-      path=`cygpath $1`
-    fi
-    nohup /c/Program\ Files/Sublime\ Text\ 2/sublime_text.exe $path > /dev/null 2>&1 &
-  }
-
-  TERM=cygwin
-  export TERM
+  export TERM=cygwin
   alias less="less -r"
-  alias edit="fn_cygwin_edit"
-
-elif [ $OSTYPE == "darwin13" ]; then
-
-  alias edit="/Applications/Sublime\ Text\ 2.app/Contents/SharedSupport/bin/subl"
 
 fi
-
 
 # Dotfiles sync
 dotfiles &
