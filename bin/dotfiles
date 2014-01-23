@@ -5,7 +5,7 @@ dotfiles_checksum_file="$dotfiles_dir/.dotfiles.md5"
  
 command="$1"
 parameter="$2"
-remove 
+
 function repositoryPull() {
   pushd "$dotfiles_dir" > /dev/null
   git pull -q origin master
