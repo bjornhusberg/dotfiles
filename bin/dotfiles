@@ -187,8 +187,7 @@ if [ ! -d "$dotfiles_dir" ]; then
   echo "Initializing dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
   mkdir -p "$dotfiles_dir"
-  pushd . > /dev/null
-  cd "$dotfiles_dir"
+  pushd "$dotfiles_dir" > /dev/null
   git clone git@github.com:bjornhusberg/dotfiles.git .
   git submodule update --init --recursive
   popd > /dev/null
