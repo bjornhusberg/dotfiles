@@ -58,19 +58,11 @@ function readPassword() {
 }
 
 function calculateChecksum() {
-  checksum=$(
+  checksums=$(
     find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" \
-    ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | {
-      while read -d $'\0' file; do
-        file="${file:${#dotfiles_dir}}"
-        file_checksum="$(shasum -b -a 256 "$dotfiles_dir/$file" | awk '{print $1}')"
-        echo ${file_checksum:0:64}
-      done
-    }
-  )
-  checksum=$(echo "$password$checksum" | shasum -b -a 256)
-  checksum=${checksum:0:64}
-  export checksum
+    ! -name ".dotfiles.md5" ! -name "README.md" -print0 | xargs -0 -I % \
+    shasum -b -a 256 "%" | awk '{print $1}' | sort)
+  export checksum=$(echo "$password$checksums" | shasum -b -a 256 | awk '{print $1}')
 }
 
 function isUpdated() {
