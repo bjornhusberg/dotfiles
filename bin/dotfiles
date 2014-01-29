@@ -61,7 +61,7 @@ function calculateChecksum() {
   checksums=$(
     find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" \
     ! -name ".dotfiles.md5" ! -name "README.md" -print0 | xargs -0 -I % \
-    shasum -b -a 256 "%" | awk '{print $1}' | sort)
+    shasum -b -a 256 "%" | sort)
   export checksum=$(echo "$password$checksums" | shasum -b -a 256 | awk '{print $1}')
 }
 
