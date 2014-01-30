@@ -16,7 +16,7 @@ if [ $OSTYPE == "cygwin" ]; then
 fi
 
 # Dotfiles sync
-dotfiles > ~/.dotfiles-message &
+dotfiles > /dev/null &
 disown
 
 # Dev environment
@@ -53,7 +53,11 @@ function promptcmd () {
   local current_time="$(date '+%H:%M:%S')"
   local current_date="$(date '+%Y-%m-%d')"
   local current_devenv="$DEVENV"
-  local current_dotfiles_message="$(cat ~/.dotfiles-message)"
+
+  local current_dotfiles_status=""
+  if [ -f "$HOME/.dotfiles_dirty" ]; then
+    local current_dotfiles_status="!"
+  fi
 
   # Color settings
   local reset_color="\[\033[0m\]"
@@ -103,8 +107,8 @@ function promptcmd () {
   local formatted_exit_code=""
   local formatted_devenv=""
   local devenv_length="0"
-  local formatted_dotfiles_message=""
-  local dotfiles_message_length="0"
+  local formatted_dotfiles_status=""
+  local dotfiles_status_length="0"
 
   # Development environment
   if [ "$current_devenv" != "" ]; then
@@ -117,15 +121,15 @@ function promptcmd () {
     formatted_exit_code="$frame_left${warning_color}EXIT: $last_exit_code$frame_right$frame_line"
   fi
 
-  # Dotfiles message
-  if [ "$current_dotfiles_message" != "" ]; then
-    formatted_dotfiles_message="$frame_left${warning_color}${current_dotfiles_message}$frame_right$frame_line"
-    dotfiles_message_length=$((${#current_dotfiles_message} + 5))
+  # Dotfiles status
+  if [ "$current_dotfiles_status" != "" ]; then
+    formatted_dotfiles_status="$frame_left${warning_color}${current_dotfiles_status}$frame_right$frame_line"
+    dotfiles_status_length=$((${#current_dotfiles_status} + 5))
   fi
 
   # Upper line fill
   local prompt_u=""
-  local upper_fill_length=$(($current_width - $user_length - $dir_length - $devenv_length - $dotfiles_message_length - 2))
+  local upper_fill_length=$(($current_width - $user_length - $dir_length - $devenv_length - $dotfiles_status_length - 2))
   if [ $upper_fill_length -lt 0 ]; then
     local max_dir_length=$(($dir_length + $upper_fill_length))
     if [ $max_dir_length -lt 8 ]; then
@@ -144,7 +148,7 @@ function promptcmd () {
   local ur_start=$(($current_width - $date_length))
 
   # Construct the prompt
-  local prompt_ul="$line_color$line_ul$formatted_user$frame_line$formatted_dotfiles_message$formatted_devenv"
+  local prompt_ul="$line_color$line_ul$formatted_user$frame_line$formatted_dotfiles_status$formatted_devenv"
   local prompt_ur="$formatted_dir$line_color$line_ur"
   local prompt_lr="$frame_line$formatted_date$line_color$line_lr"
   local prompt_ll="$line_color$line_ll$formatted_exit_code$formatted_time$frame_line$reset_color "

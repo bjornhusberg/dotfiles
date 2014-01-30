@@ -1,6 +1,7 @@
 #!/bin/bash
 
 dotfiles_dir="$HOME/.dotfiles"
+dotfiles_dirty_file="$HOME/.dotfiles_dirty"
 dotfiles_checksum_file="$dotfiles_dir/.dotfiles.md5"
  
 command="$1"
@@ -187,6 +188,7 @@ function verifyChecksum() {
   fi
 }
 
+rm -f $dotfiles_dirty_file
 if [ ! -d "$dotfiles_dir" ]; then
   echo "Initializing dotfiles. Enter password or press Ctrl-C to abort now!"
   readPassword
@@ -249,11 +251,13 @@ elif [  "$command" = "" ]; then
   diffFiles "false"
   if [ "$?" != "0" ]; then
     echo "Dotfiles need to be pushed!"
+    touch $dotfiles_dirty_file
     exit
   fi
   repositoryCheck
   if [ "$?" != "0" ]; then
     echo "Dotfiles need to be pulled!"
+    touch $dotfiles_dirty_file
     exit
   fi
 else
