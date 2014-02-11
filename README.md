@@ -4,7 +4,7 @@ dotfiles
 My git-hosted dotfiles
 
 Install:
-<code>sh -c "\`curl -fsSL https://raw.github.com/bjornhusberg/dotfiles/master/bin/dotfiles\`"</code>
+<code>sh -c "\`curl -fsSL https://raw.github.com/bjornhusberg/dotfiles/master/bin/dotfiles`"</code>
 
 My dotfiles script uses a sha-256 checksum seeded with a password to ensure the integrity of the central repository.
 The active dotfiles are copied (not linked!) to/from a local clone of the github repository. The script
