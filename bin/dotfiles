@@ -189,16 +189,19 @@ function verifyChecksum() {
 }
 
 rm -f $dotfiles_dirty_file
-if [ ! -d "$dotfiles_dir" ]; then
-  echo "Initializing dotfiles. Enter password or press Ctrl-C to abort now!"
+if [ "$command" = "init" ]; then
+  echo "Initializing dotfiles from $parameter. Enter password or press Ctrl-C to abort now!"
   readPassword
   mkdir -p "$dotfiles_dir"
   pushd "$dotfiles_dir" > /dev/null
-  git clone git@github.com:bjornhusberg/dotfiles.git .
+  git clone "$parameter" .
   git submodule update --init --recursive
   popd > /dev/null
   verifyChecksum
   updateFiles
+elif [ ! -d "$dotfiles_dir" ]; then
+  echo "Dotfiles not initialized. Run 'dotfiles init <git clone url>' to initialize."
+  exit
 elif [ "$command" = "pull" ]; then
   diffFiles "true"
   if [ "$?" != "0" ]; then
