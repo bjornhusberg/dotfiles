@@ -190,6 +190,10 @@ function verifyChecksum() {
 
 rm -f $dotfiles_dirty_file
 if [ "$command" = "init" ]; then
+  if [ -e "$dotfiles_dir" ]; then
+    echo "Dotfiles directory already exists: $dotfiles_dir"
+    exit
+  fi
   echo "Initializing dotfiles from $parameter. Enter password or press Ctrl-C to abort now!"
   readPassword
   mkdir -p "$dotfiles_dir"
