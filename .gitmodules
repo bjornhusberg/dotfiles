@@ -1,9 +1,6 @@
 [submodule "lib/index"]
 	path = lib/index
 	url = git@github.com:bjornhusberg/index.git
-[submodule "lib/shell"]
-	path = lib/shell
-	url = git@github.com:bjornhusberg/shell.git
 [submodule "lib/wallpaper"]
 	path = lib/wallpaper
 	url = git@github.com:bjornhusberg/wallpaper.git
