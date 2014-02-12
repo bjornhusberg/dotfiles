@@ -1,0 +1,4 @@
+[
+    { "keys": ["super+shift+x"], "command": "tidy_xml" },
+    { "keys": ["super+shift+j"], "command": "prettify_json" }
+]
