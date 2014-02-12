@@ -212,7 +212,7 @@ rm -f $dotfiles_dirty_file
 if [ "$command" = "init" ]; then
   init "$parameter"
 elif [ ! -d "$dotfiles_dir" ]; then
-  echo "Dotfiles not initialized."  
+  echo "Dotfiles not initialized."
 elif [ "$command" = "pull" ]; then
   diffFiles "true"
   if [ "$?" != "0" ]; then
