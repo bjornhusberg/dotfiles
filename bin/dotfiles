@@ -84,7 +84,7 @@ function diffFiles() {
     ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | {
       while read -d $'\0' file; do
         file="${file:${#dotfiles_dir}}"
-        isUpdated $file
+        isUpdated "$file"
         if [[ "$?" != "0" ]]; then
           if [ "$1" == "true" ]; then
             if [[ ! -f "$HOME$file" ]]; then
@@ -148,7 +148,7 @@ function deleteFile() {
 function commitFiles() {
   find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
-    isUpdated $file
+    isUpdated "$file"
     if [[ "$?" != "0" ]]; then
       echo "Committing file $file"
       cp -p "$HOME$file" "$dotfiles_dir$file"
@@ -159,7 +159,7 @@ function commitFiles() {
 function updateFiles() {
   find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
-    isUpdated $file
+    isUpdated "$file"
     if [[ "$?" != "0" ]]; then
       echo "Updating $file"
       rm -f "$HOME$file"
