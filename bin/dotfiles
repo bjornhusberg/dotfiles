@@ -29,7 +29,7 @@ function repositoryCheck() {
 function repositoryPush() {
   comment="$1"
   if [ "$comment" == "" ]; then
-    comment="Dotfile updates from $HOSTNAME"
+    comment="Updated from $HOSTNAME"
   fi
   pushd "$dotfiles_dir" > /dev/null
   for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
@@ -240,7 +240,7 @@ elif [ "$command" = "add" ]; then
   verifyChecksum
   addFile "$parameter"
   updateChecksum
-  repositoryPush
+  repositoryPush "Added $parameter"
 elif [ "$command" = "rm" ]; then
   repositoryCheck
   if [ "$?" != "0" ]; then
@@ -252,7 +252,7 @@ elif [ "$command" = "rm" ]; then
   verifyChecksum
   deleteFile "$parameter"
   updateChecksum
-  repositoryPush
+  repositoryPush "Removed $parameter"
 elif [ "$command" = "checksum" ]; then
   echo "Updating dotfiles checksum. Enter password or press Ctrl-C to abort now!"
   readPassword
