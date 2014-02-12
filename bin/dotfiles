@@ -230,17 +230,29 @@ elif [ "$command" = "push" ]; then
   updateChecksum
   repositoryPush "$parameter"
 elif [ "$command" = "add" ]; then
+  repositoryCheck
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles need to be pulled."
+    exit
+  fi
   echo "Adding dotfile: $parameter. Enter password or press Ctrl-C to abort now!"
   readPassword
   verifyChecksum
   addFile "$parameter"
   updateChecksum
+  repositoryPush
 elif [ "$command" = "rm" ]; then
+  repositoryCheck
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles need to be pulled."
+    exit
+  fi
   echo "Deleting dotfile: $parameter. Enter password or press Ctrl-C to abort now!"
   readPassword
   verifyChecksum
   deleteFile "$parameter"
   updateChecksum
+  repositoryPush
 elif [ "$command" = "checksum" ]; then
   echo "Updating dotfiles checksum. Enter password or press Ctrl-C to abort now!"
   readPassword
