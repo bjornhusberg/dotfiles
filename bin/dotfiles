@@ -191,11 +191,11 @@ function verifyChecksum() {
 function init() {
   if [ -e "$dotfiles_dir" ]; then
     echo "Dotfiles directory already exists: $dotfiles_dir"
-    exit
+    return
   fi
   if [ "$1" == "" ]; then
     echo "No github clone url specified. Run dotfiles init <github clone url> to initialize."
-    exit
+    return
   fi
   echo "Initializing dotfiles from $1. Enter password or press Ctrl-C to abort now!"
   readPassword
@@ -209,10 +209,8 @@ function init() {
 }
 
 rm -f $dotfiles_dirty_file
-if [ "$command" = "init" ]; then
-  init "$parameter"
-elif [ ! -d "$dotfiles_dir" ]; then
-  echo "Dotfiles not initialized."
+if [ ! -d "$dotfiles_dir" ]; then
+  init "git@github.com:bjornhusberg/dotfiles.git"
 elif [ "$command" = "pull" ]; then
   diffFiles "true"
   if [ "$?" != "0" ]; then
