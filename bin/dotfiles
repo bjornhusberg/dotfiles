@@ -80,27 +80,12 @@ function diffFiles() {
       while read -d $'\0' file; do
         file="${file:${#dotfiles_dir}}"
         isUpdated "$file"
-        if [[ "$?" != "0" ]]; then
-          if [ "$1" == "true" ]; then
-            if [[ ! -f "$HOME$file" ]]; then
-              echo "MISSING: $file" >&2
-            else
-              diff=$(diff "$HOME$file" "$dotfiles_dir$file")
-              if [ "$?" != "0" ]; then
-                echo "1"
-              fi
-              result=$?
-              if [ "$diff" != "" ]; then
-                echo "MODIFIED: $HOME$file" >&2
-                echo "$diff" >&2
-              fi
-            fi
-          else
-            diff=$(diff -q -N "$HOME$file" "$dotfiles_dir$file" > /dev/null 2>&1)
-            if [ "$?" != "0" ]; then
-              echo "1"
-            fi
-          fi
+        if [ "$?" == "0" ]; then
+          continue
+        fi
+        diffFile "$file" >&2
+        if [ "$?" != "0" ]; then
+          echo "1"
         fi
       done
     }
@@ -110,6 +95,21 @@ function diffFiles() {
   else
     return 0
   fi
+}
+
+function diffFile() {
+  if [[ ! -f "$HOME$file" ]]; then
+    echo "MISSING: $file"
+    return 1
+  else
+    diff=$(diff "$HOME$file" "$dotfiles_dir$file")
+    if [ "$diff" != "" ]; then
+      echo "MODIFIED: $HOME$file"
+      echo "$diff"
+      return 1
+    fi
+  fi
+  return 0
 }
 
 function addFile() {
@@ -214,18 +214,17 @@ rm -f $dotfiles_dirty_file
 if [ ! -d "$dotfiles_dir" ]; then
   init "git@github.com:bjornhusberg/dotfiles.git"
 elif [ "$command" = "pull" ]; then
-  diffFiles "true"
+  diffFiles
   if [ "$?" != "0" ]; then
     echo "Dotfiles contain local changes."
     exit
   fi
   verifyChecksum
   repositoryPull
-  diffFiles "true"
   verifyChecksum
   updateFiles
 elif [ "$command" = "push" ]; then
-  diffFiles "true"
+  diffFiles
   if [ "$?" == "0" ]; then
     echo "Nothing to do."
     exit
@@ -262,9 +261,9 @@ elif [ "$command" = "rm" ]; then
 elif [ "$command" = "checksum" ]; then
   updateChecksum
 elif [ "$command" = "diff" ]; then
-  diffFiles "true"
+  diffFiles
 elif [  "$command" = "" ]; then
-  diffFiles "false"
+  diffFiles > /dev/null 2>&1
   if [ "$?" != "0" ]; then
     echo "Dotfiles need to be pushed!"
     touch $dotfiles_dirty_file
