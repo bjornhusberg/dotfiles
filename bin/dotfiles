@@ -105,7 +105,7 @@ function diffFiles() {
       done
     }
   )
-  if [ "$result" != "0" ]; then
+  if [ "$result" != "" ]; then
     return 1
   else
     return 0
