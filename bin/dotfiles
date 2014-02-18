@@ -78,26 +78,31 @@ function diffFiles() {
     find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" \
     ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | {
       while read -d $'\0' file; do
+        result=0
         file="${file:${#dotfiles_dir}}"
         isUpdated "$file"
         if [[ "$?" != "0" ]]; then
           if [ "$1" == "true" ]; then
             if [[ ! -f "$HOME$file" ]]; then
-              echo "Missing file: $file" >&2
+              echo "MISSING: $file" >&2
             else
-              diff "$HOME$file" "$dotfiles_dir$file" >&2
+              diff=$(diff "$HOME$file" "$dotfiles_dir$file")
+              result=$?
+              if [ "$diff" != "" ]; then
+                echo "MODIFIED: $HOME$file" >&2
+                echo "$diff" >&2
+              fi
             fi
           else
-            diff -q -N "$HOME$file" "$dotfiles_dir$file" > /dev/null 2>&1
+            diff=$(diff -q -N "$HOME$file" "$dotfiles_dir$file" > /dev/null 2>&1)
+            result=$?
           fi
-          if [ "$?" != "0" ]; then
-            echo 1
-          fi
+          echo $result
         fi
       done
     }
   )
-  if [ "$result" != "" ]; then
+  if [ "$result" != "0" ]; then
     return 1
   else
     return 0
