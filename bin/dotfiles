@@ -269,6 +269,6 @@ elif [  "$command" = "" ]; then
     exit
   fi
 else
-  echo "Usage: $0 [init|diff|pull|push|add|rm|checksum] files ..."
+  echo "Usage: $0 [diff|pull|push|add|rm|checksum] files ..."
   exit 1
 fi
