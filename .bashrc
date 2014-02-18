@@ -12,7 +12,7 @@ if [ $OSTYPE == "cygwin" ]; then
 
   export TERM=cygwin
   alias less="less -r"
-
+  stty lnext ^q stop undef start undef
 fi
 
 # Dotfiles sync

@@ -8,3 +8,5 @@
 # commands in your history
 "\e[B": history-search-forward
 "\e[A": history-search-backward
+
+"\C-v": paste-from-clipboard
