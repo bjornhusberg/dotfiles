@@ -53,19 +53,13 @@ function repositoryPush() {
   popd > /dev/null
 }
 
-function readPassword() {
-  stty -echo
-  read -p "Password: " password; echo
-  stty echo
-}
-
 function calculateChecksum() {
   pushd "$dotfiles_dir" > /dev/null
   checksums=$(
     find . ! -path "*/.git*" -type f ! -name ".DS_Store" \
     ! -name ".dotfiles.md5" ! -name "README.md" -print0 | xargs -0 -I % \
     shasum -b -a 256 "%" | sort)
-  export checksum=$(echo "$password$checksums" | shasum -b -a 256 | awk '{print $1}')
+  export checksum=$(echo "$checksums" | shasum -b -a 256 | awk '{print $1}')
   popd > /dev/null
 }
 
@@ -198,8 +192,7 @@ function init() {
     echo "No github clone url specified. Run dotfiles init <github clone url> to initialize."
     return
   fi
-  echo "Initializing dotfiles from $1. Enter password or press Ctrl-C to abort now!"
-  readPassword
+  echo "Initializing dotfiles from $1"
   mkdir -p "$dotfiles_dir"
   pushd "$dotfiles_dir" > /dev/null
   git clone "$1" .
@@ -218,8 +211,6 @@ elif [ "$command" = "pull" ]; then
     echo "Dotfiles contain local changes."
     exit
   fi
-  echo "Pulling dotfiles. Enter password or press Ctrl-C to abort now!"
-  readPassword
   verifyChecksum
   repositoryPull
   diffFiles "true"
@@ -236,8 +227,6 @@ elif [ "$command" = "push" ]; then
     echo "Dotfiles need to be merged."
     exit
   fi
-  echo "Pushing dotfiles. Enter password or press Ctrl-C to abort now!"
-  readPassword
   verifyChecksum
   commitFiles
   updateChecksum
@@ -248,8 +237,6 @@ elif [ "$command" = "add" ]; then
     echo "Dotfiles need to be pulled."
     exit
   fi
-  echo "Adding dotfile: $parameter. Enter password or press Ctrl-C to abort now!"
-  readPassword
   verifyChecksum
   addFile "$parameter"
   updateChecksum
@@ -260,15 +247,11 @@ elif [ "$command" = "rm" ]; then
     echo "Dotfiles need to be pulled."
     exit
   fi
-  echo "Deleting dotfile: $parameter. Enter password or press Ctrl-C to abort now!"
-  readPassword
   verifyChecksum
   deleteFile "$parameter"
   updateChecksum
   repositoryPush "Removed $parameter"
 elif [ "$command" = "checksum" ]; then
-  echo "Updating dotfiles checksum. Enter password or press Ctrl-C to abort now!"
-  readPassword
   updateChecksum
 elif [ "$command" = "diff" ]; then
   diffFiles "true"
