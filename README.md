@@ -1,12 +1,13 @@
 dotfiles
 ========
 
-My personal git-hosted dotfiles. Contains a very handy dotfiles script that simplifies github synchronization. It also support git submodules.
+My personal git-hosted dotfiles. Contains a very handy dotfiles script that simplifies github synchronization. <br>
+It also support git submodules.
 
-Install:
+Install:<br>
 <code>sh -c "\`curl -fsSL https://raw.github.com/bjornhusberg/dotfiles/master/bin/dotfiles`"</code>
 
-Usage:
+Usage:<br>
 <code>dotfiles</code>
 Silently check the dotfiles for local or remote changes and report to stdout.
 
@@ -26,5 +27,5 @@ Add the named file to the local dotfiles repository.
 Remove the named file from the local dotfiles repository.
 
 <code>dotfiles checksum</code>
-Calculate a new checksum for the local dotfiles repository.
+Calculate a new checksum for the local dotfiles repository.<br>
 (Useful after manually modifying the local dotfiles repository and thus making it inconsistent)
