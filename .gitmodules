@@ -10,3 +10,6 @@
 [submodule "lib/colorant"]
 	path = lib/colorant
 	url = git@github.com:bjornhusberg/colorant.git
+[submodule "lib/serve"]
+	path = lib/serve
+	url = git@github.com:bjornhusberg/serve.git
