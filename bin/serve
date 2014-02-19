@@ -1,2 +1,2 @@
 #!/bin/bash
-$HOME/lib/serve/serve
+$HOME/lib/serve/serve "$@"

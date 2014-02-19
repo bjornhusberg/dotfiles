@@ -1,2 +1,2 @@
 #!/bin/sh
-ruby $HOME/lib/index/index.rb
+ruby $HOME/lib/index/index.rb "$@"
