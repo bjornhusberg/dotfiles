@@ -1,2 +1,0 @@
-#!/bin/bash
-$HOME/lib/colorant/colorant.sh "$@"
