@@ -6,7 +6,11 @@ PATH=~/bin:$PATH
 export PATH
 
 # ALIAS
-alias ant=colorant
+alias ant=$HOME/lib/colorant/colorant.sh
+alias index=ruby $HOME/lib/index/index.rb
+alias serve=$HOME/lib/serve/serve
+alias wallpaper=ruby $HOME/lib/wallpaper/wallpaper.rb
+alias arkivera=$HOME/lib/arkivera/arkivera.sh
 
 if [ $OSTYPE == "cygwin" ]; then
 
