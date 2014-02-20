@@ -213,6 +213,9 @@ function init() {
 rm -f $dotfiles_dirty_file
 if [ ! -d "$dotfiles_dir" ]; then
   init "git@github.com:bjornhusberg/dotfiles.git"
+elif [ "$command" = "reset" ]; then
+  repositoryPull
+  updateFiles
 elif [ "$command" = "pull" ]; then
   diffFiles
   if [ "$?" != "0" ]; then
@@ -276,6 +279,6 @@ elif [  "$command" = "" ]; then
     exit
   fi
 else
-  echo "Usage: $0 [diff|pull|push|add|rm|checksum] files ..."
+  echo "Usage: $0 [diff|pull|push|add|rm|reset|checksum] files ..."
   exit 1
 fi
