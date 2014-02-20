@@ -1,19 +1,18 @@
 export CLICOLOR=1
 export LSCOLORS=DxGxcxdxCxegedabagacad
 
-# PATHS
-PATH=~/bin:$PATH
-export PATH
+# Paths
+export PATH=~/bin:$PATH
 
-# ALIAS
+# Aliases
 alias ant=$HOME/lib/colorant/colorant.sh
-alias index=ruby $HOME/lib/index/index.rb
+alias index=$HOME/lib/index/index.rb
 alias serve=$HOME/lib/serve/serve
-alias wallpaper=ruby $HOME/lib/wallpaper/wallpaper.rb
+alias wallpaper=$HOME/lib/wallpaper/wallpaper.rb
 alias arkivera=$HOME/lib/arkivera/arkivera.sh
 
+# Cygwin customizations
 if [ $OSTYPE == "cygwin" ]; then
-
   export TERM=cygwin
   alias less="less -r"
   stty lnext ^q stop undef start undef
