@@ -57,7 +57,7 @@ function repositoryPush() {
 function calculateChecksum() {
   pushd "$dotfiles_dir" > /dev/null
   checksums=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" \
-    ! -name ".dotfiles.md5" ! -name "README.md" -print0 | xargs -0 shasum -b -a 256 | sort)
+    ! -name ".dotfiles.md5" ! -name "README.md" -print0 | tr -d '\15\32' | xargs -0 shasum -b -a 256 | sort)
   echo $checksums
   export checksum=$(echo $checksums | shasum -b -a 256 | awk '{print $1}')
   echo $checksum
