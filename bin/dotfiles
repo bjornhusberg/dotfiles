@@ -59,7 +59,7 @@ function calculateChecksum() {
   checksums=$(
     find . ! -path "*/.git*" -type f ! -name ".DS_Store" \
     ! -name ".dotfiles.md5" ! -name "README.md" -print0 | xargs -0 -I % \
-    shasum -b -a 256 "%" | sort)
+    shasum -b -a 256 "%" | sort -z)
   export checksum=$(echo "$checksums" | shasum -b -a 256 | awk '{print $1}')
   popd > /dev/null
 }
