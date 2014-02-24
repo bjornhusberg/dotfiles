@@ -2,7 +2,7 @@
 
 dotfiles_dir="$HOME/.dotfiles"
 dotfiles_dirty_file="$HOME/.dotfiles_dirty"
-dotfiles_checksum_file="$dotfiles_dir/.dotfiles.md5"
+dotfiles_checksum_file="$dotfiles_dir/.dotfiles.sum"
  
 command="$1"
 parameter="$2"
@@ -67,8 +67,7 @@ function isUpdated() {
 
 function diffFiles() {
   result=$(
-    find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" \
-    ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | {
+    find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0 | sort -z | {
       while read -d $'\0' file; do
         file="${file:${#dotfiles_dir}}"
         isUpdated "$file"
@@ -141,7 +140,7 @@ function deleteFile() {
 }
 
 function commitFiles() {
-  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
+  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
     isUpdated "$file"
     if [[ "$?" != "0" ]]; then
@@ -152,7 +151,7 @@ function commitFiles() {
 }
 
 function updateFiles() {
-  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
+  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
     isUpdated "$file"
     if [[ "$?" != "0" ]]; then
@@ -173,7 +172,7 @@ function readPassword() {
 
 function calculateChecksum() {
   pushd "$dotfiles_dir" > /dev/null
-  export checksum=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0  | sort -dzf | xargs -0 cat | tr -d "\15\32" | sed "1s/^/$password/" | shasum -b -a 256 | awk '{print $1}')
+  export checksum=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0  | sort -dzf | xargs -0 cat | tr -d "\15\32" | sed "1s/^/$password/" | shasum -b -a 256 | awk '{print $1}')
   popd > /dev/null
 }
 
