@@ -55,12 +55,6 @@ function repositoryPush() {
   popd > /dev/null
 }
 
-function calculateChecksum() {
-  pushd "$dotfiles_dir" > /dev/null
-  export checksum=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0  | sort -dzf | xargs -0 cat | tr -d '\15\32' | shasum -b -a 256 | awk '{print $1}')
-  popd > /dev/null
-}
-
 function isUpdated() {
   if [[ ! -f "$HOME$1" ]]; then
     return 1
@@ -171,6 +165,18 @@ function updateFiles() {
   done
 }
 
+function readPassword() {
+  stty -echo
+  read -p "Password: " password; echo
+  stty echo
+}
+
+function calculateChecksum() {
+  pushd "$dotfiles_dir" > /dev/null
+  export checksum=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.md5" ! -name "README.md" -print0  | sort -dzf | xargs -0 cat | tr -d "\15\32" | sed "1s/^/$password/" | shasum -b -a 256 | awk '{print $1}')
+  popd > /dev/null
+}
+
 function updateChecksum() {
   calculateChecksum
   echo "$checksum" > "$dotfiles_checksum_file"
@@ -198,7 +204,8 @@ function init() {
     echo "No github clone url specified. Run dotfiles init <github clone url> to initialize."
     return
   fi
-  echo "Initializing dotfiles from $1"
+  echo "Initializing dotfiles from $1. Enter password or press Ctrl-C to cancel."
+  readPassword
   mkdir -p "$dotfiles_dir"
   pushd "$dotfiles_dir" > /dev/null
   git clone "$1" .
@@ -220,6 +227,8 @@ elif [ "$command" = "pull" ]; then
     echo "Dotfiles contain local changes."
     exit
   fi
+  echo "Pulling dotfiles. Enter password or press Ctrl-C to cancel."
+  readPassword
   verifyChecksum
   repositoryPull
   verifyChecksum
@@ -235,6 +244,8 @@ elif [ "$command" = "push" ]; then
     echo "Dotfiles need to be merged."
     exit
   fi
+  echo "Pushing dotfiles. Enter password or press Ctrl-C to cancel."
+  readPassword
   verifyChecksum
   commitFiles
   updateChecksum
@@ -245,6 +256,8 @@ elif [ "$command" = "add" ]; then
     echo "Dotfiles need to be pulled."
     exit
   fi
+  echo "Adding dotfile $parameter. Enter password or press Ctrl-C to cancel."
+  readPassword
   verifyChecksum
   addFile "$parameter"
   updateChecksum
@@ -255,11 +268,15 @@ elif [ "$command" = "rm" ]; then
     echo "Dotfiles need to be pulled."
     exit
   fi
+  echo "Removing dotfile $parameter. Enter password or press Ctrl-C to cancel."
+  readPassword
   verifyChecksum
   deleteFile "$parameter"
   updateChecksum
   repositoryPush "Removed $parameter"
 elif [ "$command" = "checksum" ]; then
+  echo "Updating dotfiles checksum. Enter password or press Ctrl-C to cancel."
+  readPassword
   updateChecksum
 elif [ "$command" = "diff" ]; then
   diffFiles
