@@ -219,7 +219,10 @@ rm -f $dotfiles_dirty_file
 if [ ! -d "$dotfiles_dir" ]; then
   init "git@github.com:bjornhusberg/dotfiles.git"
 elif [ "$command" = "reset" ]; then
+  echo "Resetting dotfiles. Enter password or press Ctrl-C to cancel."
+  readPassword
   repositoryPull
+  verifyChecksum
   updateFiles
 elif [ "$command" = "pull" ]; then
   diffFiles
