@@ -221,6 +221,7 @@ if [ ! -d "$dotfiles_dir" ]; then
 elif [ "$command" = "reset" ]; then
   echo "Resetting dotfiles."
   repositoryPull
+  diffFiles
   updateFiles
 elif [ "$command" = "pull" ]; then
   diffFiles
@@ -233,6 +234,7 @@ elif [ "$command" = "pull" ]; then
   verifyChecksum
   repositoryPull
   verifyChecksum
+  diffFiles
   updateFiles
 elif [ "$command" = "push" ]; then
   diffFiles
