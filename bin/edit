@@ -8,9 +8,22 @@ if [ $OSTYPE == "cygwin" ]; then
   fi
   nohup /c/Program\ Files/Sublime\ Text\ 2/sublime_text.exe $path > /dev/null 2>&1 &
 
-elif [ $OSTYPE == "darwin13" ]; then
+else
 
-  /Applications/Sublime\ Text\ 2.app/Contents/SharedSupport/bin/subl $1
-
+  if [ -f "/Applications/Sublime Text 3.app/Contents/SharedSupport/bin/subl" ]; then
+  	"/Applications/Sublime Text 3.app/Contents/SharedSupport/bin/subl" "$@"
+  elif [ -f "/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl" ]; then
+  	"/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl" "$@"
+  elif [ -f "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ]; then
+  	"/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" "$@"
+  elif [ "$(which emacs)" != "" ]; then
+  	emacs "$@"
+  elif [ "$(which vim)" != "" ]; then
+  	vim "$@"
+  elif [ "$(which vi)" != "" ]; then
+  	vi "$@"
+  else
+  	cat "$@"
+  fi
 fi
 
