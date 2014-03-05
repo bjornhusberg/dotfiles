@@ -10,7 +10,9 @@ if [ $OSTYPE == "cygwin" ]; then
 
 else
 
-  if [ -f "/Applications/Sublime Text 3.app/Contents/SharedSupport/bin/subl" ]; then
+  if [ "$(which atom)" != "" ]; then
+    atom "$@"
+  elif [ -f "/Applications/Sublime Text 3.app/Contents/SharedSupport/bin/subl" ]; then
   	"/Applications/Sublime Text 3.app/Contents/SharedSupport/bin/subl" "$@"
   elif [ -f "/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl" ]; then
   	"/Applications/Sublime Text 2.app/Contents/SharedSupport/bin/subl" "$@"
@@ -26,4 +28,3 @@ else
   	cat "$@"
   fi
 fi
-
