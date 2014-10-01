@@ -18,6 +18,11 @@ if [ $OSTYPE == "cygwin" ]; then
   stty lnext ^q stop undef start undef
 fi
 
+# OSX customizations
+if [ $OSTYPE == "darwin13" ]; then
+  alias kdiff3="/Applications/kdiff3.app/Contents/MacOS/kdiff3"
+fi
+
 # Dotfiles sync
 dotfiles > /dev/null &
 disown
@@ -44,7 +49,7 @@ function promptcmd () {
       LINES=$(tput lines)
       export LINES
       COLUMNS=$(tput cols)
-      export COLUMNS 
+      export COLUMNS
     fi
   fi
 
