@@ -211,7 +211,7 @@ function init() {
     echo "No github clone url specified. Run dotfiles init <github clone url> to initialize."
     return
   fi
-  echo "Initializing dotfiles from $1. Enter password or press Ctrl-C to cancel."
+  echo "Initializing dotfiles from $1."
   rm "$dotfiles_password_file"
   readPassword
   mkdir -p "$dotfiles_dir"
@@ -237,7 +237,7 @@ elif [ "$command" = "pull" ]; then
     echo "Dotfiles contain local changes."
     exit
   fi
-  echo "Pulling dotfiles. Enter password or press Ctrl-C to cancel."
+  echo "Pulling dotfiles."
   readPassword
   verifyChecksum
   repositoryPull
@@ -255,7 +255,7 @@ elif [ "$command" = "push" ]; then
     echo "Dotfiles need to be merged."
     exit
   fi
-  echo "Pushing dotfiles. Enter password or press Ctrl-C to cancel."
+  echo "Pushing dotfiles."
   readPassword
   verifyChecksum
   commitFiles
@@ -267,7 +267,7 @@ elif [ "$command" = "add" ]; then
     echo "Dotfiles need to be pulled."
     exit
   fi
-  echo "Adding dotfile $parameter. Enter password or press Ctrl-C to cancel."
+  echo "Adding dotfile $parameter."
   readPassword
   verifyChecksum
   addFile "$parameter"
@@ -279,14 +279,14 @@ elif [ "$command" = "rm" ]; then
     echo "Dotfiles need to be pulled."
     exit
   fi
-  echo "Removing dotfile $parameter. Enter password or press Ctrl-C to cancel."
+  echo "Removing dotfile $parameter."
   readPassword
   verifyChecksum
   deleteFile "$parameter"
   updateChecksum
   repositoryPush "Removed $parameter"
 elif [ "$command" = "checksum" ]; then
-  echo "Updating dotfiles checksum. Enter password or press Ctrl-C to cancel."
+  echo "Updating dotfiles checksum."
   readPassword
   updateChecksum
 elif [ "$command" = "diff" ]; then
