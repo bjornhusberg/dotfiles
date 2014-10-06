@@ -228,6 +228,7 @@ if [ ! -d "$dotfiles_dir" ]; then
   init "git@github.com:bjornhusberg/dotfiles.git"
 elif [ "$command" = "reset" ]; then
   echo "Resetting dotfiles."
+  rm "$dotfiles_password_file"
   repositoryPull
   diffFiles
   updateFiles
@@ -287,6 +288,7 @@ elif [ "$command" = "rm" ]; then
   repositoryPush "Removed $parameter"
 elif [ "$command" = "checksum" ]; then
   echo "Updating dotfiles checksum."
+  rm "$dotfiles_password_file"
   readPassword
   updateChecksum
 elif [ "$command" = "diff" ]; then
