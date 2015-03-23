@@ -1,0 +1,23 @@
+#!/bin/bash
+
+path=$1
+if [ ! -f "$path" ]; then
+  echo "Usage: $0 <path of git controlled file>"
+  exit 1
+fi
+
+dir=$(dirname $path)
+file=$(basename $path)
+
+pushd . > /dev/null
+
+cd $dir
+
+git diff-index --quiet HEAD $file
+
+if [ $? -ne 0 ]; then
+  git commit -a -m "Updated $file" $file
+  git push
+fi
+
+popd > /dev/null
