@@ -16,7 +16,7 @@ cd $dir
 git diff-index --quiet HEAD $file
 
 if [ $? -ne 0 ]; then
-  git commit -a -m "Updated $file" $file
+  git commit -m "Autopushed $file" $file
   git push
 fi
 
