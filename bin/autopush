@@ -6,17 +6,17 @@ if [ ! -f "$path" ]; then
   exit 1
 fi
 
-dir=$(dirname $path)
-file=$(basename $path)
+dir=$(dirname "$path")
+file=$(basename "$path")
 
 pushd . > /dev/null
 
-cd $dir
+cd "$dir"
 
-git diff-index --quiet HEAD $file
+git diff-index --quiet HEAD "$file"
 
 if [ $? -ne 0 ]; then
-  git commit -m "Autopushed $file" $file
+  git commit -m "Autopushed $file" "$file"
   git push
 fi
 
