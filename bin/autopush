@@ -16,8 +16,8 @@ cd "$dir"
 git diff-index --quiet HEAD "$file"
 
 if [ $? -ne 0 ]; then
-  git pull --rebase
   git commit -m "Autopushed $file" "$file"
+  git pull --rebase
   git push
 fi
 
