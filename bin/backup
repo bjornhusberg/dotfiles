@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Configuration
+sources="/usr/local /etc /var/lib/mysql /home/shared/photo /home/shared/music /home/shared/pub /home/bjorn /home/karin"
+dest="/mnt/usb/backup"
+email="bjorn@husberg.se"
+
+# Check if media is available
+if [ ! -d "$dest" ]; then
+    echo "No backup media found"
+    exit 1
+fi
+
+# Directory names
+current=$dest/`date "+%Y-%m-%d_%H.%M.%S"`
+latest=$dest/LATEST
+
+# RSYNC each of the source directories and create hard links for untouched files
+for source in `echo $sources`
+do
+    if [ ! -d "$source" ]; then
+        echo WARNING: $source does not exist!
+	echo $source does not exist! | mail -s "Backup Warning" $email
+    else 
+        mkdir -p $current$source
+        rsync -vaL --link-dest=$latest$source $source/* $current$source
+    fi
+done
+
+# Hard-link all identical files
+echo Merging duplicate files
+faster-dupemerge $latest $current
+
+# Replace the LATEST link if successful
+if [ -d "$current" ]; then
+    rm -f $latest
+    ln -s $current $latest
+fi
