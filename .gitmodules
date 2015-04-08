@@ -13,3 +13,6 @@
 [submodule "lib/serve"]
 	path = lib/serve
 	url = git@github.com:bjornhusberg/serve.git
+[submodule "lib/backup"]
+	path = lib/backup
+	url = git@github.com:bjornhusberg/Backup.git
