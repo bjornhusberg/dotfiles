@@ -1,0 +1,38 @@
+#!/bin/bash
+
+if [ "$#" -lt 2 ]; then
+  echo "This is a utility that backs up a Pivotal Tracker repository"
+  echo "Usage: $0 <projectid> <api-token> [url to backup directory]"
+  exit 1
+fi
+
+project=$1
+token=$2
+directory="."
+
+if [ "$#" -gt 2 ]; then
+  directory=$3
+fi
+
+current="$directory/backlog-$(date '+%Y-%m-%d_%H.%M.%S').json"
+latest="$directory/LATEST"
+
+curl -s -X GET -H "X-TrackerToken: $token" -o "$current" "https://www.pivotaltracker.com/services/v5/projects/$project/stories/"
+
+if [ ! -f "$latest" ]; then
+  ln -s "$current" "$latest"
+  echo "Backlog saved"
+  exit 0
+fi
+
+diff -q "$current" "$latest" > /dev/null
+
+if [ $? -eq 0 ]; then
+  echo "No changes"
+  rm "$current"
+  exit 0
+fi
+
+rm "$latest"
+ln -s "$current" "$latest"
+echo "Backlog saved"
