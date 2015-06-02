@@ -54,12 +54,14 @@ function repositoryPush() {
 
 function recursivePush() {
   comment="$1"
-  for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
-    pushd "$submodule" > /dev/null
-    recursivePush "$comment"
-    popd > /dev/null
-    git add "$submodule"
-  done
+  if [ -f .gitmodules ]; then
+    for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
+      pushd "$submodule" > /dev/null
+      recursivePush "$comment"
+      popd > /dev/null
+      git add "$submodule"
+    done
+  fi
   git add -A .
   status=$(git status --porcelain)
   if [ "$status" != "" ]; then
