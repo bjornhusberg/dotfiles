@@ -14,7 +14,7 @@ function repositoryPull() {
   git checkout -- .
   git pull origin master
   git submodule init
-  git submodule update --recusive
+  git submodule update --recursive
   git clean -d -x -f
   popd > /dev/null
 }
