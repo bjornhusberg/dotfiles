@@ -13,10 +13,23 @@ function repositoryPull() {
   git clean -d -x -f
   git checkout -- .
   git pull origin master
-  git submodule init
-  git submodule update --recursive
+  updateSubmodulesRecursively
   git clean -d -x -f
   popd > /dev/null
+}
+
+function updateSubmodulesRecursively() {
+  git submodule init
+  git submodule update
+  for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
+    pushd "$submodule" > /dev/null
+    git clean -d -x -f
+    git checkout -- .
+    git pull origin master
+    updateSubmodulesRecursively
+    git clean -d -x -f
+    popd > /dev/null
+  done
 }
 
 function repositoryCheck() {
