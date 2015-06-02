@@ -19,22 +19,6 @@ function repositoryPull() {
   popd > /dev/null
 }
 
-function recursivePull() {
-  git clean -d -x -f
-  git checkout -- .
-  git pull origin master
-  if [  -f .gitmodules ]; then
-    git submodule init
-    git submodule update
-    for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
-      pushd "$submodule" > /dev/null
-      recursivePull
-      popd > /dev/null
-    done
-  fi
-  git clean -d -x -f
-}
-
 function repositoryCheck() {
   pushd "$dotfiles_dir" > /dev/null
   git remote update > /dev/null 2>&1
