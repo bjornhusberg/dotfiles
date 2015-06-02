@@ -19,6 +19,9 @@ function repositoryPull() {
 }
 
 function updateSubmodulesRecursively() {
+  if [ ! -f .gitmodules ]; then
+    return
+  fi
   git submodule init
   git submodule update
   for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
