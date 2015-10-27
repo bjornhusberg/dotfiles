@@ -20,6 +20,7 @@ latest="$directory/LATEST"
 curl -s -X GET -H "X-TrackerToken: $token" -o "$current" "https://www.pivotaltracker.com/services/v5/projects/$project/stories/"
 
 if [ ! -f "$latest" ]; then
+  rm "$latest" > /dev/null 2>&1
   ln -s "$current" "$latest"
   echo "Backlog saved"
   exit 0
