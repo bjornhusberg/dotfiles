@@ -5,6 +5,7 @@ export LSCOLORS=DxGxcxdxCxegedabagacad
 export PATH=~/bin:$PATH
 
 # Aliases
+alias mvn=$HOME/lib/colorant/colorant-mvn.sh
 alias ant=$HOME/lib/colorant/colorant.sh
 alias index=$HOME/lib/index/index.rb
 alias serve=$HOME/lib/serve/serve
