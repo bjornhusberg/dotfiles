@@ -5,13 +5,13 @@ export LSCOLORS=DxGxcxdxCxegedabagacad
 export PATH=~/bin:$PATH
 
 # Aliases
-alias mvn=$HOME/lib/colorant/colorant-mvn.sh
-alias ant=$HOME/lib/colorant/colorant.sh
-alias index=$HOME/lib/index/index.rb
-alias serve=$HOME/lib/serve/serve
-alias wallpaper=$HOME/lib/wallpaper/wallpaper.rb
-alias arkivera=$HOME/lib/arkivera/arkivera.sh
-alias backup=$HOME/lib/backup/backup
+alias mvn=\$HOME/lib/colorant/colorant-mvn.sh
+alias ant=\$HOME/lib/colorant/colorant.sh
+alias index=\$HOME/lib/index/index.rb
+alias serve=\$HOME/lib/serve/serve
+alias wallpaper=\$HOME/lib/wallpaper/wallpaper.rb
+alias arkivera=\$HOME/lib/arkivera/arkivera.sh
+alias backup=\$HOME/lib/backup/backup
 
 # Cygwin customizations
 if [ $OSTYPE == "cygwin" ]; then
@@ -33,19 +33,22 @@ disown
 if [ -f ~/.devenv ]; then
   DEVENV="$(cat ~/.devenv)"
   if [ -f ~/.devenv_${DEVENV} ]; then
-    DEVENV_HOME="~"
+    DEVENV_HOME=~
     source ~/.devenv_${DEVENV}
   else
     DEVENV=""
-    DEVENV_HOME="~"
+    DEVENV_HOME=~
   fi
 fi
 export DEVENV
 export DEVENV_HOME
-alias cde="cd $DEVENV_HOME"
+alias cde="cd \$DEVENV_HOME"
 
 # Prompt
 function promptcmd () {
+
+  local last_exit_code="$?"
+
   if [ "$OSTYPE" = "cygwin" ]; then
     if [ -x /usr/bin/tput ]; then
       LINES=$(tput lines)
@@ -56,7 +59,6 @@ function promptcmd () {
   fi
 
   # Variables
-  local last_exit_code="${?}"
   local current_width="$COLUMNS"
   local current_dir="${PWD/#$HOME/~}"
   local current_user="$USER@$HOSTNAME"
