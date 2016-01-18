@@ -12,6 +12,7 @@ alias serve=\$HOME/lib/serve/serve
 alias wallpaper=\$HOME/lib/wallpaper/wallpaper.rb
 alias arkivera=\$HOME/lib/arkivera/arkivera.sh
 alias backup=\$HOME/lib/backup/backup
+alias devenv="source devenv"
 
 # Cygwin customizations
 if [ $OSTYPE == "cygwin" ]; then
