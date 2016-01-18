@@ -131,7 +131,7 @@ function promptcmd () {
 
   # Optional exit code
   if [ "$last_exit_code" != "0" ]; then
-    formatted_exit_code="$frame_left${warning_color}EXIT: $last_exit_code$frame_right$frame_line"
+    formatted_exit_code="$frame_left${warning_color}$last_exit_code$frame_right$frame_line"
   fi
 
   # Dotfiles status
