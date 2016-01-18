@@ -2,7 +2,7 @@ export CLICOLOR=1
 export LSCOLORS=DxGxcxdxCxegedabagacad
 
 # Paths
-export PATH=~/bin:$PATH
+export PATH=$HOME/bin:$PATH
 
 # Aliases
 alias mvn=\$HOME/lib/colorant/colorant-mvn.sh
@@ -31,14 +31,14 @@ dotfiles > /dev/null &
 disown
 
 # Dev environment
-if [ -f ~/.devenv ]; then
-  DEVENV="$(cat ~/.devenv)"
-  if [ -f ~/.devenv_${DEVENV} ]; then
-    DEVENV_HOME=~
-    source ~/.devenv_${DEVENV}
+if [ -f $HOME/.devenv ]; then
+  DEVENV="$(cat $HOME/.devenv)"
+  if [ -f $HOME/.devenv_${DEVENV} ]; then
+    DEVENV_HOME=$HOME
+    source $HOME/.devenv_${DEVENV}
   else
     DEVENV=""
-    DEVENV_HOME=~
+    DEVENV_HOME=$HOME
   fi
 fi
 export DEVENV
@@ -62,7 +62,6 @@ function promptcmd () {
   # Variables
   local current_width="$COLUMNS"
   local current_dir="${PWD/#$HOME/~}"
-  local current_user="$USER@$HOSTNAME"
   local current_time="$(date '+%H:%M:%S')"
   local current_date="$(date '+%Y-%m-%d')"
   local current_devenv="$DEVENV"
@@ -70,6 +69,11 @@ function promptcmd () {
   local current_dotfiles_status=""
   if [ -f "$HOME/.dotfiles_dirty" ]; then
     local current_dotfiles_status="!"
+  fi
+
+  local current_user="$USER@$HOSTNAME"
+  if [ -f "$HOME/.promptuser" ]; then
+    local current_user="$(cat $HOME/.promptuser)"
   fi
 
   # Color settings
