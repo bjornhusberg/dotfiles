@@ -1,10 +1,16 @@
 #!/bin/bash
+
+if [ $# -lt 1 ]; then
+  echo "Usage: $(basename $0) <command> <args...>"
+  exit 1
+fi 
+
 start=$SECONDS
 "$@"
 duration=$(( SECONDS - start ))
-echo $duration
+
 if [ $duration -gt -1 ]; then
-  echo "$(basename $0) finished!" > ~/.bitbar-message
+  echo "$(basename $1) finished!" > ~/.bitbar-message
   echo Press any key to remove bitbar message!
   read -n 1
   rm ~/.bitbar-message
