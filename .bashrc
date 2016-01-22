@@ -13,6 +13,7 @@ alias wallpaper=\$HOME/lib/wallpaper/wallpaper.rb
 alias arkivera=\$HOME/lib/arkivera/arkivera.sh
 alias backup=\$HOME/lib/backup/backup
 alias devenv="source devenv"
+alias mci="mvn clean install"
 
 # Cygwin customizations
 if [ $OSTYPE == "cygwin" ]; then
