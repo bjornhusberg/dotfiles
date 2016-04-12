@@ -1,18 +1,24 @@
 [submodule "lib/index"]
 	path = lib/index
 	url = git@github.com:bjornhusberg/index.git
+	branch = master
 [submodule "lib/wallpaper"]
 	path = lib/wallpaper
 	url = git@github.com:bjornhusberg/wallpaper.git
+	branch = master
 [submodule "lib/arkivera"]
 	path = lib/arkivera
 	url = git@github.com:bjornhusberg/arkivera.git
+	branch = master
 [submodule "lib/colorant"]
 	path = lib/colorant
 	url = git@github.com:bjornhusberg/colorant.git
+	branch = master
 [submodule "lib/serve"]
 	path = lib/serve
 	url = git@github.com:bjornhusberg/serve.git
+	branch = master
 [submodule "lib/backup"]
 	path = lib/backup
 	url = git@github.com:bjornhusberg/Backup.git
+	branch = master
