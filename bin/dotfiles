@@ -5,8 +5,150 @@ dotfiles_dirty_file="$HOME/.dotfiles_dirty"
 dotfiles_password_file="$HOME/.dotfiles_password"
 dotfiles_checksum_file="$dotfiles_dir/.dotfiles.sum"
 
-command="$1"
-parameter="$2"
+function run() {
+  command="$1"
+  parameter="$2"
+  rm -f $dotfiles_dirty_file
+  if [ ! -d "$dotfiles_dir" ]; then
+    init "git@github.com:bjornhusberg/dotfiles.git"
+  elif [ "$command" = "reset" ]; then
+    reset
+  elif [ "$command" = "pull" ]; then
+    pull
+  elif [ "$command" = "push" ]; then
+    push "$parameter"
+  elif [ "$command" = "add" ]; then
+    add "$parameter"
+  elif [ "$command" = "rm" ]; then
+    remove "$parameter"
+  elif [ "$command" = "checksum" ]; then
+    checksum
+  elif [ "$command" = "diff" ]; then
+    diffFiles
+  elif [  "$command" = "" ]; then
+    status
+  else
+    echo "Usage: $0 [diff|pull|push|add|rm|reset|checksum] files ..."
+    exit 1
+  fi
+}
+
+function init() {
+  url="$1"
+  if [ -e "$dotfiles_dir" ]; then
+    echo "Dotfiles directory already exists: $dotfiles_dir"
+    return
+  fi
+  if [ "$url" == "" ]; then
+    echo "No github clone url specified. Run dotfiles init <github clone url> to initialize."
+    return
+  fi
+  echo "Initializing dotfiles from $url."
+  rm "$dotfiles_password_file"
+  readPassword
+  mkdir -p "$dotfiles_dir"
+  pushd "$dotfiles_dir" > /dev/null
+  git clone "$url" .
+  git submodule update --init --recursive
+  popd > /dev/null
+  verifyChecksum
+  updateFiles
+}
+
+function reset() {
+  echo "Resetting dotfiles."
+  rm "$dotfiles_password_file"
+  repositoryPull
+  diffFiles
+  updateFiles
+}
+
+function pull() {
+  diffFiles
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles contain local changes."
+    exit
+  fi
+  echo "Pulling dotfiles."
+  readPassword
+  verifyChecksum
+  repositoryPull
+  verifyChecksum
+  diffFiles
+  updateFiles
+}
+
+function push() {
+  path="$1"
+  diffFiles
+  if [ "$?" == "0" ]; then
+    echo "Nothing to do."
+    exit
+  fi
+  repositoryCheck
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles need to be merged."
+    exit
+  fi
+  echo "Pushing dotfiles."
+  readPassword
+  verifyChecksum
+  commitFiles
+  updateChecksum
+  repositoryPush "$path"
+}
+
+function add() {
+  path="$1"
+  repositoryCheck
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles need to be pulled."
+    exit
+  fi
+  echo "Adding dotfile $path."
+  readPassword
+  verifyChecksum
+  addFile "$path"
+  updateChecksum
+  repositoryPush "Added $path"
+}
+
+function remove() {
+  path="$1"
+  repositoryCheck
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles need to be pulled."
+    exit
+  fi
+  echo "Removing dotfile $path."
+  readPassword
+  verifyChecksum
+  deleteFile "$path"
+  updateChecksum
+  repositoryPush "Removed $path"
+}
+
+function checksum() {
+  echo "Updating dotfiles checksum."
+  rm "$dotfiles_password_file"
+  readPassword
+  updateChecksum
+}
+
+function status() {
+  diffFiles > /dev/null 2>&1
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles need to be pushed!"
+    touch $dotfiles_dirty_file
+    exit
+  fi
+  repositoryCheck
+  if [ "$?" != "0" ]; then
+    echo "Dotfiles need to be pulled!"
+    touch $dotfiles_dirty_file
+    exit
+  fi
+}
 
 function repositoryPull() {
   pushd "$dotfiles_dir" > /dev/null
@@ -59,10 +201,11 @@ function recursivePush() {
 }
 
 function isUpdated() {
-  if [[ ! -f "$HOME$1" ]]; then
+  path="$1"
+  if [[ ! -f "$HOME$path" ]]; then
     return 1
-  elif [[ "$HOME$1" -ot "$dotfiles_dir$1"
-       || "$HOME$1" -nt "$dotfiles_dir$1" ]]; then
+  elif [[ "$HOME$path" -ot "$dotfiles_dir$path"
+       || "$HOME$path" -nt "$dotfiles_dir$path" ]]; then
     return 1
   fi
   return 0
@@ -204,111 +347,4 @@ function verifyChecksum() {
   fi
 }
 
-function init() {
-  if [ -e "$dotfiles_dir" ]; then
-    echo "Dotfiles directory already exists: $dotfiles_dir"
-    return
-  fi
-  if [ "$1" == "" ]; then
-    echo "No github clone url specified. Run dotfiles init <github clone url> to initialize."
-    return
-  fi
-  echo "Initializing dotfiles from $1."
-  rm "$dotfiles_password_file"
-  readPassword
-  mkdir -p "$dotfiles_dir"
-  pushd "$dotfiles_dir" > /dev/null
-  git clone "$1" .
-  git submodule update --init --recursive
-  popd > /dev/null
-  verifyChecksum
-  updateFiles
-}
-
-rm -f $dotfiles_dirty_file
-if [ ! -d "$dotfiles_dir" ]; then
-  init "git@github.com:bjornhusberg/dotfiles.git"
-elif [ "$command" = "reset" ]; then
-  echo "Resetting dotfiles."
-  rm "$dotfiles_password_file"
-  repositoryPull
-  diffFiles
-  updateFiles
-elif [ "$command" = "pull" ]; then
-  diffFiles
-  if [ "$?" != "0" ]; then
-    echo "Dotfiles contain local changes."
-    exit
-  fi
-  echo "Pulling dotfiles."
-  readPassword
-  verifyChecksum
-  repositoryPull
-  verifyChecksum
-  diffFiles
-  updateFiles
-elif [ "$command" = "push" ]; then
-  diffFiles
-  if [ "$?" == "0" ]; then
-    echo "Nothing to do."
-    exit
-  fi
-  repositoryCheck
-  if [ "$?" != "0" ]; then
-    echo "Dotfiles need to be merged."
-    exit
-  fi
-  echo "Pushing dotfiles."
-  readPassword
-  verifyChecksum
-  commitFiles
-  updateChecksum
-  repositoryPush "$parameter"
-elif [ "$command" = "add" ]; then
-  repositoryCheck
-  if [ "$?" != "0" ]; then
-    echo "Dotfiles need to be pulled."
-    exit
-  fi
-  echo "Adding dotfile $parameter."
-  readPassword
-  verifyChecksum
-  addFile "$parameter"
-  updateChecksum
-  repositoryPush "Added $parameter"
-elif [ "$command" = "rm" ]; then
-  repositoryCheck
-  if [ "$?" != "0" ]; then
-    echo "Dotfiles need to be pulled."
-    exit
-  fi
-  echo "Removing dotfile $parameter."
-  readPassword
-  verifyChecksum
-  deleteFile "$parameter"
-  updateChecksum
-  repositoryPush "Removed $parameter"
-elif [ "$command" = "checksum" ]; then
-  echo "Updating dotfiles checksum."
-  rm "$dotfiles_password_file"
-  readPassword
-  updateChecksum
-elif [ "$command" = "diff" ]; then
-  diffFiles
-elif [  "$command" = "" ]; then
-  diffFiles > /dev/null 2>&1
-  if [ "$?" != "0" ]; then
-    echo "Dotfiles need to be pushed!"
-    touch $dotfiles_dirty_file
-    exit
-  fi
-  repositoryCheck
-  if [ "$?" != "0" ]; then
-    echo "Dotfiles need to be pulled!"
-    touch $dotfiles_dirty_file
-    exit
-  fi
-else
-  echo "Usage: $0 [diff|pull|push|add|rm|reset|checksum] files ..."
-  exit 1
-fi
+run "$1" "$2"
