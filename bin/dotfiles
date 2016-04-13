@@ -14,8 +14,7 @@ function repositoryPull() {
   git checkout -- .
   git pull origin master
   git submodule init
-  git submodule update --recursive
-  git submodule foreach git branch -u origin/master master
+  git submodule update --remote --recursive
   git clean -d -x -f
   popd > /dev/null
 }
@@ -56,7 +55,7 @@ function recursivePush() {
   status=$(git status --porcelain)
   if [ "$status" != "" ]; then
     git commit -m "$comment"
-    git push
+    git push origin master
   fi
 }
 
