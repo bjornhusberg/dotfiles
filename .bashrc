@@ -3,6 +3,9 @@ export LSCOLORS=DxGxcxdxCxegedabagacad
 
 # Paths
 export PATH=$HOME/bin:$PATH
+if [ -x /usr/libexec/path_helper ]; then
+	eval `/usr/libexec/path_helper -s`
+fi
 
 # Aliases
 alias mvn=\$HOME/lib/colorant/colorant-mvn.sh
