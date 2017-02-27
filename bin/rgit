@@ -22,7 +22,7 @@ done
 wait
 
 for repo in $repos; do
-  echo -e "\n${repo%%/.git}:"
+  echo -e "\n\033[1;34m${repo%%/.git}\033[0m"
   cat "$repo/rgit.log"
   rm "$repo/rgit.log"
 done
