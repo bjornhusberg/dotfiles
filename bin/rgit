@@ -2,29 +2,27 @@
 
 function doGit() {
   pushd . > /dev/null
-  cd "$1"
+  cd "${repo%%/.git}"
   shift
-  git $@ > mgit.log 2>&1
+  git $@ > .git/rgit.log 2>&1
   popd > /dev/null
 }
 
 repos=$(find . -type d -name ".git")
 
 for repo in $repos; do
+  # Limit number of parallell threads to unchoke github
   while [ $(jobs -r | grep doGit | wc -l) -gt 7 ]; do
     sleep 0.1
   done
 
-  doGit ${repo%%/.git} $@ &
+  doGit $repo $@ &
 done
 
 wait
 
 for repo in $repos; do
-  repo=${repo%%/.git}
-  if [ -d "${repo}/.git" ]; then
-    echo -e "\n${repo}:"
-    cat "${repo}/mgit.log"
-    rm "${repo}/mgit.log"
-  fi
+  echo -e "\n${repo%%/.git}:"
+  cat "$repo/rgit.log"
+  rm "$repo/rgit.log"
 done
