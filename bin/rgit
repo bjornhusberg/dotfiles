@@ -11,6 +11,10 @@ function doGit() {
 repos=$(find . -type d -name ".git")
 
 for repo in $repos; do
+  while [ $(jobs -r | grep doGit | wc -l) -gt 7 ]; do
+    sleep 0.1
+  done
+
   doGit ${repo%%/.git} $@ &
 done
 
