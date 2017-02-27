@@ -17,7 +17,6 @@ alias arkivera=\$HOME/lib/arkivera/arkivera.sh
 alias backup=\$HOME/lib/backup/backup
 alias devenv="source devenv"
 alias mci="mvn clean install"
-alias mgit=./mgit.sh
 
 # Cygwin customizations
 if [ $OSTYPE == "cygwin" ]; then
