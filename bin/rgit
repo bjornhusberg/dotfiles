@@ -1,0 +1,26 @@
+#!/bin/bash
+
+function doGit() {
+  pushd . > /dev/null
+  cd "$1"
+  shift
+  git $@ > mgit.log 2>&1
+  popd > /dev/null
+}
+
+repos=$(find . -type d -name ".git")
+
+for repo in $repos; do
+  doGit ${repo%%/.git} $@ &
+done
+
+wait
+
+for repo in $repos; do
+  repo=${repo%%/.git}
+  if [ -d "${repo}/.git" ]; then
+    echo -e "\n${repo}:"
+    cat "${repo}/mgit.log"
+    rm "${repo}/mgit.log"
+  fi
+done
