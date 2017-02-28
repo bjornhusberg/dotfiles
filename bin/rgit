@@ -1,5 +1,7 @@
 #!/bin/bash
 
+MAX_PARALLELL_JOBS=7 
+
 function doGit() {
   pushd . > /dev/null
   cd "${repo%%/.git}"
@@ -11,8 +13,8 @@ function doGit() {
 repos=$(find . -type d -name ".git")
 
 for repo in $repos; do
-  # Limit number of parallell threads to unchoke github
-  while [ $(jobs -r | grep doGit | wc -l) -gt 7 ]; do
+  # Limit number of parallell threads to unchoke the remote
+  while [ $(jobs -r | grep doGit | wc -l) -gt $MAX_PARALLELL_JOBS ]; do
     sleep 0.1
   done
 
