@@ -23,8 +23,17 @@ done
 
 wait
 
+silentCount=0
 for repo in $repos; do
-  echo -e "\n\033[1;34m${repo%%/.git}\033[0m"
-  cat "$repo/rgit.log"
+  if [ -s "$repo/rgit.log" ]; then
+    echo -e "\n\033[1;34m${repo%%/.git}\033[0m"
+    cat "$repo/rgit.log"
+  else
+    silentCount=$((silentCount + 1))
+  fi
   rm "$repo/rgit.log"
 done
+
+if [ $silentCount -gt 0 ]; then
+  echo "Suppressed output from $silentCount silent commands"
+fi
