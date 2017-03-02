@@ -12,13 +12,27 @@ function doGit() {
 
 repos=$(find . -type d -name ".git")
 
+if [ ${#repos} -eq 0 ]; then
+  echo "No git repositories found."
+  exit 0
+fi
+
+args=$@
+
+if [ ${#args} -eq 0 ]; then
+  echo "No arguments supplied. Defaulting to 'git status --porcelain'"
+  args=(status --porcelain)
+  args=${args[*]}
+fi
+
+
 for repo in $repos; do
   # Limit number of parallell threads to unchoke the remote
   while [ $(jobs -r | grep doGit | wc -l) -gt $MAX_PARALLELL_JOBS ]; do
     sleep 0.1
   done
 
-  doGit $repo $@ &
+  doGit $repo $args &
 done
 
 wait
