@@ -1,0 +1,15 @@
+#!/bin/bash
+
+type=$1
+progress=$2
+
+if [ -z $progress ]; then
+  progress=$(date +%s)
+fi
+
+if [ "$type" = "braille" ]; then
+  chars="⠼⠶⠧⠏⠛⠹"
+  echo -ne "${chars:$((progress % ${#chars})):1}"
+else
+  echo $progress
+fi
