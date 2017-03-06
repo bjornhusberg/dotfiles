@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAX_PARALLELL_JOBS=7 
+MAX_PARALLELL_JOBS=7
 
 function doGit() {
   pushd . > /dev/null
@@ -8,6 +8,12 @@ function doGit() {
   shift
   git $@ > .git/rgit.log 2>&1
   popd > /dev/null
+}
+
+function progress() {
+  progress=$(date +%s)
+  chars="⠼⠶⠧⠏⠛⠹"
+  echo -ne "\r${chars:$((progress % ${#chars})):1} "
 }
 
 repos=$(find . -type d -name ".git")
@@ -25,12 +31,12 @@ if [ ${#args} -eq 0 ]; then
   args=${args[*]}
 fi
 
-
 for repo in $repos; do
   # Limit number of parallell threads to unchoke the remote
   while [ $(jobs -r | grep doGit | wc -l) -gt $MAX_PARALLELL_JOBS ]; do
     sleep 0.1
   done
+  progress
 
   doGit $repo $args &
 done
