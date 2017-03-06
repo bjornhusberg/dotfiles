@@ -10,12 +10,6 @@ function doGit() {
   popd > /dev/null
 }
 
-function progress() {
-  progress=$(date +%s)
-  chars="⠼⠶⠧⠏⠛⠹"
-  echo -ne "\r${chars:$((progress % ${#chars})):1} "
-}
-
 repos=$(find . -type d -name ".git")
 
 if [ ${#repos} -eq 0 ]; then
@@ -35,9 +29,8 @@ for repo in $repos; do
   # Limit number of parallell threads to unchoke the remote
   while [ $(jobs -r | grep doGit | wc -l) -gt $MAX_PARALLELL_JOBS ]; do
     sleep 0.1
-    progress
+    echo -ne "\r$(progress braille) "
   done
-  progress
 
   doGit $repo $args &
 done
