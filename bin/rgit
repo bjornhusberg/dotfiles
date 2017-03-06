@@ -35,6 +35,7 @@ for repo in $repos; do
   # Limit number of parallell threads to unchoke the remote
   while [ $(jobs -r | grep doGit | wc -l) -gt $MAX_PARALLELL_JOBS ]; do
     sleep 0.1
+    progress
   done
   progress
 
