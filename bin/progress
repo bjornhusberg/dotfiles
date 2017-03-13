@@ -8,7 +8,8 @@ if [ -z $progress ]; then
 fi
 
 if [ "$type" = "braille" ]; then
-  chars="⠼⠶⠧⠏⠛⠹"
+#  chars="⠼⠶⠧⠏⠛⠹"
+  chars="⠇⠋⠙⠸⠴⠦"
   echo -ne "${chars:$((progress % ${#chars})):1}"
 else
   echo $progress
