@@ -2,7 +2,7 @@
 
 MAX_PARALLELL_JOBS=7
 
-function doGit() {
+function invokeGit() {
   pushd . > /dev/null
   cd "${repo%%/.git}"
   shift
@@ -10,42 +10,41 @@ function doGit() {
   popd > /dev/null
 }
 
-repos=$(find . -type d -name ".git")
+repos=()
+while IFS=  read -r -d $'\0'; do
+    repos+=("$REPLY")
+done < <(find . -type d -name '.git' -print0)
 
-if [ ${#repos} -eq 0 ]; then
+if [ ${#repos[@]} -eq 0 ]; then
   echo "No git repositories found."
   exit 0
 fi
 
-args=$@
-
-if [ ${#args} -eq 0 ]; then
-  echo "No arguments supplied. Defaulting to 'git status --porcelain'"
-  args=(status --porcelain)
-  args=${args[*]}
-fi
-
-for repo in $repos; do
+for repo in ${repos[@]}; do
   # Limit number of parallell threads to unchoke the remote
-  while [ $(jobs -r | grep doGit | wc -l) -gt $MAX_PARALLELL_JOBS ]; do
+  while [ $(jobs -r | grep invokeGit | wc -l) -gt $MAX_PARALLELL_JOBS ]; do
     sleep 0.1
     echo -ne "\r$(progress braille) "
   done
 
-  doGit "$repo" $args &
+  if [ $# -eq 0 ]; then
+    invokeGit "$repo" status --porcelain
+  else
+    invokeGit "$repo" "$@" &
+  fi
 done
 
 wait
 
 silentCount=0
-for repo in $repos; do
+for repo in ${repos[@]}; do
   if [ -s "$repo/rgit.log" ]; then
     echo -e "\n\033[1;34m${repo%%/.git}\033[0m"
     cat "$repo/rgit.log"
   else
     silentCount=$((silentCount + 1))
   fi
-  rm "$repo/rgit.log"
+  rm "$repo/rgit.log" > /dev/null 2>&1
 done
 
 if [ $silentCount -gt 0 ]; then
