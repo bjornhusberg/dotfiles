@@ -6,7 +6,7 @@ function doGit() {
   pushd . > /dev/null
   cd "${repo%%/.git}"
   shift
-  git $@ > .git/rgit.log 2>&1
+  git "$@" > .git/rgit.log 2>&1
   popd > /dev/null
 }
 
@@ -32,7 +32,7 @@ for repo in $repos; do
     echo -ne "\r$(progress braille) "
   done
 
-  doGit $repo $args &
+  doGit "$repo" $args &
 done
 
 wait
