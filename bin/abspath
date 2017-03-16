@@ -1,23 +1,3 @@
 #!/bin/bash
 
-dir="$1"
-file=""
-
-if [ -f "$dir" ]; then
-	file=$(basename "$dir")
-	dir=$(dirname "$dir")
-fi
-
-if [ "$dir" == "" ]; then
-	dir="."
-fi
-
-pushd "$dir" > /dev/null
-dir=$(pwd)
-popd > /dev/null
-
-if [ "$file" != "" ]; then
-	echo "$dir/$file"
-else
-	echo "$dir"
-fi
+echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
