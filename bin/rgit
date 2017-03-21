@@ -42,6 +42,9 @@ wait
 
 silentCount=0
 for repo in ${repos[@]}; do
+  if [ -f "$repo/rgit.ignore" ]; then
+    continue
+  fi
   if [ -s "$repo/rgit.log" ]; then
     echo -e "\n\033[1;34m${repo%%/.git}\033[0m"
     cat "$repo/rgit.log"
