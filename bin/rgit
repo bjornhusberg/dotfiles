@@ -21,6 +21,10 @@ if [ ${#repos[@]} -eq 0 ]; then
 fi
 
 for repo in ${repos[@]}; do
+  if [ -f "$repo/rgit.ignore" ]; then
+    continue
+  fi
+
   # Limit number of parallell threads to unchoke the remote
   while [ $(jobs -r | grep invokeGit | wc -l) -gt $MAX_PARALLELL_JOBS ]; do
     sleep 0.1
