@@ -26,7 +26,7 @@ if [ $OSTYPE == "cygwin" ]; then
 fi
 
 # OSX customizations
-if [ $OSTYPE == "darwin13" ]; then
+if [ $OSTYPE == darwin* ]; then
   alias kdiff3="/Applications/kdiff3.app/Contents/MacOS/kdiff3"
 fi
 
