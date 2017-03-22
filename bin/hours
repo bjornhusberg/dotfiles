@@ -1,0 +1,24 @@
+#!/bin/bash
+
+function getCurrentAppMac {
+  osascript << EOF
+    global frontApp, frontAppName
+
+    tell application "System Events"
+      set frontApp to first application process whose frontmost is true
+      set frontAppName to name of frontApp
+    end tell
+
+    return frontAppName
+EOF
+}
+
+function getCurrentApp() {
+  if [[ $OSTYPE == darwin* ]]; then
+    getCurrentAppMac
+  else
+    echo Unsupported OS: $OSTYPE
+  fi
+}
+
+echo $(date +"%Y-%m-%d %H:%M:%S ")$(getCurrentApp) >> ~/Dropbox/System/hours.log
