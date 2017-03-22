@@ -2,14 +2,12 @@
 
 function getCurrentAppMac {
   osascript << EOF
-    global frontApp, frontAppName
-
     tell application "System Events"
-      set frontApp to first application process whose frontmost is true
-      set frontAppName to name of frontApp
+      if exists process "ScreenSaverEngine"
+        return "screensaver"
+      end if
+      return name of first application process whose frontmost is true
     end tell
-
-    return frontAppName
 EOF
 }
 
@@ -21,4 +19,13 @@ function getCurrentApp() {
   fi
 }
 
-echo $(date +"%Y-%m-%d %H:%M:%S ")$(getCurrentApp) >> ~/Dropbox/System/hours.log
+app=$(getCurrentApp)
+
+if [ "$app" == "screensaver" ]; then
+  exit 0
+fi
+
+date=$(date +"%Y-%m-%d %H:%M:%S")
+
+echo "$app"
+echo "$date $app" >> ~/Dropbox/System/hours.log
