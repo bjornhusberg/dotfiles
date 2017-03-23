@@ -1,10 +1,19 @@
 #!/bin/bash
 
 function getCurrentAppMac {
+  
+  # Detect locked screen
+  python -c 'import sys,Quartz; d=Quartz.CGSessionCopyCurrentDictionary(); sys.exit(d and d.get("CGSSessionScreenIsLocked", 0) == 0 and d.get("kCGSSessionOnConsoleKey", 0) == 1)'
+  if [ $? -eq 0 ]; then
+    echo "idle"
+    return
+  fi
+  
+  # Detect screensaver
   osascript << EOF
     tell application "System Events"
       if exists process "ScreenSaverEngine"
-        return "screensaver"
+        return "idle"
       end if
       return name of first application process whose frontmost is true
     end tell
@@ -21,7 +30,7 @@ function getCurrentApp() {
 
 app=$(getCurrentApp)
 
-if [ "$app" == "screensaver" ]; then
+if [ "$app" == "idle" ]; then
   exit 0
 fi
 
