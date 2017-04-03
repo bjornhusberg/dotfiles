@@ -53,14 +53,12 @@ function init() {
     return
   fi
   echo "Initializing dotfiles from $url."
-  rm "$dotfiles_password_file" > /dev/null
-  readPassword
+  rm "$dotfiles_password_file" > /dev/null 2>&1
   mkdir -p "$dotfiles_dir"
   pushd "$dotfiles_dir" > /dev/null
   git clone "$url" .
   git submodule update --init --recursive
   popd > /dev/null
-  verifyChecksum
   updateFiles
 }
 
