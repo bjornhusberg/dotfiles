@@ -76,12 +76,12 @@ function pull() {
   fi
   echo "Pulling dotfiles."
   readPassword "Enter password for data verification (or leave blank to disable)"
-  if [[ ! -z "$password" ]]; then
-    verifyChecksum
+  if [[ -z "$password" ]]; then
     repositoryPull
-    verifyChecksum
   else
+    verifyChecksum
     repositoryPull
+    verifyChecksum
   fi
   diffFiles
   updateFiles
@@ -320,7 +320,7 @@ function updateFiles() {
 }
 
 function readPassword() {
-  if [[ -s "$dotfiles_password_file" ]]; then
+  if [[ -f "$dotfiles_password_file" ]]; then
     password=$(cat "$dotfiles_password_file")
     return
   fi
@@ -331,8 +331,6 @@ function readPassword() {
   stty -echo
   read -p "$message: " password; echo
   stty echo
-  echo "$password" > "$dotfiles_password_file"
-  chmod 600 "$dotfiles_password_file"
 }
 
 function calculateChecksum() {
