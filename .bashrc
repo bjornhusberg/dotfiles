@@ -19,14 +19,14 @@ alias devenv="source devenv"
 alias mci="mvn clean install"
 
 # Cygwin customizations
-if [ "$OSTYPE" == "cygwin" ]; then
+if [ $OSTYPE == "cygwin" ]; then
   export TERM=cygwin
   alias less="less -r"
   stty lnext ^q stop undef start undef
 fi
 
 # OSX customizations
-if [ "$OSTYPE" == darwin* ]; then
+if [ $OSTYPE == darwin* ]; then
   alias kdiff3="/Applications/kdiff3.app/Contents/MacOS/kdiff3"
 fi
 
@@ -35,11 +35,11 @@ dotfiles > /dev/null &
 disown
 
 # Dev environment
-if [ -f "$HOME/.devenv" ]; then
+if [ -f $HOME/.devenv ]; then
   DEVENV="$(cat $HOME/.devenv)"
-  if [ -f "$HOME/.devenv_${DEVENV}" ]; then
+  if [ -f $HOME/.devenv_${DEVENV} ]; then
     DEVENV_HOME=$HOME
-    source "$HOME/.devenv_${DEVENV}"
+    source $HOME/.devenv_${DEVENV}
   else
     DEVENV=""
     DEVENV_HOME=$HOME
@@ -48,11 +48,6 @@ fi
 export DEVENV
 export DEVENV_HOME
 alias cde="cd \$DEVENV_HOME"
-
-# Local config
-if [ -f "$HOME/.bash_local" ]; then
-  source "$HOME/.bash_local"
-fi
 
 # Prompt
 function promptcmd () {

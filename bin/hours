@@ -34,8 +34,7 @@ if [ "$app" == "idle" ]; then
   exit 0
 fi
 
-dateAndTime=$(date +"%Y-%m-%d %H:%M:%S")
-date=$(date +"%Y-%m-%d")
+date=$(date +"%Y-%m-%d %H:%M:%S")
 
 echo "$app"
-echo "$dateAndTime $app" >> ~/Dropbox/System/hours/$date.log
+echo "$date $app" >> ~/Dropbox/System/hours.log
