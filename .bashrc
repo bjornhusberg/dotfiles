@@ -50,8 +50,8 @@ export DEVENV_HOME
 alias cde="cd \$DEVENV_HOME"
 
 # Local config
-if [ -f "$HOME/.bashrc-local" ]; then
-  source "$HOME/.bashrc-local"
+if [ -f "$HOME/.bash_local" ]; then
+  source "$HOME/.bash_local"
 fi
 
 # Prompt
