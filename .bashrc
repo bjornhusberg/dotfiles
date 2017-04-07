@@ -87,8 +87,6 @@ function promptcmd () {
 
   # Color settings
   local reset_color="\[\033[0m\]"
-  local line_color="\[\033[1;36m\]"
-  local frame_color="\[\033[1;34m\]"
   local user_color="\[\033[1;32m\]"
   local devenv_color="\[\033[1;33m\]"
   local dir_color="\[\033[1;35m\]"
@@ -96,6 +94,15 @@ function promptcmd () {
   local date_color="\[\033[1;33m\]"
   local warning_color="\[\033[1;35m\]"
 
+  if [ -z "$SERVERPROMPT" ]; then
+    local line_color="\[\033[1;36m\]"
+    local frame_color="\[\033[1;34m\]"
+  else 
+    local line_color="\[\033[1;31m\]"
+    local frame_color="\[\033[1;35m\]"
+  fi
+  
+ 
   # Box drawing in Unicode
   local line_h=$(echo -e "\xe2\x94\x80")
   local line_ul=$(echo -e "\xe2\x94\x8c")
