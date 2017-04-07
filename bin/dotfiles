@@ -88,6 +88,7 @@ function pull() {
 }
 
 function push() {
+  echo "Pushing dotfiles."
   path="$1"
   diffFiles
   if (( $? == 0 )); then
@@ -99,7 +100,6 @@ function push() {
     echo "Dotfiles need to be merged."
     exit
   fi
-  echo "Pushing dotfiles."
   readPassword
   verifyChecksum
   commitFiles
