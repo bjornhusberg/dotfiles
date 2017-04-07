@@ -62,7 +62,7 @@ function init() {
 
 function reset() {
   echo "Resetting dotfiles."
-  rm "$dotfiles_password_file"
+  rm "$dotfiles_password_file" > /dev/null 2>&1
   repositoryPull
   diffFiles
   updateFiles
@@ -359,7 +359,7 @@ function verifyChecksum() {
 
 function require() {
   while (( "$#" )); do
-    if [[ -z "$(which $1)" ]]; then
+    if [[ -z "$(which $1 2>/dev/null)" ]]; then
       echo "Please install $1"
       exit 1
     fi
@@ -368,8 +368,9 @@ function require() {
 }
 
 require git awk sort
-if [[ -z "$(which shasum)" ]]; then
-  if [[ -z "$(which sha256sum)" ]]; then
+
+if [[ -z "$(which shasum 2>/dev/null)" ]]; then
+  if [[ -z "$(which sha256sum 2>/dev/null)" ]]; then
     echo "Please install shasum or sha256sum"
     exit 1
   fi
