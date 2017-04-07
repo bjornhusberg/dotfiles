@@ -75,7 +75,7 @@ function pull() {
     exit
   fi
   echo "Pulling dotfiles."
-  readPassword "Enter password for data verification (or leave blank to disable)"
+  readPassword "Enter password for data verification (or leave blank to skip)"
   if [[ -z "$password" ]]; then
     repositoryPull
   else
