@@ -37,10 +37,6 @@ function run() {
 
 function init() {
   echo "Initializing dotfiles from $url."
-  if [[ -d "$dotfiles_dir" ]]; then
-    echo "Dotfiles directory already exists: $dotfiles_dir"
-    exit 1 
-  fi
   sshResult="$(ssh -T git@github.com 2>&1)"
   if [[ "${sshResult:0:2}" == "Hi" ]]; then
     url="$gitrepo_ssh"
