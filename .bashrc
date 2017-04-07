@@ -75,14 +75,16 @@ function promptcmd () {
   local current_date="$(date '+%Y-%m-%d')"
   local current_devenv="$DEVENV"
 
-  local current_dotfiles_status=""
   if [ -f "$HOME/.dotfiles_dirty" ]; then
     local current_dotfiles_status="!"
+  else
+    local current_dotfiles_status=""
   fi
 
-  local current_user="$USER@$HOSTNAME"
-  if [ -f "$HOME/.promptuser" ]; then
-    local current_user="$(cat $HOME/.promptuser)"
+  if [ -z "$PROMPTUSER" ]; then
+    local current_user="$USER@$HOSTNAME"
+  else
+    local current_user="$PROMPTUSER"
   fi
 
   # Color settings
@@ -101,7 +103,6 @@ function promptcmd () {
     local line_color="\[\033[1;31m\]"
     local frame_color="\[\033[1;35m\]"
   fi
-  
  
   # Box drawing in Unicode
   local line_h=$(echo -e "\xe2\x94\x80")
