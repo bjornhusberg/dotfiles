@@ -367,5 +367,13 @@ function require() {
   done
 }
 
-require git shasum awk sort
+require git awk sort
+if [[ -z "$(which shasum)" ]]; then
+  if [[ -z "$(which sha256sum)" ]]; then
+    echo "Please install shasum or sha256sum"
+    exit 1
+  fi
+  alias shasum="sha256sum"
+fi
+
 run "$1" "$2"
