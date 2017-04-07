@@ -70,10 +70,14 @@ function promptcmd () {
 
   # Variables
   local current_width="$COLUMNS"
-  local current_dir="${PWD/#$HOME/~}"
+  local current_dir="${PWD}"
   local current_time="$(date '+%H:%M:%S')"
   local current_date="$(date '+%Y-%m-%d')"
   local current_devenv="$DEVENV"
+
+  if [ "${current_dir:0:${#HOME}}" == "$HOME" ]; then
+		current_dir="~${current_dir:${#HOME}}"
+	fi
 
   if [ -f "$HOME/.dotfiles_dirty" ]; then
     local current_dotfiles_status="!"
@@ -99,11 +103,11 @@ function promptcmd () {
   if [ -z "$SERVERPROMPT" ]; then
     local line_color="\[\033[1;36m\]"
     local frame_color="\[\033[1;34m\]"
-  else 
+  else
     local line_color="\[\033[1;31m\]"
     local frame_color="\[\033[1;35m\]"
   fi
- 
+
   # Box drawing in Unicode
   local line_h=$(echo -e "\xe2\x94\x80")
   local line_ul=$(echo -e "\xe2\x94\x8c")
