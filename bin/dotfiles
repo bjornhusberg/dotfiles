@@ -67,7 +67,7 @@ function pull() {
     echo "Dotfiles contain local changes."
     exit
   fi
-  readPassword "Enter password for data verification (or leave blank to skip)."
+  readPassword "Enter password for data verification (or leave blank to skip)"
   if [[ -z "$password" ]]; then
     repositoryPull
   else
