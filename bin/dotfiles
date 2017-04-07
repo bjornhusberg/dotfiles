@@ -36,13 +36,13 @@ function run() {
 }
 
 function init() {
-  echo "Initializing dotfiles from $url."
   sshResult="$(ssh -T git@github.com 2>&1)"
   if [[ "${sshResult:0:2}" == "Hi" ]]; then
     url="$gitrepo_ssh"
   else
     url="$gitrepo_https"
   fi
+  echo "Initializing dotfiles from $url."
   rm "$dotfiles_password_file" > /dev/null 2>&1
   mkdir -p "$dotfiles_dir"
   pushd "$dotfiles_dir" > /dev/null
