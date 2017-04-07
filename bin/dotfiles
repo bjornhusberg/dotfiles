@@ -69,13 +69,13 @@ function reset() {
 }
 
 function pull() {
+  echo "Pulling dotfiles."
   diffFiles
   if (( $? != 0 )); then
     echo "Dotfiles contain local changes."
     exit
   fi
-  echo "Pulling dotfiles."
-  readPassword "Enter password for data verification (or leave blank to skip)"
+  readPassword "Enter password for data verification (or leave blank to skip)."
   if [[ -z "$password" ]]; then
     repositoryPull
   else
@@ -119,7 +119,7 @@ function add() {
   verifyChecksum
   addFile "$path"
   updateChecksum
-  repositoryPush "Added $path"
+  repositoryPush "Added $path."
 }
 
 function remove() {
@@ -134,7 +134,7 @@ function remove() {
   verifyChecksum
   deleteFile "$path"
   updateChecksum
-  repositoryPush "Removed $path"
+  repositoryPush "Removed $path."
 }
 
 function checksum() {
@@ -147,13 +147,13 @@ function checksum() {
 function status() {
   diffFiles > /dev/null 2>&1
   if (( $? != 0 )); then
-    echo "Dotfiles need to be pushed!"
+    echo "Dotfiles need to be pushed."
     touch $dotfiles_dirty_file
     exit
   fi
   repositoryCheck
   if (( $? != 0 )); then
-    echo "Dotfiles need to be pulled!"
+    echo "Dotfiles need to be pulled."
     touch $dotfiles_dirty_file
     exit
   fi
