@@ -70,7 +70,7 @@ function promptcmd () {
 		current_dir="~${current_dir:${#HOME}}"
 	fi
 
-  local current_time="$(date '+%H:%M:%S')"
+  local current_time="\t"
   local current_date="$(date '+%Y-%m-%d')"
   local current_devenv="$DEVENV"
 
