@@ -59,25 +59,20 @@ function promptcmd () {
 
   local last_exit_code="$?"
 
-  if [ "$OSTYPE" = "cygwin" ]; then
-    if [ -x /usr/bin/tput ]; then
-      LINES=$(tput lines)
-      export LINES
-      COLUMNS=$(tput cols)
-      export COLUMNS
-    fi
-  fi
-
   # Variables
   local current_width="$COLUMNS"
-  local current_dir="${PWD}"
-  local current_time="$(date '+%H:%M:%S')"
-  local current_date="$(date '+%Y-%m-%d')"
-  local current_devenv="$DEVENV"
+	if [[ "$current_width" == "" ]] && [[ "$OSTYPE" == "cygwin" ]]; then
+		current_width=$(tput cols)
+  fi
 
+	local current_dir="${PWD}"
   if [ "${current_dir:0:${#HOME}}" == "$HOME" ]; then
 		current_dir="~${current_dir:${#HOME}}"
 	fi
+
+  local current_time="$(date '+%H:%M:%S')"
+  local current_date="$(date '+%Y-%m-%d')"
+  local current_devenv="$DEVENV"
 
   if [ -f "$HOME/.dotfiles_dirty" ]; then
     local current_dotfiles_status="!"
