@@ -86,6 +86,13 @@ function promptcmd () {
     local current_user="$PROMPTUSER"
   fi
 
+  local check="$last_exit_code$current_dir$current_width$current_devenv$current_dotfiles_status$current_user"
+  if [ "$PS1_CHECK" == "$check" ]; then
+    return
+  fi
+  export PS1_CHECK=$check
+
+
   # Color settings
   local reset_color="\[\033[0m\]"
   local user_color="\[\033[1;32m\]"
