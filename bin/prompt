@@ -1,110 +1,85 @@
 #!/bin/bash
 
-last_exit_code="$1"
+LINE="\342\224\200"
+CORNER_UL="\342\224\214"
+CORNER_UR="\342\224\220"
+CORNER_LL="\342\224\224"
+CORNER_LR="\342\224\230"
+
+RESET="\[\033[0m\]"
+GREEN="\[\033[1;32m\]"
+YELLOW="\[\033[1;33m\]"
+PINK="\[\033[1;35m\]"
+CYAN="\[\033[1;36m\]"
+RED="\[\033[1;31m\]"
+PURPLE="\[\033[1;34m\]"
+
+if [ -z "$SERVERPROMPT" ]; then
+  LINE_COLOR="$CYAN"
+  FRAME_COLOR="$PURPLE"
+else
+  LINE_COLOR="$RED"
+  FRAME_COLOR="$PINK"
+fi
+
+FRAME_BEGIN="$FRAME_COLOR$LINE("
+FRAME_END="$FRAME_COLOR)$LINE"
+
+if [ "$1" != "0" ]; then
+  exitCode="$FRAME_BEGIN${PINK}$1$FRAME_END$LINE_COLOR$LINE"
+else
+  exitCode=""
+fi
 
 if [ "$COLUMNS" == "" ]; then
   COLUMNS=$(tput cols)
 fi
 
-current_dir="${PWD}"
-if [ "${current_dir:0:${#HOME}}" == "$HOME" ]; then
-  current_dir="~${current_dir:${#HOME}}"
-fi
-
 if [ -f "$HOME/.dotfiles_dirty" ]; then
-  current_dotfiles_status="!"
+  notification="$FRAME_BEGIN${PINK}!$FRAME_END$LINE_COLOR$LINE"
+  notificationLength=6
 else
-  current_dotfiles_status=""
+  notification=""
+  notificationLength=0
 fi
 
 if [ -z "$PROMPTUSER" ]; then
-  current_user="$USER@$HOSTNAME"
-else
-  current_user="$PROMPTUSER"
+  PROMPTUSER="$USER@$HOSTNAME"
 fi
+userLength=$((${#PROMPTUSER} + 5))
 
-# Color settings
-reset_color="\[\033[0m\]"
-user_color="\[\033[1;32m\]"
-devenv_color="\[\033[1;33m\]"
-dir_color="\[\033[1;35m\]"
-time_color="\[\033[1;33m\]"
-date_color="\[\033[1;33m\]"
-warning_color="\[\033[1;35m\]"
-
-if [ -z "$SERVERPROMPT" ]; then
-  line_color="\[\033[1;36m\]"
-  frame_color="\[\033[1;34m\]"
-else
-  line_color="\[\033[1;31m\]"
-  frame_color="\[\033[1;35m\]"
-fi
-
-# Box drawings
-line_h="\342\224\200"
-line_ul="\342\224\214"
-line_ur="\342\224\220"
-line_ll="\342\224\224"
-line_lr="\342\224\230"
-
-frame_left="$frame_color$line_h("
-frame_right="$frame_color)$line_h"
-frame_line="$line_color$line_h"
-
-dir_length=$((${#current_dir} + 4))
-user_length=$((${#current_user} + 5))
-date_length=15
-
-formatted_dir="$frame_left$dir_color$current_dir$frame_right"
-formatted_user="$frame_left$user_color$current_user$frame_right"
-formatted_time="$frame_left$time_color\t$frame_right"
-formatted_date="$frame_left$date_color\D{%F}$frame_right"
-
-# Development environment
 if [ "$DEVENV" != "" ]; then
-  formatted_devenv="$frame_left$devenv_color$DEVENV$frame_right$frame_line"
-  devenv_length=$((${#DEVENV} + 5))
+  devenv="$FRAME_BEGIN$YELLOW$DEVENV$FRAME_END$LINE_COLOR$LINE"
 else
-  formatted_devenv=""
-  devenv_length="0"
+  devenv=""
 fi
+devenvLength=$((${#DEVENV} + 5))
 
-# Optional exit code
-if [ "$last_exit_code" != "0" ]; then
-  formatted_exit_code="$frame_left${warning_color}$last_exit_code$frame_right$frame_line"
+if [ "${PWD:0:${#HOME}}" == "$HOME" ]; then
+  directory="~${PWD:${#HOME}}"
 else
-  formatted_exit_code=""
+  directory="${PWD}"
 fi
-
-# Dotfiles status
-if [ "$current_dotfiles_status" != "" ]; then
-  formatted_dotfiles_status="$frame_left${warning_color}${current_dotfiles_status}$frame_right$frame_line"
-  dotfiles_status_length=$((${#current_dotfiles_status} + 5))
+directoryLength=$((${#directory} + 4))
+padding=$(($COLUMNS - $userLength - $directoryLength - $devenvLength - $notificationLength - 2))
+if [ $padding -gt 0 ]; then
+  directory="$FRAME_BEGIN$PINK$directory$FRAME_END"
 else
-  formatted_dotfiles_status=""
-  dotfiles_status_length="0"
-fi
-
-# Upper line fill
-upper_fill_length=$(($COLUMNS - $user_length - $dir_length - $devenv_length - $dotfiles_status_length - 2))
-if [ $upper_fill_length -lt 0 ]; then
-  max_dir_length=$(($dir_length + $upper_fill_length))
-  if [ $max_dir_length -lt 8 ]; then
-    upper_fill_length=$(($upper_fill_length + $dir_length))
-    formatted_dir=""
+  maxdirectoryLength=$(($directoryLength + $padding))
+  if [ $maxdirectoryLength -lt 8 ]; then
+    padding=$(($padding + $directoryLength))
+    directory=""
   else
-    upper_fill_length=0
-    truncated_dir="...${current_dir:$((7-$max_dir_length))}"
-    formatted_dir="$frame_left$dir_color$truncated_dir$frame_right"
+    padding=0
+    directory="$FRAME_BEGIN$PINK...${directory:$((7-$maxdirectoryLength))}$FRAME_END"
   fi
 fi
 
-ur_start=$(($COLUMNS - $date_length))
+echo -n "\n\033[1A$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPTUSER$FRAME_END$LINE_COLOR$LINE$notification$devenv"
 
-echo -n "\n\033[1A$line_color$line_ul$formatted_user$frame_line$formatted_dotfiles_status$formatted_devenv"
-
-for ((; upper_fill_length > 0; upper_fill_length--)) {
-  echo -n "$line_h"
+for ((; padding > 0; padding--)) {
+  echo -n "$LINE"
 }
 
-echo -n "$formatted_dir$line_color$line_ur\033[1B\033[${ur_start}G$frame_line$formatted_date$line_color$line_lr\033[1A\n$line_color$line_ll$formatted_exit_code$formatted_time$frame_line$reset_color "
+rightBegin=$(($COLUMNS - 15))
+echo -n "$directory$LINE_COLOR$CORNER_UR\033[1B\033[${rightBegin}G$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW\D{%F}$FRAME_END$LINE_COLOR$CORNER_LR\033[1A\n$LINE_COLOR$CORNER_LL$exitCode$FRAME_BEGIN$YELLOW\t$FRAME_END$LINE_COLOR$LINE$RESET "
