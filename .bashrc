@@ -71,7 +71,7 @@ function promptcmd () {
 	fi
 
   local current_time="\t"
-  local current_date="$(date '+%Y-%m-%d')"
+  local current_date="\D{%F}"
   local current_devenv="$DEVENV"
 
   if [ -f "$HOME/.dotfiles_dirty" ]; then
@@ -131,7 +131,7 @@ function promptcmd () {
 
   local dir_length=$((${#current_dir} + 4))
   local user_length=$((${#current_user} + 5))
-  local date_length=$((${#current_date} + 5))
+  local date_length=15
 
   local formatted_dir="$frame_left$dir_color$current_dir$frame_right"
   local formatted_user="$frame_left$user_color$current_user$frame_right"
