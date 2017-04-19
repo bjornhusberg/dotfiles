@@ -56,6 +56,7 @@ fi
 
 # Prompt
 function promptCommand() {
-	export PS1="$(prompt $? $COLUMNS)"
+  export COLUMNS
+  export PS1="$(prompt $?)"
 }
 export PROMPT_COMMAND=promptCommand

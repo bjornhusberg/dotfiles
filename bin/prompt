@@ -3,7 +3,7 @@
 last_exit_code="$1"
 
 # Variables
-current_width="$2"
+current_width="$COLUMNS"
 if [[ "$current_width" == "" ]]; then
   current_width=$(tput cols)
 fi
@@ -28,13 +28,6 @@ if [ -z "$PROMPTUSER" ]; then
 else
   current_user="$PROMPTUSER"
 fi
-
-check="$last_exit_code$current_dir$current_width$current_devenv$current_dotfiles_status$current_user"
-if [ "$PS1_CHECK" == "$check" ]; then
-  echo "$PS1"
-fi
-export PS1_CHECK=$check
-
 
 # Color settings
 reset_color="\[\033[0m\]"
