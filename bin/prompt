@@ -1,0 +1,123 @@
+#!/bin/bash
+
+last_exit_code="$1"
+
+# Variables
+current_width="$2"
+if [[ "$current_width" == "" ]]; then
+  current_width=$(tput cols)
+fi
+
+current_dir="${PWD}"
+if [ "${current_dir:0:${#HOME}}" == "$HOME" ]; then
+  current_dir="~${current_dir:${#HOME}}"
+fi
+
+current_time="\t"
+current_date="\D{%F}"
+current_devenv="$DEVENV"
+
+if [ -f "$HOME/.dotfiles_dirty" ]; then
+  current_dotfiles_status="!"
+else
+  current_dotfiles_status=""
+fi
+
+if [ -z "$PROMPTUSER" ]; then
+  current_user="$USER@$HOSTNAME"
+else
+  current_user="$PROMPTUSER"
+fi
+
+check="$last_exit_code$current_dir$current_width$current_devenv$current_dotfiles_status$current_user"
+if [ "$PS1_CHECK" == "$check" ]; then
+  echo "$PS1"
+fi
+export PS1_CHECK=$check
+
+
+# Color settings
+reset_color="\[\033[0m\]"
+user_color="\[\033[1;32m\]"
+devenv_color="\[\033[1;33m\]"
+dir_color="\[\033[1;35m\]"
+time_color="\[\033[1;33m\]"
+date_color="\[\033[1;33m\]"
+warning_color="\[\033[1;35m\]"
+
+if [ -z "$SERVERPROMPT" ]; then
+  line_color="\[\033[1;36m\]"
+  frame_color="\[\033[1;34m\]"
+else
+  line_color="\[\033[1;31m\]"
+  frame_color="\[\033[1;35m\]"
+fi
+
+# Box drawing in Unicode
+line_h=$(echo -e "\xe2\x94\x80")
+line_ul=$(echo -e "\xe2\x94\x8c")
+line_ur=$(echo -e "\xe2\x94\x90")
+line_ll=$(echo -e "\xe2\x94\x94")
+line_lr=$(echo -e "\xe2\x94\x98")
+
+frame_left="$frame_color$line_h("
+frame_right="$frame_color)$line_h"
+frame_line="$line_color$line_h"
+
+dir_length=$((${#current_dir} + 4))
+user_length=$((${#current_user} + 5))
+date_length=15
+
+formatted_dir="$frame_left$dir_color$current_dir$frame_right"
+formatted_user="$frame_left$user_color$current_user$frame_right"
+formatted_time="$frame_left$time_color$current_time$frame_right"
+formatted_date="$frame_left$date_color$current_date$frame_right"
+formatted_exit_code=""
+formatted_devenv=""
+devenv_length="0"
+formatted_dotfiles_status=""
+dotfiles_status_length="0"
+
+# Development environment
+if [ "$current_devenv" != "" ]; then
+  formatted_devenv="$frame_left$devenv_color$current_devenv$frame_right$frame_line"
+  devenv_length=$((${#current_devenv} + 5))
+fi
+
+# Optional exit code
+if [ "$last_exit_code" != "0" ]; then
+  formatted_exit_code="$frame_left${warning_color}$last_exit_code$frame_right$frame_line"
+fi
+
+# Dotfiles status
+if [ "$current_dotfiles_status" != "" ]; then
+  formatted_dotfiles_status="$frame_left${warning_color}${current_dotfiles_status}$frame_right$frame_line"
+  dotfiles_status_length=$((${#current_dotfiles_status} + 5))
+fi
+
+# Upper line fill
+prompt_u=""
+upper_fill_length=$(($current_width - $user_length - $dir_length - $devenv_length - $dotfiles_status_length - 2))
+if [ $upper_fill_length -lt 0 ]; then
+  max_dir_length=$(($dir_length + $upper_fill_length))
+  if [ $max_dir_length -lt 8 ]; then
+    upper_fill_length=$(($upper_fill_length + $dir_length))
+    formatted_dir=""
+  else
+    upper_fill_length=0
+    truncated_dir="...${current_dir:$((7-$max_dir_length))}"
+    formatted_dir="$frame_left$dir_color$truncated_dir$frame_right"
+  fi
+fi
+for ((; upper_fill_length > 0; upper_fill_length--)) {
+  prompt_u="$prompt_u$line_h"
+}
+
+ur_start=$(($current_width - $date_length))
+
+# Construct the prompt
+prompt_ul="$line_color$line_ul$formatted_user$frame_line$formatted_dotfiles_status$formatted_devenv"
+prompt_ur="$formatted_dir$line_color$line_ur"
+prompt_lr="$frame_line$formatted_date$line_color$line_lr"
+prompt_ll="$line_color$line_ll$formatted_exit_code$formatted_time$frame_line$reset_color "
+echo "\n\033[1A$prompt_ul$prompt_u$prompt_ur\033[1B\033[${ur_start}G$prompt_lr\033[1A\n$prompt_ll"
