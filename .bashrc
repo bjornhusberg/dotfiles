@@ -117,21 +117,6 @@ function promptcmd () {
   local line_ll=$(echo -e "\xe2\x94\x94")
   local line_lr=$(echo -e "\xe2\x94\x98")
 
-  # Get the current cursor column position
-  exec < /dev/tty
-  local old_stty=$(stty -g)
-  stty raw -echo min 0
-  echo -en "\033[6n" > /dev/tty
-  IFS=';' read -r -d R -a pos
-  stty $old_stty
-  local current_column=${pos[1]}
-
-  # Optional extra linefeed
-  local optional_lf=""
-  if [ "${current_column}" != "1" ]; then
-    optional_lf="\n"
-  fi
-
   local frame_left="$frame_color$line_h("
   local frame_right="$frame_color)$line_h"
   local frame_line="$line_color$line_h"
@@ -192,6 +177,6 @@ function promptcmd () {
   local prompt_ur="$formatted_dir$line_color$line_ur"
   local prompt_lr="$frame_line$formatted_date$line_color$line_lr"
   local prompt_ll="$line_color$line_ll$formatted_exit_code$formatted_time$frame_line$reset_color "
-  PS1="$optional_lf\n\033[1A$prompt_ul$prompt_u$prompt_ur\033[1B\033[${ur_start}G$prompt_lr\033[1A\n$prompt_ll"
+  PS1="\n\033[1A$prompt_ul$prompt_u$prompt_ur\033[1B\033[${ur_start}G$prompt_lr\033[1A\n$prompt_ll"
 }
 export PROMPT_COMMAND=promptcmd
