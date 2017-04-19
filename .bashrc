@@ -5,7 +5,8 @@ if [ -x /usr/libexec/path_helper ]; then
 fi
 
 # Start dotfiles sync
-dotfiles > /dev/null &; disown
+dotfiles > /dev/null &
+disown
 
 # Colors
 export CLICOLOR=1
