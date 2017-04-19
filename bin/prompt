@@ -25,14 +25,14 @@ fi
 FRAME_BEGIN="$FRAME_COLOR$LINE("
 FRAME_END="$FRAME_COLOR)$LINE"
 
+if [ "$COLUMNS" == "" ]; then
+  COLUMNS=$(tput cols)
+fi
+
 if [ "$1" != "0" ]; then
   exitCode="$FRAME_BEGIN${PINK}$1$FRAME_END$LINE_COLOR$LINE"
 else
   exitCode=""
-fi
-
-if [ "$COLUMNS" == "" ]; then
-  COLUMNS=$(tput cols)
 fi
 
 if [ -f "$HOME/.dotfiles_dirty" ]; then
