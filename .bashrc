@@ -55,4 +55,7 @@ if [ -f "$HOME/.bash_local" ]; then
 fi
 
 # Prompt
-export PROMPT_COMMAND="PS1=\"$(prompt $? $COLUMNS)\""
+function promptCommand() {
+	export PS1="$(prompt $? $COLUMNS)"
+}
+export PROMPT_COMMAND=promptCommand
