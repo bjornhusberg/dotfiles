@@ -24,10 +24,10 @@
 	branch = master
 [submodule "lib/hours"]
 	path = lib/hours
-	url = git@github.com:bjornhusberg/hours.git
+	url = https://github.com/bjornhusberg/hours.git
 [submodule "lib/ptbackup"]
 	path = lib/ptbackup
-	url = git@github.com:bjornhusberg/ptbackup.git
+	url = https://github.com/bjornhusberg/ptbackup.git
 [submodule "lib/rgit"]
 	path = lib/rgit
-	url = git@github.com:bjornhusberg/rgit.git
+	url = https://github.com/bjornhusberg/rgit.git
