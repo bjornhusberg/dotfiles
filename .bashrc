@@ -54,8 +54,10 @@ fi
 
 # Prompt
 function promptCommand() {
-  EXIT=$?
+  export PROMPT_EXIT=$?
+  export PROMPT_USER
+  export PROMPT_STYLE
   export COLUMNS
-  export PS1="$(prompt $EXIT)"
+  export PS1="$(prompt)"
 }
 export PROMPT_COMMAND=promptCommand
