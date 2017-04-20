@@ -1,7 +1,7 @@
 # Paths
 export PATH=$HOME/bin:$PATH
 if [ -x /usr/libexec/path_helper ]; then
-	eval `/usr/libexec/path_helper -s`
+  eval `/usr/libexec/path_helper -s`
 fi
 
 # Start dotfiles sync
@@ -26,7 +26,7 @@ alias cde="cd \$DEVENV_HOME"
 
 # Cygwin customizations
 if [ "$OSTYPE" == "cygwin" ]; then
-	source "$HOME/.bash_win"
+  source "$HOME/.bash_win"
 fi
 
 # OSX customizations
@@ -51,7 +51,7 @@ fi
 
 # Prompt
 function promptCommand() {
-	EXIT=$?
+  EXIT=$?
   export COLUMNS
   export PS1="$(prompt $EXIT)"
 }
