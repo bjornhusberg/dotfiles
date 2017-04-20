@@ -50,10 +50,11 @@ userLength=$((${#PROMPT_USER} + 5))
 
 if [ "$DEVENV" != "" ]; then
   devenv="$FRAME_BEGIN$YELLOW$DEVENV$FRAME_END$LINE_COLOR$LINE"
+  devenvLength=$((${#DEVENV} + 5))
 else
   devenv=""
+  devenvLength=0
 fi
-devenvLength=$((${#DEVENV} + 5))
 
 if [ "${PWD:0:${#HOME}}" == "$HOME" ]; then
   directory="~${PWD:${#HOME}}"
