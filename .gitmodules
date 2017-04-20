@@ -22,3 +22,12 @@
 	path = lib/backup
 	url = https://github.com/bjornhusberg/Backup.git
 	branch = master
+[submodule "lib/hours"]
+	path = lib/hours
+	url = git@github.com:bjornhusberg/hours.git
+[submodule "lib/ptbackup"]
+	path = lib/ptbackup
+	url = git@github.com:bjornhusberg/ptbackup.git
+[submodule "lib/rgit"]
+	path = lib/rgit
+	url = git@github.com:bjornhusberg/rgit.git
