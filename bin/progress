@@ -1,15 +1,47 @@
 #!/bin/bash
 
-type=$1
-progress=$2
+type="$1"
+if [ "$type" = "braille" ]; then
+  progress="$2"
+elif [ "$type" = "bar" ]; then
+  progress="$2"
+  max="$3"
+  size="$4"
+elif [ "$type" = "percent" ]; then
+  progress="$2"
+  max="$3"
+else
+  type="bar"
+  progress="$1"
+  max="$2"
+  size="$3"
+fi
 
-if [ -z $progress ]; then
+if [ -z "$progress" ]; then
+  type="braille"
   progress=$(date +%s)
+fi
+
+if [ -z "$max" ]; then
+  max=100
+fi
+
+if [ -z "$size" ]; then
+  size=10
 fi
 
 if [ "$type" = "braille" ]; then
   chars="⠯⠏⠋⠉⠙⠹⠽⠼⠴⠤⠦⠧"
   echo -ne "${chars:$((progress % ${#chars})):1}"
+elif [ "$type" = "bar" ]; then
+  blocks=$((size * progress / max))
+  for ((i = 0; i < blocks; i++)) {
+    echo -n "█"
+  }
+  for ((i = blocks; i < size; i++)) {
+    echo -n "░"
+  }
 else
-  echo $progress
+  echo -n "$((100 * progress / max))%"
 fi
+echo
