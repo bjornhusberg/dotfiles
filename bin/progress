@@ -44,4 +44,3 @@ elif [ "$type" = "bar" ]; then
 else
   echo -n "$((100 * progress / max))%"
 fi
-echo
