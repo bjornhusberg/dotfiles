@@ -1,2 +1,0 @@
-#!/bin/bash
-~/lib/colorant/colorant-mvn.sh "$@"
