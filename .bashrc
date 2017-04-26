@@ -13,9 +13,9 @@ export CLICOLOR=1
 export LSCOLORS=DxGxcxdxCxegedabagacad
 
 # Aliases
-alias index=\$HOME/lib/index/index.rb
+alias index=\$HOME/lib/index/index
 alias serve=\$HOME/lib/serve/serve
-alias wallpaper=\$HOME/lib/wallpaper/wallpaper.rb
+alias wallpaper=\$HOME/lib/wallpaper/wallpaper
 alias arkivera=\$HOME/lib/arkivera/arkivera.sh
 alias backup=\$HOME/lib/backup/backup
 alias ptbackup=\$HOME/lib/ptbackup/ptbackup
