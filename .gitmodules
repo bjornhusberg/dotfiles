@@ -25,9 +25,12 @@
 [submodule "lib/hours"]
 	path = lib/hours
 	url = https://github.com/bjornhusberg/hours.git
+  branch = master
 [submodule "lib/ptbackup"]
 	path = lib/ptbackup
 	url = https://github.com/bjornhusberg/ptbackup.git
+  branch = master
 [submodule "lib/rgit"]
 	path = lib/rgit
 	url = https://github.com/bjornhusberg/rgit.git
+  branch = master
