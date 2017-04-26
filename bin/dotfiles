@@ -54,7 +54,6 @@ function init() {
 
 function reset() {
   echo "Resetting dotfiles."
-  rm "$dotfiles_password_file" > /dev/null 2>&1
   repositoryPull
   diffFiles
   updateFiles
@@ -131,7 +130,6 @@ function remove() {
 
 function checksum() {
   echo "Updating dotfiles checksum."
-  rm "$dotfiles_password_file"
   readPassword
   updateChecksum
 }
