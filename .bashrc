@@ -13,8 +13,6 @@ export CLICOLOR=1
 export LSCOLORS=DxGxcxdxCxegedabagacad
 
 # Aliases
-alias mvn=\$HOME/lib/colorant/colorant-mvn.sh
-alias ant=\$HOME/lib/colorant/colorant.sh
 alias index=\$HOME/lib/index/index.rb
 alias serve=\$HOME/lib/serve/serve
 alias wallpaper=\$HOME/lib/wallpaper/wallpaper.rb
@@ -23,6 +21,8 @@ alias backup=\$HOME/lib/backup/backup
 alias ptbackup=\$HOME/lib/ptbackup/ptbackup
 alias rgit=\$HOME/lib/rgit/rgit
 alias hours=\$HOME/lib/hours/hours
+
+# Aliases
 alias mci="mvn clean install"
 alias devenv="source devenv"
 alias cde="cd \$DEVENV_HOME"
