@@ -1,5 +1,5 @@
 # Paths
-export PATH=$HOME/bin:$PATH
+export PATH=$HOME/bin:$HOME/lib/colorant:$PATH
 if [ -x /usr/libexec/path_helper ]; then
   eval `/usr/libexec/path_helper -s`
 fi
