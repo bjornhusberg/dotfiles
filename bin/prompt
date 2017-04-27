@@ -29,6 +29,21 @@ if [ "$COLUMNS" == "" ]; then
   COLUMNS=$(tput cols)
 fi
 
+function insertOptionalNewline() {
+  exec < /dev/tty
+  oldstty=$(stty -g)
+  stty raw -echo min 0
+  echo -en "\033[6n" > /dev/tty
+  IFS=';' read -r -d R -a pos
+  stty $oldstty
+  if [ "${pos[1]}" != "1" ]; then
+    echo
+  fi
+}
+
+# Fork for performance (cygwin sucks)
+insertOptionalNewline &
+
 if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
   exitCode="$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END$LINE_COLOR$LINE"
 else
@@ -75,6 +90,9 @@ else
     directory="$FRAME_BEGIN$PINK...${directory:$((7-$maxdirectoryLength))}$FRAME_END"
   fi
 fi
+
+# Wait for forked optionalNewLine
+wait
 
 echo -n "\n\033[1A$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END$LINE_COLOR$LINE$notification$devenv"
 
