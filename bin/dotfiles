@@ -36,7 +36,7 @@ function run() {
 }
 
 function init() {
-  sshResult="$(ssh -T git@github.com)"
+  sshResult="$(ssh -qT git@github.com 2>&1)"
   if [[ "${sshResult:0:2}" == "Hi" ]]; then
     url="$gitrepo_ssh"
   else
