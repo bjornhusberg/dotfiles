@@ -4,7 +4,7 @@ dotfiles_dir="$HOME/.dotfiles"
 dotfiles_dirty_file="$HOME/.dotfiles_dirty"
 dotfiles_password_file="$HOME/.dotfiles_password"
 dotfiles_checksum_file="$dotfiles_dir/.dotfiles.sum"
-gitrepo_ssh="git@github.com/bjornhusberg/dotfiles.git"
+gitrepo_ssh="git@github.com:bjornhusberg/dotfiles.git"
 gitrepo_https="https://github.com/bjornhusberg/dotfiles.git"
 
 function run() {
@@ -36,7 +36,7 @@ function run() {
 }
 
 function init() {
-  sshResult="$(ssh -T git@github.com 2>&1)"
+  sshResult="$(ssh -T git@github.com)"
   if [[ "${sshResult:0:2}" == "Hi" ]]; then
     url="$gitrepo_ssh"
   else
