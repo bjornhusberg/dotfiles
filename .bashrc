@@ -25,7 +25,7 @@ alias hours=\$HOME/lib/hours/hours
 # Aliases
 alias mci="mvn clean install"
 alias devenv="source devenv"
-alias cde="cd \$DEVENV_HOME"
+alias cde="cd \"\$DEVENV_HOME\""
 
 # Cygwin customizations
 if [ "$OSTYPE" == "cygwin" ]; then
