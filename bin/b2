@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+
+apiBasePath=https://api.backblazeb2.com/b2api/v1/
+
+function fromAccount {
+  echo "$b2_account" | jq -r .$1
+}
+
+function apiCall {
+  curl -s -H "Authorization: $(fromAccount authorizationToken)" \
+      "$(fromAccount apiUrl)/b2api/v1/$1?accountId=$(fromAccount accountId)$2"
+}
+
+cmd=$1
+if [ "$cmd" == "authorize_account" ]; then
+  export b2_account=$(curl -s $apiBasePath/b2_authorize_account -u "$2:$3")
+
+elif [ "$cmd" == "create_bucket" ]; then
+  type=$3
+  if [ "$type" == "" ]; then
+    type="allPrivate"
+  fi
+  apiCall b2_create_bucket "&bucketName=$2&bucketType=$type"
+
+elif [ "$cmd" == "list_buckets" ]; then
+  apiCall b2_list_buckets
+
+elif [ "$cmd" == "delete_bucket" ]; then
+  apiCall b2_delete_bucket "&bucketId=$2"
+
+elif [ "$cmd" == "delete_bucket_byname" ]; then
+  id=$(apiCall b2_list_buckets | jq -r ".buckets[] | select(.bucketName == \"$2\") | .bucketId")
+  if [ "$id" == "" ]; then
+    echo "No such bucket"
+    exit 1
+  fi
+  apiCall b2_delete_bucket "&bucketId=$id"
+
+elif [ "$cmd" == "upload_file"]
+  echo "Not yet implemented!"
+  exit 1
+
+else
+  echo "Usage: $0 <b2_command> <parameters>"
+  exit 1
+fi
