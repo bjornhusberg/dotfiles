@@ -27,13 +27,10 @@ alias mci="mvn clean install"
 alias devenv="source devenv"
 alias cde="cd \"\$DEVENV_HOME\""
 
-# Cygwin customizations
-if [ "$OSTYPE" == "cygwin" ]; then
+# OS specific customizations
+if [[ "$OSTYPE" == cygwin* ]]; then
   source "$HOME/.bash_win"
-fi
-
-# OSX customizations
-if [ "$OSTYPE" == darwin* ]; then
+elif [[ "$OSTYPE" == darwin* ]]; then
   source "$HOME/.bash_osx"
 fi
 
