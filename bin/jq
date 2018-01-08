@@ -1,6 +1,0 @@
-#!/bin/bash
-if [[ $OSTYPE == darwin* ]]; then
-  jq-osx-amd64 "$@"
-else
-  jq-linux64 "$@"
-fi
