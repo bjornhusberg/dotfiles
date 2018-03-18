@@ -324,7 +324,7 @@ function readPassword() {
 
 function calculateChecksum() {
   pushd "$dotfiles_dir" > /dev/null
-  checksum=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0  | sort -dzf | xargs -0 cat | LC_CTYPE=C tr -d "\15\32" | xargs -0 echo "$password" | shasum -b -a 256 | awk '{print $1}')
+  checksum=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0  | sort -dzf | xargs -0 shasum -b -a 256 | xargs -0 echo "$password" | shasum -b -a 256 | awk '{print $1}')
   popd > /dev/null
 }
 
