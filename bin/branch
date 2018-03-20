@@ -6,8 +6,16 @@ if [ $result -ne 0 ]; then
   exit $result
 fi
 
+if [ $# -eq 0 ]; then
+  command="checkout"
+else
+  command="$@"
+fi
+
+echo "git $command <branch>"
+
 branches=("master $(echo "$branches" | sed -e 's/* //' -e 's/(no branch)//' -e 's/master//')")
 select branch in $branches; do
-  git checkout "$branch"
+  git $command "$branch"
 	exit
 done
