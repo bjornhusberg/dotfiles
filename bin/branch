@@ -1,0 +1,13 @@
+#!/bin/bash
+PS3="- Select branch: "
+branches=$(git branch)
+result=$?
+if [ $result -ne 0 ]; then
+  exit $result
+fi
+
+branches=("master $(echo "$branches" | sed -e 's/* //' -e 's/(no branch)//' -e 's/master//')")
+select branch in $branches; do
+  git checkout "$branch"
+	exit
+done
