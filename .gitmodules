@@ -26,3 +26,11 @@
 	path = lib/ptbackup
 	url = https://github.com/bjornhusberg/ptbackup.git
   branch = master
+[submodule "lib/rgit"]
+	path = lib/rgit
+	url = https://github.com/bjornhusberg/rgit.git
+  branch = master
+[submodule "lib/serve"]
+	path = lib/serve
+	url = https://github.com/bjornhusberg/serve.git
+  branch = master
