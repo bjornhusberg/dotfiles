@@ -71,13 +71,23 @@ else
   devenvLength=0
 fi
 
+BRANCH="$(git symbolic-ref HEAD 2>/dev/null)"
+if [ "$BRANCH" != "" ]; then
+  BRANCH=${BRANCH##refs/heads/}
+  branch="$FRAME_BEGIN$YELLOW$BRANCH$FRAME_END$LINE_COLOR$LINE"
+  branchLength=$((${#BRANCH} + 4))
+else
+  branch=""
+  branchLength=0
+fi
+
 if [ "${PWD:0:${#HOME}}" == "$HOME" ]; then
   directory="~${PWD:${#HOME}}"
 else
   directory="${PWD}"
 fi
 directoryLength=$((${#directory} + 4))
-padding=$(($COLUMNS - $userLength - $directoryLength - $devenvLength - $notificationLength - 2))
+padding=$(($COLUMNS - $userLength - $branchLength - $directoryLength - $devenvLength - $notificationLength - 2))
 if [ $padding -gt 0 ]; then
   directory="$FRAME_BEGIN$PINK$directory$FRAME_END"
 else
@@ -94,9 +104,10 @@ fi
 # Wait for forked optionalNewLine
 wait
 
-echo -n "\n\033[1A$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END$LINE_COLOR$LINE$notification$devenv"
+echo -n "\n\033[1A$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END$LINE_COLOR$LINE$notification$devenv$branch"
 
 for ((; padding > 0; padding--)) {
+
   echo -n "$LINE"
 }
 
