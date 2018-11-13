@@ -44,41 +44,28 @@ function insertOptionalNewline() {
 # Fork for performance (cygwin sucks)
 insertOptionalNewline &
 
-if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
-  exitCode="$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END$LINE_COLOR$LINE"
-else
-  exitCode=""
-fi
-
-if [ -f "$HOME/.dotfiles_dirty" ]; then
-  notification="$FRAME_BEGIN${PINK}!$FRAME_END$LINE_COLOR$LINE"
-  notificationLength=6
-else
-  notification=""
-  notificationLength=0
-fi
-
 if [ -z "$PROMPT_USER" ]; then
   PROMPT_USER="$USER@$HOSTNAME"
 fi
-userLength=$((${#PROMPT_USER} + 5))
 
-if [ "$DEVENV" != "" ]; then
-  devenv="$FRAME_BEGIN$YELLOW$DEVENV$FRAME_END$LINE_COLOR$LINE"
-  devenvLength=$((${#DEVENV} + 5))
-else
-  devenv=""
-  devenvLength=0
+prompt="\n\033[1A$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END$LINE_COLOR$LINE"
+padding=$(($COLUMNS - ${#PROMPT_USER} - 7))
+
+if [ -f "$HOME/.dotfiles_dirty" ]; then
+  prompt="$prompt$FRAME_BEGIN${PINK}!$FRAME_END$LINE_COLOR$LINE"
+  padding=$(($padding - 6))
 fi
 
-BRANCH="$(git symbolic-ref HEAD 2>/dev/null)"
-if [ "$BRANCH" != "" ]; then
-  BRANCH=${BRANCH##refs/heads/}
-  branch="$FRAME_BEGIN$YELLOW$BRANCH$FRAME_END$LINE_COLOR$LINE"
-  branchLength=$((${#BRANCH} + 4))
-else
-  branch=""
-  branchLength=0
+if [ "$DEVENV" != "" ]; then
+  prompt="$prompt$FRAME_BEGIN$YELLOW$DEVENV$FRAME_END$LINE_COLOR$LINE"
+  padding=$(($padding - ${#DEVENV} - 5))
+fi
+
+branch="$(git symbolic-ref HEAD 2>/dev/null)"
+if [ "$branch" != "" ]; then
+  branch=${branch##refs/heads/}
+  prompt="$prompt$FRAME_BEGIN$PINK$branch$FRAME_END$LINE_COLOR$LINE"
+  padding=$(($padding - ${#branch} - 5))
 fi
 
 if [ "${PWD:0:${#HOME}}" == "$HOME" ]; then
@@ -87,29 +74,31 @@ else
   directory="${PWD}"
 fi
 directoryLength=$((${#directory} + 4))
-padding=$(($COLUMNS - $userLength - $branchLength - $directoryLength - $devenvLength - $notificationLength - 2))
-if [ $padding -gt 0 ]; then
-  directory="$FRAME_BEGIN$PINK$directory$FRAME_END"
+
+if [ $padding -gt $directoryLength ]; then
+  for ((i=$directoryLength; i < $padding; i++)) {
+    prompt="$prompt$LINE"
+  }
+  prompt="$prompt$FRAME_BEGIN$PINK$directory$FRAME_END"
 else
-  maxdirectoryLength=$(($directoryLength + $padding))
-  if [ $maxdirectoryLength -lt 8 ]; then
-    padding=$(($padding + $directoryLength))
-    directory=""
+  if [ $padding -lt 8 ]; then
+    for ((; padding > 0; padding--)) {
+      prompt="$prompt$LINE"
+    }
   else
-    padding=0
-    directory="$FRAME_BEGIN$PINK...${directory:$((7-$maxdirectoryLength))}$FRAME_END"
+    prompt="$prompt$FRAME_BEGIN$PINK...${directory:$((7-$padding))}$FRAME_END"
   fi
 fi
+
+prompt="$prompt$LINE_COLOR$CORNER_UR\033[1B\033[$(($COLUMNS - 15))G$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW\D{%F}$FRAME_END$LINE_COLOR$CORNER_LR\033[1A\n$LINE_COLOR$CORNER_LL"
+
+if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
+  prompt="$prompt$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END$LINE_COLOR$LINE"
+fi
+
+prompt="$prompt$FRAME_BEGIN$YELLOW\t$FRAME_END$LINE_COLOR$LINE$RESET "
 
 # Wait for forked optionalNewLine
 wait
 
-echo -n "\n\033[1A$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END$LINE_COLOR$LINE$notification$devenv$branch"
-
-for ((; padding > 0; padding--)) {
-
-  echo -n "$LINE"
-}
-
-rightBegin=$(($COLUMNS - 15))
-echo -n "$directory$LINE_COLOR$CORNER_UR\033[1B\033[${rightBegin}G$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW\D{%F}$FRAME_END$LINE_COLOR$CORNER_LR\033[1A\n$LINE_COLOR$CORNER_LL$exitCode$FRAME_BEGIN$YELLOW\t$FRAME_END$LINE_COLOR$LINE$RESET "
+echo -n "$prompt"
