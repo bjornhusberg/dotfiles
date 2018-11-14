@@ -23,7 +23,7 @@ else
 fi
 
 FRAME_BEGIN="$FRAME_COLOR$LINE("
-FRAME_END="$FRAME_COLOR)$LINE"
+FRAME_END="$FRAME_COLOR)$LINE$LINE_COLOR$LINE"
 
 if [ "$COLUMNS" == "" ]; then
   COLUMNS=$(tput cols)
@@ -48,24 +48,26 @@ if [ -z "$PROMPT_USER" ]; then
   PROMPT_USER="$USER@$HOSTNAME"
 fi
 
-prompt="\n\033[1A$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END$LINE_COLOR$LINE"
+prompt="\n\033[1A$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END"
 padding=$(($COLUMNS - ${#PROMPT_USER} - 7))
 
 if [ -f "$HOME/.dotfiles_dirty" ]; then
-  prompt="$prompt$FRAME_BEGIN${PINK}!$FRAME_END$LINE_COLOR$LINE"
+  prompt="$prompt$FRAME_BEGIN${PINK}!$FRAME_END"
   padding=$(($padding - 6))
 fi
 
 if [ "$DEVENV" != "" ]; then
-  prompt="$prompt$FRAME_BEGIN$YELLOW$DEVENV$FRAME_END$LINE_COLOR$LINE"
+  prompt="$prompt$FRAME_BEGIN$YELLOW$DEVENV$FRAME_END"
   padding=$(($padding - ${#DEVENV} - 5))
 fi
 
 branch="$(git symbolic-ref HEAD 2>/dev/null)"
 if [ "$branch" != "" ]; then
   branch=${branch##refs/heads/}
-  prompt="$prompt$FRAME_BEGIN$PINK$branch$FRAME_END$LINE_COLOR$LINE"
+  branchPrompt="$FRAME_BEGIN$PINK$branch$FRAME_END"
   padding=$(($padding - ${#branch} - 5))
+else
+  branchPrompt=""
 fi
 
 if [ "${PWD:0:${#HOME}}" == "$HOME" ]; then
@@ -79,24 +81,24 @@ if [ $padding -gt $directoryLength ]; then
   for ((i=$directoryLength; i < $padding; i++)) {
     prompt="$prompt$LINE"
   }
-  prompt="$prompt$FRAME_BEGIN$PINK$directory$FRAME_END"
+  prompt="$prompt$branchPrompt$FRAME_BEGIN$PINK$directory$FRAME_COLOR)$LINE"
 else
   if [ $padding -lt 8 ]; then
-    for ((; padding > 0; padding--)) {
+    for ((i=0; i < padding; i++)) {
       prompt="$prompt$LINE"
     }
   else
-    prompt="$prompt$FRAME_BEGIN$PINK...${directory:$((7-$padding))}$FRAME_END"
+    prompt="$prompt$branchPrompt$FRAME_BEGIN$PINK...${directory:$((7-$padding))}$FRAME_COLOR)$LINE"
   fi
 fi
 
-prompt="$prompt$LINE_COLOR$CORNER_UR\033[1B\033[$(($COLUMNS - 15))G$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW\D{%F}$FRAME_END$LINE_COLOR$CORNER_LR\033[1A\n$LINE_COLOR$CORNER_LL"
+prompt="$prompt$LINE_COLOR$CORNER_UR\033[1B\033[$(($COLUMNS - 15))G$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW\D{%F}$FRAME_COLOR)$LINE$LINE_COLOR$CORNER_LR\033[1A\n$LINE_COLOR$CORNER_LL"
 
 if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
-  prompt="$prompt$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END$LINE_COLOR$LINE"
+  prompt="$prompt$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END"
 fi
 
-prompt="$prompt$FRAME_BEGIN$YELLOW\t$FRAME_END$LINE_COLOR$LINE$RESET "
+prompt="$prompt$FRAME_BEGIN$YELLOW\t$FRAME_END$RESET "
 
 # Wait for forked optionalNewLine
 wait
