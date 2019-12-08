@@ -1,1 +1,2 @@
 alias kdiff3="/Applications/kdiff3.app/Contents/MacOS/kdiff3"
+export BASH_SILENCE_DEPRECATION_WARNING=1
