@@ -61,21 +61,21 @@ if [ "$DEVENV" != "" ]; then
   padding=$(($padding - ${#DEVENV} - 5))
 fi
 
-branch="$(git symbolic-ref HEAD 2>/dev/null)"
-if [ "$branch" != "" ]; then
-  branch=${branch##refs/heads/}
-  branchPrompt="$FRAME_BEGIN$PINK$branch$FRAME_END"
-  padding=$(($padding - ${#branch} - 5))
-else
-  branchPrompt=""
-fi
-
 if [ "${PWD:0:${#HOME}}" == "$HOME" ]; then
   directory="~${PWD:${#HOME}}"
 else
   directory="${PWD}"
 fi
 directoryLength=$((${#directory} + 4))
+
+branch="$(git symbolic-ref HEAD 2>/dev/null)"
+if [[ "$branch" != "" && $(($padding - ${#branch})) -gt 5 ]]; then
+  branch=${branch##refs/heads/}
+  branchPrompt="$FRAME_BEGIN$PINK$branch$FRAME_END"
+  padding=$(($padding - ${#branch} - 5))
+else
+  branchPrompt=""
+fi
 
 if [ $padding -gt $directoryLength ]; then
   for ((i=$directoryLength; i < $padding; i++)) {
