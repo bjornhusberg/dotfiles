@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROMPT_EXIT=$1
+SHELL_TYPE=$1
 
 LINE="\342\224\200"
 CORNER_UL="\342\224\214"
@@ -8,10 +8,14 @@ CORNER_UR="\342\224\220"
 CORNER_LL="\342\224\224"
 CORNER_LR="\342\224\230"
 
-#ESC="%%{"
-ESC="\["
-#CSE="%%}"
-CSE="\]"
+if [ "$SHELL_TYPE" == "zsh" ]; then
+  ESC="%%{"
+  CSE="%%}"
+else
+  ESC="\["
+  CSE="\]"
+fi
+
 RESET="$ESC\033[0m$CSE"
 GREEN="$ESC\033[1;32m$CSE"
 YELLOW="$ESC\033[1;33m$CSE"

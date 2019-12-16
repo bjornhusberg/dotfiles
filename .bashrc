@@ -57,5 +57,10 @@ function promptCommand() {
   export COLUMNS
   export PS1="$(~/bin/prompt $1)"
 }
-export PROMPT_COMMAND=promptCommand
+function precmd() { 
+  promptCommand zsh
+}
+
+export precmd_functions=(precmd)
+export PROMPT_COMMAND="promptCommand bash"
 
