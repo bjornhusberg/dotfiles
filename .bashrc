@@ -55,7 +55,7 @@ function promptCommand() {
   export PROMPT_USER
   export PROMPT_STYLE
   export COLUMNS
-  export PS1="$(~/bin/prompt)"
+  export PS1="$(~/bin/prompt $1)"
 }
 export PROMPT_COMMAND=promptCommand
-export precmd_functions=(promptCommand)
+
