@@ -92,15 +92,17 @@ else
   fi
 fi
 
-prompt="$prompt$LINE_COLOR$CORNER_UR\033[1B\033[$(($COLUMNS - 15))G$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW\D{%F}$FRAME_COLOR)$LINE$LINE_COLOR$CORNER_LR\033[1A\n$LINE_COLOR$CORNER_LL"
+DATE=$(date +"%Y-%m-%d")
+prompt="$prompt$LINE_COLOR$CORNER_UR\033[1B\033[$(($COLUMNS - 15))G$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW$DATE$FRAME_COLOR)$LINE$LINE_COLOR$CORNER_LR\033[1A\n$LINE_COLOR$CORNER_LL"
 
 if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
   prompt="$prompt$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END"
 fi
 
-prompt="$prompt$FRAME_BEGIN$YELLOW\t$FRAME_END$RESET "
+TIME=$(date +"%H:%M:%S")
+prompt="$prompt$FRAME_BEGIN$YELLOW$TIME$FRAME_END$RESET "
 
 # Wait for forked optionalNewLine
 wait
 
-echo -n "$prompt"
+printf "$prompt"
