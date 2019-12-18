@@ -48,27 +48,30 @@ function insertOptionalNewline() {
   IFS=';' read -r -d R -a pos
   stty $oldstty
   if [ "${pos[1]}" != "1" ]; then
-    echo
+    export NEWLINE=true
+  else
+    export NEWLINE=false
   fi
 }
 
 # Fork for performance (cygwin sucks)
 insertOptionalNewline &
+NEWLINE_PID=$!
 
 if [ -z "$PROMPT_USER" ]; then
   PROMPT_USER="$USER@$HOSTNAME"
 fi
 
-prompt="\n$CURSOR_UP$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END"
+uprompt="$CURSOR_UP$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END"
 padding=$(($COLUMNS - ${#PROMPT_USER} - 7))
 
 if [ -f "$HOME/.dotfiles_dirty" ]; then
-  prompt="$prompt$FRAME_BEGIN${PINK}!$FRAME_END"
+  uprompt="$uprompt$FRAME_BEGIN${PINK}!$FRAME_END"
   padding=$(($padding - 6))
 fi
 
 if [ "$DEVENV" != "" ]; then
-  prompt="$prompt$FRAME_BEGIN$YELLOW$DEVENV$FRAME_END"
+  uprompt="$uprompt$FRAME_BEGIN$YELLOW$DEVENV$FRAME_END"
   padding=$(($padding - ${#DEVENV} - 5))
 fi
 
@@ -90,31 +93,40 @@ fi
 
 if [ $padding -gt $directoryLength ]; then
   for ((i=$directoryLength; i < $padding; i++)) {
-    prompt="$prompt$LINE"
+    uprompt="$uprompt$LINE"
   }
-  prompt="$prompt$branchPrompt$FRAME_BEGIN$PINK$directory$FRAME_COLOR)$LINE"
+  uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PINK$directory$FRAME_COLOR)$LINE"
 else
   if [ $padding -lt 8 ]; then
     for ((i=0; i < padding; i++)) {
-      prompt="$prompt$LINE"
+      uprompt="$uprompt$LINE"
     }
   else
-    prompt="$prompt$branchPrompt$FRAME_BEGIN$PINK...${directory:$((7-$padding))}$FRAME_COLOR)$LINE"
+    uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PINK...${directory:$((7-$padding))}$FRAME_COLOR)$LINE"
   fi
 fi
+uprompt="$uprompt$LINE_COLOR$CORNER_UR"
 
 DATE=$(date +"%Y-%m-%d")
 RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
-prompt="$prompt$LINE_COLOR$CORNER_UR\n$RIGHT_ALIGN$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW$DATE$FRAME_COLOR)$LINE$LINE_COLOR$CORNER_LR\r$LINE_COLOR$CORNER_LL"
 
+rprompt="$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW$DATE$FRAME_COLOR)$LINE$LINE_COLOR$CORNER_LR"
+
+
+lprompt="$LINE_COLOR$CORNER_LL"
 if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
-  prompt="$prompt$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END"
+  lprompt="$lprompt$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END"
 fi
-
 TIME=$(date +"%H:%M:%S")
-prompt="$prompt$FRAME_BEGIN$YELLOW$TIME$FRAME_END$RESET "
+lprompt="$lprompt$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE "
+
+RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
 
 # Wait for forked optionalNewLine
 wait
 
-printf "$prompt"
+if [ "$SHELL_TYPE" == "zsh" ]; then
+  printf "\n$uprompt\n$lprompt\0$prompt"
+else
+  printf "\n$uprompt\n$RIGHT_ALIGN$rprompt\r$lprompt"
+fi

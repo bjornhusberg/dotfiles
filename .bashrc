@@ -55,7 +55,8 @@ function promptCommand() {
   export PROMPT_USER
   export PROMPT_STYLE
   export COLUMNS
-  export PS1="$(~/bin/prompt $1)"
+  promptLines=$(~/bin/prompt $1)
+  export PS1="$promptLines"
 }
 function precmd() { 
   promptCommand zsh
