@@ -55,13 +55,19 @@ function promptCommand() {
   export PROMPT_USER
   export PROMPT_STYLE
   export COLUMNS
-  promptLines=$(~/bin/prompt $1)
-  export PS1="$promptLines"
+  export PS1="$(~/bin/prompt)"
 }
+
 function precmd() { 
-  promptCommand zsh
+  export PROMPT_EXIT=$?
+  export PROMPT_USER
+  export PROMPT_STYLE
+  export COLUMNS
+  lines="$(~/bin/prompt zsh)"
+  export PROMPT="$(echo -n -e $lines | head -z -n 1)"
+  export RPROMPT="$(echo -n -e $lines | tail -z -n 1)"
 }
 
 export precmd_functions=(precmd)
-export PROMPT_COMMAND="promptCommand bash"
+export PROMPT_COMMAND="promptCommand"
 
