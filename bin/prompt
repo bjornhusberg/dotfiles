@@ -56,7 +56,6 @@ function insertOptionalNewline() {
 
 # Fork for performance (cygwin sucks)
 insertOptionalNewline &
-NEWLINE_PID=$!
 
 if [ -z "$PROMPT_USER" ]; then
   PROMPT_USER="$USER@$HOSTNAME"
@@ -118,13 +117,12 @@ fi
 TIME=$(date +"%H:%M:%S")
 lprompt="$lprompt$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$RESET "
 
-RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
-
 # Wait for forked optionalNewLine
 wait
 
 if [ "$SHELL_TYPE" == "zsh" ]; then
   printf "\n$uprompt\n$lprompt\0$ESC $CSE$rprompt$RESET"
 else
-  printf "\n$uprompt\n\r$RIGHT_ALIGN$rprompt\r$lprompt"
+  RIGHT_ALIGN="$ESC\033[$(($COLUMNS - ${#rprompt}))G$CSE"
+  printf "\n$uprompt\n$RIGHT_ALIGN$rprompt\r$lprompt"
 fi
