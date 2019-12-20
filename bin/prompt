@@ -115,7 +115,7 @@ if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
   lprompt="$lprompt$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END"
 fi
 TIME=$(date +"%H:%M:%S")
-lprompt="$lprompt$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$RESET "
+lprompt="$lprompt$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET "
 
 # Wait for forked optionalNewLine
 wait
