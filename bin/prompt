@@ -36,6 +36,7 @@ FRAME_BEGIN="$FRAME_COLOR$LINE("
 FRAME_END="$FRAME_COLOR)$LINE$LINE_COLOR$LINE"
 CURSOR_UP="$ESC\033[1A$CSE"
 CURSOR_DOWN="$ESC\033[1B$CSE"
+FLAG="$ESC\e[44m\e[93m$CSE\u253f$RESET"
 
 if [ "$COLUMNS" == "" ]; then
   COLUMNS=$(tput cols)
@@ -66,7 +67,7 @@ uprompt="$CURSOR_UP$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END
 padding=$(($COLUMNS - ${#PROMPT_USER} - 7))
 
 if [ -f "$HOME/.dotfiles_dirty" ]; then
-  uprompt="$uprompt$FRAME_BEGIN$ESC\e[44m\e[93m$CSE\u253f$RESET$FRAME_END"
+  uprompt="$uprompt$FRAME_BEGIN$FLAG$FRAME_END"
   padding=$(($padding - 6))
 fi
 
