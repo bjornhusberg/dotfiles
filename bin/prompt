@@ -18,11 +18,11 @@ RED="$ESC\033[1;31m$CSE"
 PURPLE="$ESC\033[1;34m$CSE"
 GRAY="$ESC\033[1;90m$CSE"
 
-LINE="\u2500"
-CORNER_UL="\u256d"
-CORNER_LL="\u2570"
-CORNER_UR="\u256e"
-CORNER_LR="\u256f"
+LINE="\xe2\x94\x80"
+CORNER_UL="\xe2\x95\xad"
+CORNER_LL="\xe2\x95\xb0"
+CORNER_UR="\xe2\x95\xae"
+CORNER_LR="\xe2\x95\xaf"
 
 if [ "$PROMPT_STYLE" == "server" ]; then
   LINE_COLOR="$RED"
