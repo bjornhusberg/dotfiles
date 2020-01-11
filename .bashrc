@@ -64,8 +64,8 @@ function precmd() {
   export PROMPT_STYLE
   export COLUMNS
   lines="$(~/bin/prompt zsh)"
-  export PROMPT="$(echo -n -e $lines | head -z -n 1)"
-  export RPROMPT="$(echo -n -e $lines | tail -z -n 1)"
+  export PROMPT="$(echo -n -e $lines | sed 's/\(.*\)\x0.*/\1/g')"
+  export RPROMPT="$(echo -n -e $lines | sed 's/.*\x0\(.*\)/\1/g')"
 }
 
 export precmd_functions=(precmd)
