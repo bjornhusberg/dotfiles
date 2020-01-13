@@ -18,11 +18,11 @@ RED="$ESC\033[1;31m$CSE"
 PURPLE="$ESC\033[1;34m$CSE"
 GRAY="$ESC\033[1;90m$CSE"
 
-LINE="\xe2\x94\x80"
-CORNER_UL="\xe2\x95\xad"
-CORNER_LL="\xe2\x95\xb0"
-CORNER_UR="\xe2\x95\xae"
-CORNER_LR="\xe2\x95\xaf"
+LINE="\342\224\200"
+CORNER_UL="\342\225\255"
+CORNER_LL="\342\225\260"
+CORNER_UR="\342\225\256"
+CORNER_LR="\342\225\257"
 
 if [ "$PROMPT_STYLE" == "server" ]; then
   LINE_COLOR="$RED"
@@ -36,7 +36,7 @@ FRAME_BEGIN="$FRAME_COLOR$LINE("
 FRAME_END="$FRAME_COLOR)$LINE$LINE_COLOR$LINE"
 CURSOR_UP="$ESC\033[1A$CSE"
 CURSOR_DOWN="$ESC\033[1B$CSE"
-FLAG="$ESC\e[44m\e[93m$CSE\xe2\x94\xbf$RESET"
+FLAG="$RED!$RESET"
 
 if [ "$COLUMNS" == "" ]; then
   COLUMNS=$(tput cols)
@@ -126,5 +126,5 @@ if [ "$SHELL_TYPE" == "zsh" ]; then
   printf "\n$uprompt\n$lprompt\0$ESC $CSE$rprompt$RESET"
 else
   RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
-  printf "\n$uprompt\n$RIGHT_ALIGN$rprompt\r$lprompt"
+  printf "\n$uprompt\n$RIGHT_ALIGN$rprompt$CURSOR_UP\n$lprompt"
 fi
