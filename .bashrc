@@ -12,7 +12,7 @@ disown
 export CLICOLOR=1
 export LSCOLORS=DxGxcxdxCxegedabagacad
 
-# Aliases
+# Linked project aliases
 alias index=\$HOME/lib/index/index
 alias serve=\$HOME/lib/serve/serve
 alias wallpaper=\$HOME/lib/wallpaper/wallpaper
@@ -26,6 +26,11 @@ alias hours=\$HOME/lib/hours/hours
 alias mci="mvn clean install"
 alias devenv="source devenv"
 alias cde="cd \"\$DEVENV_HOME\""
+alias gci="git commit"
+alias gad="git add"
+alias gst="git status"
+alias gco="git checkout"
+alias gbr="git checkout -b"
 
 # OS specific customizations
 if [[ "$OSTYPE" == cygwin* ]]; then
