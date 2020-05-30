@@ -18,11 +18,11 @@ RED="$ESC\033[1;31m$CSE"
 PURPLE="$ESC\033[1;34m$CSE"
 GRAY="$ESC\033[1;90m$CSE"
 
-LINE="\342\224\200"
-CORNER_UL="\342\225\255"
-CORNER_LL="\342\225\260"
-CORNER_UR="\342\225\256"
-CORNER_LR="\342\225\257"
+LINE="$ESC\342\224$CSE\200"
+CORNER_UL="$ESC\342\225$CSE\255"
+CORNER_LL="$ESC\342\225$CSE\260"
+CORNER_UR="$ESC\342\225$CSE\256"
+CORNER_LR="$ESC\342\225$CSE\257"
 
 if [ "$PROMPT_STYLE" == "server" ]; then
   LINE_COLOR="$RED"
@@ -113,16 +113,18 @@ rprompt="$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW$DATE$FRAME_COLOR)$LINE$LINE_COLOR$C
 
 lprompt="$LINE_COLOR$CORNER_LL"
 if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
-  lprompt="$lprompt$FRAME_BEGIN${PINK}$PROMPT_EXIT$FRAME_END"
+  lprompt="$lprompt$FRAME_BEGIN$PINK$PROMPT_EXIT$FRAME_END"
 fi
 TIME=$(date +"%H:%M:%S")
 lprompt="$lprompt$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET "
+
+lprompt="$LINE_COLOR$CORNER_LL$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET "
 
 # Wait for forked optionalNewLine
 wait
 
 if [ "$SHELL_TYPE" == "zsh" ]; then
-  printf "\n$uprompt\n$lprompt\0$ESC $CSE$rprompt$RESET"
+  printf "\n$uprompt\n$lprompt\0$ESC\t $CSE$rprompt$RESET"
 else
   RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
   printf "\n$uprompt\n$RIGHT_ALIGN$rprompt$CURSOR_UP\n$lprompt"

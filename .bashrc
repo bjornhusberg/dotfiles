@@ -63,16 +63,15 @@ function promptCommand() {
   export PS1="$(~/bin/prompt)"
 }
 
-function precmd() { 
+function precmd() {
   export PROMPT_EXIT=$?
   export PROMPT_USER
   export PROMPT_STYLE
   export COLUMNS
   lines="$(~/bin/prompt zsh)"
-  export PROMPT="$(echo -n -e $lines | cut -d '' -f1)"
-  export RPROMPT="$(echo -n -e $lines | cut -d '' -s -f2)"
+  export PROMPT="$(echo -n -e $lines | cut -f1)"
+  export RPROMPT="$(echo -n -e $lines | cut -s -f2)"
 }
 
 export precmd_functions=(precmd)
 export PROMPT_COMMAND="promptCommand"
-
