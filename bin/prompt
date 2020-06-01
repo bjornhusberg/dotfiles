@@ -124,7 +124,7 @@ lprompt="$LINE_COLOR$CORNER_LL$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$LINE_CO
 wait
 
 if [ "$SHELL_TYPE" == "zsh" ]; then
-  printf "\n$uprompt\n$lprompt\0$ESC\t $CSE$rprompt$RESET"
+  printf "\n$uprompt\n$lprompt\t$rprompt$RESET"
 else
   RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
   printf "\n$uprompt\n$RIGHT_ALIGN$rprompt$CURSOR_UP\n$lprompt"
