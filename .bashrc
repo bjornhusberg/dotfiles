@@ -69,8 +69,8 @@ function precmd() {
   export PROMPT_STYLE
   export COLUMNS
   lines="$(~/bin/prompt zsh)"
-  export PROMPT="$(echo -n -e $lines | cut -f1) "
-  export RPROMPT="$(echo -n -e $lines | cut -s -f2)"
+  export PROMPT="$(LC_CTYPE=C && LANG=C && echo -n -e $lines | cut -f1) "
+  export RPROMPT="$(LC_CTYPE=C && LANG=C && echo -n -e $lines | cut -s -f2)"
 }
 
 export precmd_functions=(precmd)
