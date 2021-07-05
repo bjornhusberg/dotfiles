@@ -55,7 +55,7 @@ function init() {
   if [[ -f "$dotfiles_lib_file" ]]; then
     mkdir lib
     pushd "lib" > /dev/null
-    for lib in $(echo "$dotfiles_lib_file"); do
+    for lib in $(cat "$dotfiles_lib_file"); do
       echo "Initializing lib $lib."
       git clone -q "${gitrepo}/${lib}.git" .
     done
