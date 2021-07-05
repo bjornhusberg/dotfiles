@@ -246,19 +246,17 @@ function isUpdated() {
 
 function diffFiles() {
   result=$(
-    find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0 | sort -z | {
-      while read -d $'\0' file; do
-        file="${file:${#dotfiles_dir}}"
-        isUpdated "$file"
-        if (( $? == 0 )); then
-          continue
-        fi
-        diffFile "$file" >&2
-        if (( $? != 0 )); then
-          echo "1"
-        fi
-      done
-    }
+    allFiles | while read -d $'\0' file; do
+      file="${file:${#dotfiles_dir}}"
+      isUpdated "$file"
+      if (( $? == 0 )); then
+        continue
+      fi
+      diffFile "$file" >&2
+      if (( $? != 0 )); then
+        echo "1"
+      fi
+    done
   )
   if [[ ! -z "$result" ]]; then
     return 1
@@ -318,8 +316,12 @@ function deleteFile() {
   rm "$dotfiles_dir/$file"
 }
 
+function allFiles() {
+  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0 | sort -dzf
+}
+
 function commitFiles() {
-  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
+  allFiles | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
     isUpdated "$file"
     if (( $? != 0 )); then
@@ -330,7 +332,7 @@ function commitFiles() {
 }
 
 function updateFiles() {
-  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
+  allFiles | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
     isUpdated "$file"
     if (( $? != 0 )); then
@@ -359,7 +361,7 @@ function readPassword() {
 
 function calculateChecksum() {
   pushd "$dotfiles_dir" > /dev/null
-  checksum=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0  | sort -dzf | xargs -0 shasum -b -a 256 | xargs -0 echo "$password" | shasum -b -a 256 | awk '{print $1}')
+  checksum=$(allFiles | xargs -0 shasum -b -a 256 | xargs -0 echo "$password" | shasum -b -a 256 | awk '{print $1}')
   popd > /dev/null
 }
 
