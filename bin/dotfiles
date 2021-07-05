@@ -56,6 +56,7 @@ function init() {
     mkdir lib
     pushd "lib" > /dev/null
     for lib in $(echo "$dotfiles_lib_file"); do
+      echo "Initializing lib $lib."
       git clone -q "${gitrepo}/${lib}.git" .
     done
     popd > /dev/null
@@ -215,7 +216,7 @@ function isUpdated() {
 
 function diffFiles() {
   result=$(
-    find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0 | sort -z | {
+    find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0 | sort -z | {
       while read -d $'\0' file; do
         file="${file:${#dotfiles_dir}}"
         isUpdated "$file"
@@ -288,7 +289,7 @@ function deleteFile() {
 }
 
 function commitFiles() {
-  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
+  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
     isUpdated "$file"
     if (( $? != 0 )); then
@@ -299,7 +300,7 @@ function commitFiles() {
 }
 
 function updateFiles() {
-  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
+  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0 | sort -z | while read -d $'\0' file; do
     file="${file:${#dotfiles_dir}}"
     isUpdated "$file"
     if (( $? != 0 )); then
@@ -328,7 +329,7 @@ function readPassword() {
 
 function calculateChecksum() {
   pushd "$dotfiles_dir" > /dev/null
-  checksum=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles.sum" ! -name "README.md" -print0  | sort -dzf | xargs -0 shasum -b -a 256 | xargs -0 echo "$password" | shasum -b -a 256 | awk '{print $1}')
+  checksum=$(find . ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0  | sort -dzf | xargs -0 shasum -b -a 256 | xargs -0 echo "$password" | shasum -b -a 256 | awk '{print $1}')
   popd > /dev/null
 }
 
