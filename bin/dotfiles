@@ -56,8 +56,9 @@ function init() {
     mkdir lib
     pushd "lib" > /dev/null
     for lib in $(cat "$dotfiles_lib_file"); do
-      echo "Initializing lib $lib."
-      git clone -q "${gitrepo}/${lib}.git"
+      url="${gitrepo}/${lib}.git"
+      echo "Initializing lib $url."
+      git clone -q "$url"
     done
     popd > /dev/null
   fi
