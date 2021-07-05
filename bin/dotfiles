@@ -46,7 +46,6 @@ function init() {
   mkdir -p "$dotfiles_dir"
   pushd "$dotfiles_dir" > /dev/null
   git clone -q "$url" .
-  git submodule update -q --init --recursive
   popd > /dev/null
   updateFiles
 }
@@ -153,7 +152,6 @@ function repositoryPull() {
   git clean -q -d -x -f
   git checkout -q -- .
   git pull -q origin master
-  git submodule update -q --init --merge --remote --recursive
   git clean -q -d -x -f
   popd > /dev/null
 }
@@ -182,14 +180,6 @@ function repositoryPush() {
 
 function recursivePush() {
   comment="$1"
-  if [[ -f .gitmodules ]]; then
-    for submodule in $(grep path .gitmodules | sed 's/.*= //'); do
-      pushd "$submodule" > /dev/null
-      recursivePush "$comment"
-      popd > /dev/null
-      git add "$submodule"
-    done
-  fi
   git add -A .
   status=$(git status --porcelain)
   if [[ ! -z "$status" ]]; then
