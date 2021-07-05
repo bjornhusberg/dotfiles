@@ -3,7 +3,7 @@
 dotfiles_dir="$HOME/.dotfiles"
 dotfiles_dirty_file="$HOME/.dotfiles_dirty"
 dotfiles_password_file="$HOME/.dotfiles_password"
-dotfiles_checksum_file="$dotfiles_dir/.dotfiles.sum"
+dotfiles_checksum_file="$dotfiles_dir/.dotfiles_sum"
 gitrepo_ssh="git@github.com:bjornhusberg/dotfiles.git"
 gitrepo_https="https://github.com/bjornhusberg/dotfiles.git"
 
