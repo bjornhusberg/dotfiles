@@ -169,6 +169,16 @@ function repositoryPull() {
   git checkout -q -- .
   git pull -q origin master
   git clean -q -d -x -f
+  if [[ -f "$dotfiles_lib_file" ]]; then
+    for lib in $(cat "$dotfiles_lib_file"); do
+      pushd "$dotfiles_dir/lib/$lib" > /dev/null
+      git clean -q -d -x -f
+      git checkout -q -- .
+      git pull -q origin master
+      git clean -q -d -x -f
+      popd > /dev/null
+    done
+  fi
   popd > /dev/null
 }
 
