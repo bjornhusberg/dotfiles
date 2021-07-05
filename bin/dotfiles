@@ -183,15 +183,28 @@ function directoryPull() {
 }
 
 function repositoryCheck() {
-  pushd "$dotfiles_dir" > /dev/null
+  directoryCheck "$dotfiles_dir"
+  if (( $? != 0 )); then
+    return 1
+  fi
+  if [[ -f "$dotfiles_lib_file" ]]; then
+    for lib in $(cat "$dotfiles_lib_file"); do
+      directoryCheck "$dotfiles_dir/lib/$lib"
+      if (( $? != 0 )); then
+        return 1
+      fi
+    done
+  fi
+  return 0
+}
+
+function directoryCheck() {
+  directory="$1"
+  pushd "$directory" > /dev/null
   git remote update > /dev/null 2>&1
   status=$(git status --porcelain --branch | head -n 1 | grep behind)
   popd > /dev/null
-  if [[ -z "$status" ]]; then
-    return 0
-  else
-    return 1
-  fi
+  return $status
 }
 
 function repositoryPush() {
