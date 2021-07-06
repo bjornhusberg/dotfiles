@@ -184,10 +184,10 @@ function repositoryPull() {
 function directoryPull() {
   directory="$1"
   pushd "$directory" > /dev/null
-  git clean -q -d -x -f
-  git checkout -q -- .
+#  git clean -q -d -x -f
+#  git checkout -q -- .
   git pull -q origin master
-  git clean -q -d -x -f
+#  git clean -q -d -x -f
   popd > /dev/null
 }
 
