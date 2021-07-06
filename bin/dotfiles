@@ -10,7 +10,13 @@ gitrepo_ssh="git@github.com:bjornhusberg"
 gitrepo_https="https://github.com/bjornhusberg"
 
 function listDotfiles() {
-  find "$dotfiles_dir" ! -path "*/.git*" -type f ! -name ".DS_Store" ! -name ".dotfiles_sum" ! -name "README.md" -print0 | sort -dzf
+  find "$dotfiles_dir" \
+    ! -path "*/.git*" \
+    -type f \
+    ! -name ".DS_Store" \
+    ! -name ".dotfiles_sum" \
+    ! -name "README.md" \
+    -print0 | sort -dzf
 }
 
 function run() {
