@@ -1,6 +1,7 @@
 #!/bin/bash
 
 dotfiles_dir="$HOME/.dotfiles"
+dotfiles_lib_dir="$dotfiles_dir/lib"
 dotfiles_dirty_file="$HOME/.dotfiles_dirty"
 dotfiles_password_file="$HOME/.dotfiles_password"
 dotfiles_checksum_file="$dotfiles_dir/.dotfiles_sum"
@@ -40,33 +41,32 @@ function run() {
   fi
 }
 
-function initGitrepo() {
-  sshResult="$(ssh -qT git@github.com 2>&1)"
-  if [[ "${sshResult:0:2}" == "Hi" ]]; then
-    gitrepo="${gitrepo_ssh}"
-  else
-    gitrepo="${gitrepo_https}"
+function clone() {
+  module=$1
+  directory=$2
+  if [[ -z "$gitrepo" ]]; then
+    sshResult="$(ssh -qT git@github.com 2>&1)"
+    if [[ "${sshResult:0:2}" == "Hi" ]]; then
+      gitrepo="${gitrepo_ssh}"
+    else
+      gitrepo="${gitrepo_https}"
+    fi
   fi
+  url="${gitrepo}/${module}.git"
+  echo "Initializing $module from $url."
+  mkdir -p "$directory"
+  pushd "$directory" > /dev/null
+  git clone -q "$url" .
+  popd > /dev/null
 }
 
 function init() {
-  initGitrepo
-  url="${gitrepo}/dotfiles.git"
-  echo "Initializing dotfiles from $url."
-  mkdir -p "$dotfiles_dir"
-  pushd "$dotfiles_dir" > /dev/null
-  git clone -q "$url" .
+  clone dotfiles "$dotfiles_dir"
   if [[ -f "$dotfiles_lib_file" ]]; then
-    mkdir lib
-    pushd "lib" > /dev/null
     for lib in $(cat "$dotfiles_lib_file"); do
-      url="${gitrepo}/${lib}.git"
-      echo "Initializing $lib from $url."
-      git clone -q "$url"
+      clone "$lib" "$dotfiles_lib_dir/$lib"
     done
-    popd > /dev/null
   fi
-  popd > /dev/null
   updateFiles
 }
 
@@ -171,7 +171,12 @@ function repositoryPull() {
   directoryPull "$dotfiles_dir"
   if [[ -f "$dotfiles_lib_file" ]]; then
     for lib in $(cat "$dotfiles_lib_file"); do
-      directoryPull "$dotfiles_dir/lib/$lib"
+      libdir="$dotfiles_lib_dir/$lib"
+      if [[ ! -d "$libdir" ]]; then
+        clone "$lib" "$libdir"
+      else
+        directoryPull "$libdir"
+      fi
     done
   fi
 }
@@ -193,7 +198,7 @@ function repositoryCheck() {
   fi
   if [[ -f "$dotfiles_lib_file" ]]; then
     for lib in $(cat "$dotfiles_lib_file"); do
-      directoryCheck "$dotfiles_dir/lib/$lib"
+      directoryCheck "$dotfiles_lib_dir/$lib"
       if (( $? != 0 )); then
         return 1
       fi
@@ -219,7 +224,7 @@ function repositoryPush() {
   directoryPush "$dotfiles_dir" "$comment"
   if [[ -f "$dotfiles_lib_file" ]]; then
     for lib in $(cat "$dotfiles_lib_file"); do
-      directoryPush "$dotfiles_dir/lib/$lib" "$comment"
+      directoryPush "$dotfiles_lib_dir/$lib" "$comment"
     done
   fi
 }
