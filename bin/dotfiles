@@ -375,13 +375,9 @@ function updateChecksum() {
   echo "$checksum" > "$dotfiles_checksum_file"
 }
 
-function getDotfilesChecksum() {
-  dotfiles_checksum=$(cat "$dotfiles_checksum_file")
-}
-
 function verifyChecksum() {
   calculateChecksum
-  getDotfilesChecksum
+  dotfiles_checksum=$(cat "$dotfiles_checksum_file")
   if [[ "$checksum" != "$dotfiles_checksum" ]]; then
     echo "*** CHECKSUM VERIFICATION FAILED ***"
     exit 1
