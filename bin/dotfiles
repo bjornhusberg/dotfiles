@@ -75,7 +75,7 @@ function pull() {
 
 function push() {
   echo "Pushing dotfiles."
-  path="$1"
+  comment="$1"
   diffFiles
   if (( $? == 0 )); then
     echo "Nothing to do."
@@ -90,7 +90,7 @@ function push() {
   verifyChecksum
   commitFiles
   updateChecksum
-  repositoryPush "$path"
+  repositoryPush "$comment"
 }
 
 function add() {
