@@ -10,8 +10,8 @@ gitrepo_ssh="git@github.com:bjornhusberg"
 gitrepo_https="https://github.com/bjornhusberg"
 
 function run() {
-  command="$1"
-  parameter="$2"
+  local command="$1"
+  local parameter="$2"
   rm -f $dotfiles_dirty_file
   if [[ ! -d "$dotfiles_dir" ]]; then
     init
@@ -75,7 +75,7 @@ function pull() {
 
 function push() {
   echo "Pushing dotfiles."
-  comment="$1"
+  local comment="$1"
   diffFiles
   if (( $? == 0 )); then
     echo "Nothing to do."
@@ -94,7 +94,7 @@ function push() {
 }
 
 function add() {
-  path="$1"
+  local path="$1"
   repositoryCheck
   if (( $? != 0 )); then
     echo "Dotfiles need to be pulled."
@@ -109,7 +109,7 @@ function add() {
 }
 
 function remove() {
-  path="$1"
+  local path="$1"
   repositoryCheck
   if (( $? != 0 )); then
     echo "Dotfiles need to be pulled."
@@ -154,17 +154,17 @@ function listDotfiles() {
 }
 
 function clone() {
-  module=$1
-  directory=$2
+  local module=$1
+  local directory=$2
   if [[ -z "$gitrepo" ]]; then
-    sshResult="$(ssh -qT git@github.com 2>&1)"
+    local sshResult="$(ssh -qT git@github.com 2>&1)"
     if [[ "${sshResult:0:2}" == "Hi" ]]; then
-      gitrepo="${gitrepo_ssh}"
+      local gitrepo="${gitrepo_ssh}"
     else
-      gitrepo="${gitrepo_https}"
+      local gitrepo="${gitrepo_https}"
     fi
   fi
-  url="${gitrepo}/${module}.git"
+  local url="${gitrepo}/${module}.git"
   echo "Initializing $module from $url."
   mkdir -p "$directory"
   pushd "$directory" > /dev/null
@@ -176,7 +176,7 @@ function repositoryPull() {
   directoryPull "$dotfiles_dir"
   if [[ -f "$dotfiles_lib_file" ]]; then
     for lib in $(cat "$dotfiles_lib_file"); do
-      libdir="$dotfiles_lib_dir/$lib"
+      local libdir="$dotfiles_lib_dir/$lib"
       if [[ ! -d "$libdir" ]]; then
         clone "$lib" "$libdir"
       else
@@ -187,7 +187,7 @@ function repositoryPull() {
 }
 
 function directoryPull() {
-  directory="$1"
+  local directory="$1"
   pushd "$directory" > /dev/null
   git pull -q origin master
   popd > /dev/null
@@ -210,18 +210,18 @@ function repositoryCheck() {
 }
 
 function directoryCheck() {
-  directory="$1"
+  local directory="$1"
   pushd "$directory" > /dev/null
   git remote update > /dev/null 2>&1
-  status=$(git status --porcelain --branch | head -n 1 | grep behind)
+  local status=$(git status --porcelain --branch | head -n 1 | grep behind)
   popd > /dev/null
   return $status
 }
 
 function repositoryPush() {
-  comment="$1"
+  local comment="$1"
   if [[ -z "$comment" ]]; then
-    comment="Updated from $HOSTNAME"
+    local comment="Updated from $HOSTNAME"
   fi
   directoryPush "$dotfiles_dir" "$comment"
   if [[ -f "$dotfiles_lib_file" ]]; then
@@ -232,11 +232,11 @@ function repositoryPush() {
 }
 
 function directoryPush() {
-  directory="$1"
-  comment="$2"
+  local directory="$1"
+  local comment="$2"
   pushd "$directory" > /dev/null
   git add -A .
-  status=$(git status --porcelain)
+  local status=$(git status --porcelain)
   if [[ ! -z "$status" ]]; then
     git commit -q -m "$comment"
     git push -q origin master
@@ -245,7 +245,7 @@ function directoryPush() {
 }
 
 function isUpdated() {
-  path="$1"
+  local path="$1"
   if [[ ! -f "$HOME$path" ]]; then
     return 1
   elif [[ "$HOME$path" -ot "$dotfiles_dir$path"
@@ -256,9 +256,9 @@ function isUpdated() {
 }
 
 function diffFiles() {
-  result=$(
+  local result=$(
     listDotfiles | while read -d $'\0' file; do
-      file="${file:${#dotfiles_dir}}"
+      local file="${file:${#dotfiles_dir}}"
       isUpdated "$file"
       if (( $? == 0 )); then
         continue
@@ -281,7 +281,7 @@ function diffFile() {
     echo "MISSING: $file"
     return 1
   else
-    diff=$(diff "$HOME$file" "$dotfiles_dir$file")
+    local diff=$(diff "$HOME$file" "$dotfiles_dir$file")
     if [[ ! -z "$diff" ]]; then
       echo "MODIFIED: $HOME$file"
       echo "$diff"
@@ -292,7 +292,7 @@ function diffFile() {
 }
 
 function addFile() {
-  file=$(abspath "$1")
+  local file=$(abspath "$1")
   if [[ "${file:0:${#HOME}}" != "$HOME" ]]; then
     echo "File not in home directory: $file"
     return
@@ -301,24 +301,24 @@ function addFile() {
     echo "File not found: $file"
     return
   fi
-  file="${file:(${#HOME}+1)}"
+  local file="${file:(${#HOME}+1)}"
   if [[ -f "$dotfiles_dir/$file" ]]; then
     echo "File already exists: $file"
     return
   fi
   echo "Adding $file"
-  directory=$(dirname "$dotfiles_dir/$file")
+  local directory=$(dirname "$dotfiles_dir/$file")
   mkdir -p "$directory" 2> /dev/null
   cp -p "$HOME/$file" "$dotfiles_dir/$file"
 }
 
 function deleteFile() {
-  file=$(abspath "$1")
+  local file=$(abspath "$1")
   if [[ "${file:0:${#HOME}}" != "$HOME" ]]; then
     echo "File not in home directory: $file"
     return
   fi
-  file="${file:(${#HOME}+1)}"
+  local file="${file:(${#HOME}+1)}"
   if [[ ! -f "$dotfiles_dir/$file" ]]; then
     echo "File not found: $file"
     return
@@ -329,7 +329,7 @@ function deleteFile() {
 
 function commitFiles() {
   listDotfiles | while read -d $'\0' file; do
-    file="${file:${#dotfiles_dir}}"
+    local file="${file:${#dotfiles_dir}}"
     isUpdated "$file"
     if (( $? != 0 )); then
       echo "Committing file $file"
@@ -340,12 +340,12 @@ function commitFiles() {
 
 function updateFiles() {
   listDotfiles | while read -d $'\0' file; do
-    file="${file:${#dotfiles_dir}}"
+    local file="${file:${#dotfiles_dir}}"
     isUpdated "$file"
     if (( $? != 0 )); then
       echo "Updating $file"
       rm -f "$HOME$file"
-      directory=$(dirname "$HOME$file")
+      local directory=$(dirname "$HOME$file")
       mkdir -p "$directory" 2> /dev/null
       cp -p "$dotfiles_dir$file" "$HOME$file"
     fi
@@ -357,9 +357,9 @@ function readPassword() {
     password=$(cat "$dotfiles_password_file")
     return
   fi
-  message="$1"
+  local message="$1"
   if [[ -z "$message" ]]; then
-    message="Enter password for data verification"
+    local message="Enter password for data verification"
   fi
   stty -echo
   read -p "$message: " password; echo
@@ -379,7 +379,7 @@ function updateChecksum() {
 
 function verifyChecksum() {
   calculateChecksum
-  dotfiles_checksum=$(cat "$dotfiles_checksum_file")
+  local dotfiles_checksum=$(cat "$dotfiles_checksum_file")
   if [[ "$checksum" != "$dotfiles_checksum" ]]; then
     echo "*** CHECKSUM VERIFICATION FAILED ***"
     exit 1
