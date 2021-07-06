@@ -9,15 +9,6 @@ dotfiles_lib_file="$dotfiles_dir/.dotfiles_lib"
 gitrepo_ssh="git@github.com:bjornhusberg"
 gitrepo_https="https://github.com/bjornhusberg"
 
-function listDotfiles() {
-  find "$dotfiles_dir" -type f \
-    ! -path "*/.git*" \
-    ! -name ".DS_Store" \
-    ! -name ".dotfiles_sum" \
-    ! -name "README.md" \
-    -print0 | sort -dzf
-}
-
 function run() {
   command="$1"
   parameter="$2"
@@ -44,25 +35,6 @@ function run() {
     echo "Usage: $0 [diff|pull|push|add|rm|reset|checksum] files ..."
     exit 1
   fi
-}
-
-function clone() {
-  module=$1
-  directory=$2
-  if [[ -z "$gitrepo" ]]; then
-    sshResult="$(ssh -qT git@github.com 2>&1)"
-    if [[ "${sshResult:0:2}" == "Hi" ]]; then
-      gitrepo="${gitrepo_ssh}"
-    else
-      gitrepo="${gitrepo_https}"
-    fi
-  fi
-  url="${gitrepo}/${module}.git"
-  echo "Initializing $module from $url."
-  mkdir -p "$directory"
-  pushd "$directory" > /dev/null
-  git clone -q "$url" .
-  popd > /dev/null
 }
 
 function init() {
@@ -170,6 +142,34 @@ function status() {
     touch $dotfiles_dirty_file
     exit
   fi
+}
+
+function listDotfiles() {
+  find "$dotfiles_dir" -type f \
+    ! -path "*/.git*" \
+    ! -name ".DS_Store" \
+    ! -name ".dotfiles_sum" \
+    ! -name "README.md" \
+    -print0 | sort -dzf
+}
+
+function clone() {
+  module=$1
+  directory=$2
+  if [[ -z "$gitrepo" ]]; then
+    sshResult="$(ssh -qT git@github.com 2>&1)"
+    if [[ "${sshResult:0:2}" == "Hi" ]]; then
+      gitrepo="${gitrepo_ssh}"
+    else
+      gitrepo="${gitrepo_https}"
+    fi
+  fi
+  url="${gitrepo}/${module}.git"
+  echo "Initializing $module from $url."
+  mkdir -p "$directory"
+  pushd "$directory" > /dev/null
+  git clone -q "$url" .
+  popd > /dev/null
 }
 
 function repositoryPull() {
