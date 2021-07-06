@@ -61,13 +61,13 @@ function pull() {
     echo "Dotfiles contain local changes."
     exit
   fi
-  readPassword "Enter password for data verification (or leave blank to skip)"
+  local password=$(readPassword "Enter password for data verification (or leave blank to skip)")
   if [[ -z "$password" ]]; then
     repositoryPull
   else
-    verifyChecksum
-    repositoryPull
-    verifyChecksum
+    verifyChecksum "$password"
+    repositoryPull "$password"
+    verifyChecksum "$password"
   fi
   diffFiles
   updateFiles
@@ -86,10 +86,10 @@ function push() {
     echo "Dotfiles need to be merged."
     exit
   fi
-  readPassword
-  verifyChecksum
+  local password=$(readPassword)
+  verifyChecksum "$password"
   commitFiles
-  updateChecksum
+  updateChecksum "$password"
   repositoryPush "$comment"
 }
 
@@ -101,10 +101,10 @@ function add() {
     exit
   fi
   echo "Adding dotfile $path."
-  readPassword
-  verifyChecksum
+  local password=$(readPassword)
+  verifyChecksum "$password"
   addFile "$path"
-  updateChecksum
+  updateChecksum "$password"
   repositoryPush "Added $path."
 }
 
@@ -116,17 +116,17 @@ function remove() {
     exit
   fi
   echo "Removing dotfile $path."
-  readPassword
-  verifyChecksum
+  local password=$(readPassword)
+  verifyChecksum "$password"
   deleteFile "$path"
-  updateChecksum
+  updateChecksum "$password"
   repositoryPush "Removed $path."
 }
 
 function checksum() {
   echo "Updating dotfiles checksum."
-  readPassword
-  updateChecksum
+  local password=$(readPassword)
+  updateChecksum "$password"
 }
 
 function status() {
@@ -354,31 +354,36 @@ function updateFiles() {
 
 function readPassword() {
   if [[ -f "$dotfiles_password_file" ]]; then
-    password=$(cat "$dotfiles_password_file")
+    cat "$dotfiles_password_file"
     return
   fi
   local message="$1"
   if [[ -z "$message" ]]; then
     local message="Enter password for data verification"
   fi
+  echo -n "$message: " 1>&2
   stty -echo
-  read -p "$message: " password; echo
+  read password; echo
   stty echo
+  echo -n "$password"
 }
 
 function calculateChecksum() {
+  local password="$1"
   pushd "$dotfiles_dir" > /dev/null
-  checksum=$(listDotfiles | xargs -0 shasum -b -a 256 | xargs -0 echo "$password" | shasum -b -a 256 | awk '{print $1}')
+  listDotfiles | xargs -0 shasum -b -a 256 | xargs -0 echo "$password" | shasum -b -a 256 | awk '{print $1}'
   popd > /dev/null
 }
 
 function updateChecksum() {
-  calculateChecksum
+  local password="$1"
+  local checksum=$(calculateChecksum "$password")
   echo "$checksum" > "$dotfiles_checksum_file"
 }
 
 function verifyChecksum() {
-  calculateChecksum
+  local password="$1"
+  local checksum=$(calculateChecksum "$password")
   local dotfiles_checksum=$(cat "$dotfiles_checksum_file")
   if [[ "$checksum" != "$dotfiles_checksum" ]]; then
     echo "*** CHECKSUM VERIFICATION FAILED ***"
