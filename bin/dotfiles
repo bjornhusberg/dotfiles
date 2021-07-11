@@ -1,13 +1,14 @@
 #!/bin/bash
 
+gitrepo_ssh="git@github.com:bjornhusberg"
+gitrepo_https="https://github.com/bjornhusberg"
+
 dotfiles_dir="$HOME/.dotfiles"
 dotfiles_lib_dir="$dotfiles_dir/lib"
 dotfiles_dirty_file="$HOME/.dotfiles_dirty"
 dotfiles_password_file="$HOME/.dotfiles_password"
 dotfiles_checksum_file="$dotfiles_dir/.dotfiles_sum"
 dotfiles_lib_file="$dotfiles_dir/.dotfiles_lib"
-gitrepo_ssh="git@github.com:bjornhusberg"
-gitrepo_https="https://github.com/bjornhusberg"
 
 function run() {
   local command="$1"
@@ -156,13 +157,11 @@ function listDotfiles() {
 function clone() {
   local module=$1
   local directory=$2
-  if [[ -z "$gitrepo" ]]; then
-    local sshResult="$(ssh -qT git@github.com 2>&1)"
-    if [[ "${sshResult:0:2}" == "Hi" ]]; then
-      local gitrepo="${gitrepo_ssh}"
-    else
-      local gitrepo="${gitrepo_https}"
-    fi
+  local sshResult="$(ssh -qT git@github.com 2>&1)"
+  if [[ "${sshResult:0:2}" == "Hi" ]]; then
+    local gitrepo="${gitrepo_ssh}"
+  else
+    local gitrepo="${gitrepo_https}"
   fi
   local url="${gitrepo}/${module}.git"
   echo "Initializing $module from $url."
@@ -353,15 +352,16 @@ function updateFiles() {
 }
 
 function readPassword() {
+  local message="$1"
   if [[ -f "$dotfiles_password_file" ]]; then
     cat "$dotfiles_password_file"
     return
   fi
-  local message="$1"
   if [[ -z "$message" ]]; then
-    local message="Enter password for data verification"
+    echo -n "$message: " 1>&2
+  else
+    echo -n "Enter password for data verification: " 1>&2
   fi
-  echo -n "$message: " 1>&2
   stty -echo
   read password; echo
   stty echo
