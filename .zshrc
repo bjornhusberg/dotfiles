@@ -2,9 +2,11 @@
 
 setopt histignorealldups sharehistory
 
+bindkey '\e[A' history-search-backward
+bindkey '\e[B' history-search-forward
+
 # Use emacs keybindings even if our EDITOR is set to vi
 bindkey -e
-
 ZLE_RPROMPT_INDENT=0
 
 # Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
