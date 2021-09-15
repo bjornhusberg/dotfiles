@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [[ -z "$1" ]]; then
+  echo "Usage: $0 <host>"
+  exit 1
+fi
+
+key=$(cat ~/.ssh/id_rsa.pub)
+ssh "$1" "echo $key >> ~/.ssh/authorized_keys"
