@@ -6,4 +6,4 @@ if [[ -z "$1" ]]; then
 fi
 
 key=$(cat ~/.ssh/id_rsa.pub)
-ssh "$1" "echo $key >> ~/.ssh/authorized_keys"
+ssh "$1" "mkdir -p ~/.ssh; touch ~/.ssh/authorized_keys; echo $key >> ~/.ssh/authorized_keys"
