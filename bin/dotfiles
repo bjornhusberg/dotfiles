@@ -147,11 +147,21 @@ function status() {
 
 function listDotfiles() {
   find "$dotfiles_dir" -type f \
+    ! -path "$dotfiles_lib_dir/*" \
     ! -path "*/.git*" \
     ! -name ".DS_Store" \
     ! -name ".dotfiles_sum" \
     ! -name "README.md" \
     -print0 | sort -dzf
+  if [[ -f "$dotfiles_lib_file" ]]; then
+    for lib in $(cat "$dotfiles_lib_file"); do
+      find "$dotfiles_lib_dir/$lib" -type f \
+        ! -path "*/.git*" \
+        ! -name ".DS_Store" \
+        ! -name "README.md" \
+        -print0 | sort -dzf
+    done
+  fi
 }
 
 function clone() {
