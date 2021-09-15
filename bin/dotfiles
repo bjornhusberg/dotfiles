@@ -373,8 +373,15 @@ function readPassword() {
 function calculateChecksum() {
   local password="$1"
   pushd "$dotfiles_dir" > /dev/null
-  listDotfiles | xargs -0 shasum -b -a 256 | xargs -0 echo "$password" | shasum -b -a 256 | awk '{print $1}'
+  local sums=$(listDotfiles | xargs -0 shasum -b -a 256 | xargs -I % sh -c "echo % | head -c 64")
+  echo $sums$password | shasum -b -a 256 | head -c 64
   popd > /dev/null
+}
+
+function calculateFileChecksum() {
+  local file="$1"
+  local result=$(shasum -b -a 256 $file)
+  echo $result
 }
 
 function updateChecksum() {
@@ -403,7 +410,7 @@ function require() {
   done
 }
 
-require git awk sort
+require git sort
 
 if [[ -z "$(which shasum 2>/dev/null)" ]]; then
   if [[ -z "$(which sha256sum 2>/dev/null)" ]]; then
