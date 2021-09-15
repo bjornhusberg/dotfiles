@@ -214,7 +214,10 @@ function directoryCheck() {
   git remote update > /dev/null 2>&1
   local status=$(git status --porcelain --branch | head -n 1 | grep behind)
   popd > /dev/null
-  return $status
+  if [[ -z "$status" ]]; then
+    return 0
+  fi
+  return 1
 }
 
 function repositoryPush() {
