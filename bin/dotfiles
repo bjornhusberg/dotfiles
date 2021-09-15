@@ -378,12 +378,6 @@ function calculateChecksum() {
   popd > /dev/null
 }
 
-function calculateFileChecksum() {
-  local file="$1"
-  local result=$(shasum -b -a 256 $file)
-  echo $result
-}
-
 function updateChecksum() {
   local password="$1"
   local checksum=$(calculateChecksum "$password")
