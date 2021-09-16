@@ -17,6 +17,7 @@ CYAN="$ESC\033[1;36m$CSE"
 RED="$ESC\033[1;31m$CSE"
 PURPLE="$ESC\033[1;34m$CSE"
 GRAY="$ESC\033[1;90m$CSE"
+WHITE="$ESC\033[1;37m$CSE"
 
 LINE="$ESC\342\224$CSE\200"
 CORNER_UL="$ESC\342\225$CSE\255"
@@ -24,12 +25,27 @@ CORNER_LL="$ESC\342\225$CSE\260"
 CORNER_UR="$ESC\342\225$CSE\256"
 CORNER_LR="$ESC\342\225$CSE\257"
 
+LINE_COLOR="$CYAN"
+FRAME_COLOR="$PURPLE"
+TIME_COLOR="$YELLOW"
+INFO_COLOR="$YELLOW"
+USER_COLOR="$GREEN"
+PATH_COLOR="$PINK"
+ALERT_COLOR="$PINK"
+
 if [ "$PROMPT_STYLE" == "server" ]; then
   LINE_COLOR="$RED"
   FRAME_COLOR="$PINK"
-else
-  LINE_COLOR="$CYAN"
-  FRAME_COLOR="$PURPLE"
+elif [ "$PROMPT_STYLE" == "grayish" ]; then
+  LINE_COLOR="$GRAY"
+  FRAME_COLOR="$WHITE"
+elif [ "$PROMPT_STYLE" == "gray" ]; then
+  LINE_COLOR="$GRAY"
+  FRAME_COLOR="$WHITE"
+  TIME_COLOR="$GRAY"
+  INFO_COLOR="$GRAY"
+  USER_COLOR="$GRAY"
+  PATH_COLOR="$WHITE"
 fi
 
 FRAME_BEGIN="$FRAME_COLOR$LINE("
@@ -62,16 +78,16 @@ if [ -z "$PROMPT_USER" ]; then
   PROMPT_USER="$USER@$HOSTNAME"
 fi
 
-uprompt="$CURSOR_UP$LINE_COLOR$CORNER_UL$FRAME_BEGIN$GREEN$PROMPT_USER$FRAME_END"
+uprompt="$CURSOR_UP$LINE_COLOR$CORNER_UL$FRAME_BEGIN$USER_COLOR$PROMPT_USER$FRAME_END"
 padding=$(($COLUMNS - ${#PROMPT_USER} - 7))
 
 if [ -f "$HOME/.dotfiles_dirty" ]; then
-  uprompt="$uprompt$FRAME_BEGIN$PINK!$FRAME_END"
+  uprompt="$uprompt$FRAME_BEGIN$ALERT_COLOR!$FRAME_END"
   padding=$(($padding - 6))
 fi
 
 if [ "$DEVENV" != "" ]; then
-  uprompt="$uprompt$FRAME_BEGIN$YELLOW$DEVENV$FRAME_END"
+  uprompt="$uprompt$FRAME_BEGIN$INFO_COLOR$DEVENV$FRAME_END"
   padding=$(($padding - ${#DEVENV} - 5))
 fi
 
@@ -85,7 +101,7 @@ directoryLength=$((${#directory} + 4))
 branch="$(git symbolic-ref HEAD 2>/dev/null)"
 if [[ "$branch" != "" && $(($padding - ${#branch})) -gt 5 ]]; then
   branch=${branch##refs/heads/}
-  branchPrompt="$FRAME_BEGIN$PINK$branch$FRAME_END"
+  branchPrompt="$FRAME_BEGIN$PATH_COLOR$branch$FRAME_END"
   padding=$(($padding - ${#branch} - 5))
 else
   branchPrompt=""
@@ -95,28 +111,28 @@ if [ $padding -gt $directoryLength ]; then
   for ((i=$directoryLength; i < $padding; i++)) {
     uprompt="$uprompt$LINE"
   }
-  uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PINK$directory$FRAME_COLOR)$LINE"
+  uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PATH_COLOR$directory$FRAME_COLOR)$LINE"
 else
   if [ $padding -lt 8 ]; then
     for ((i=0; i < padding; i++)) {
       uprompt="$uprompt$LINE"
     }
   else
-    uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PINK...${directory:$((7-$padding))}$FRAME_COLOR)$LINE"
+    uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PATH_COLOR...${directory:$((7-$padding))}$FRAME_COLOR)$LINE"
   fi
 fi
 uprompt="$uprompt$LINE_COLOR$CORNER_UR"
 
 DATE=$(date +"%Y-%m-%d")
 
-rprompt="$LINE_COLOR$LINE$FRAME_BEGIN$YELLOW$DATE$FRAME_COLOR)$LINE$LINE_COLOR$CORNER_LR"
+rprompt="$LINE_COLOR$LINE$FRAME_BEGIN$TIME_COLOR$DATE$FRAME_COLOR)$LINE$LINE_COLOR$CORNER_LR"
 
 lprompt="$LINE_COLOR$CORNER_LL"
 if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
-  lprompt="$lprompt$FRAME_BEGIN$PINK$PROMPT_EXIT$FRAME_END"
+  lprompt="$lprompt$FRAME_BEGIN$ALERT_COLOR$PROMPT_EXIT$FRAME_END"
 fi
 TIME=$(date +"%H:%M:%S")
-lprompt="$lprompt$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET "
+lprompt="$lprompt$FRAME_BEGIN$TIME_COLOR$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET "
 
 # Wait for forked optionalNewLine
 wait
