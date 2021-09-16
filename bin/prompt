@@ -118,8 +118,6 @@ fi
 TIME=$(date +"%H:%M:%S")
 lprompt="$lprompt$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET "
 
-lprompt="$LINE_COLOR$CORNER_LL$FRAME_BEGIN$YELLOW$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET "
-
 # Wait for forked optionalNewLine
 wait
 
