@@ -7,3 +7,7 @@ fi
 
 key=$(cat ~/.ssh/id_rsa.pub)
 ssh "$1" "mkdir -p ~/.ssh; touch ~/.ssh/authorized_keys; echo $key >> ~/.ssh/authorized_keys"
+if [[ $? -ne 0 ]]; then
+  exit 1
+fi
+ssh "$1"
