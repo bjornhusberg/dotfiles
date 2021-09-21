@@ -41,9 +41,9 @@ elif [ "$PROMPT_STYLE" == "grayish" ]; then
 elif [ "$PROMPT_STYLE" == "gray" ]; then
   LINE_COLOR="$WHITE"
   FRAME_COLOR="$WHITE"
-  TIME_COLOR="$GRAY"
-  INFO_COLOR="$GRAY"
-  USER_COLOR="$GRAY"
+  TIME_COLOR="$WHITE"
+  INFO_COLOR="$WHITE"
+  USER_COLOR="$WHITE"
   PATH_COLOR="$WHITE"
 fi
 
