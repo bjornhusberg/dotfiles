@@ -233,7 +233,7 @@ function directoryCheck() {
 function repositoryPush() {
   local comment="$1"
   if [[ -z "$comment" ]]; then
-    local comment="Updated from $HOSTNAME"
+    local comment="Dotfiles update"
   fi
   directoryPush "$dotfiles_dir" "$comment"
   if [[ -f "$dotfiles_lib_file" ]]; then
