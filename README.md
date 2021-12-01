@@ -5,7 +5,7 @@ My personal git-hosted dotfiles. Contains a very handy dotfiles script that simp
 It also support git submodules.
 
 Install:<br>
-<code>bash -c "$(curl -fsSL https://raw.github.com/bjornhusberg/dotfiles/master/bin/dotfiles)"</code>
+<code>bash -c "$(curl -fsSL https://raw.github.com/bjornhusberg/dotfiles/main/bin/dotfiles)"</code>
 
 Usage:<br>
 <code>dotfiles</code>
