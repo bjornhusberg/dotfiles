@@ -198,7 +198,7 @@ function repositoryPull() {
 function directoryPull() {
   local directory="$1"
   pushd "$directory" > /dev/null
-  git pull -q origin master
+  git pull -q origin main
   popd > /dev/null
 }
 
@@ -251,7 +251,7 @@ function directoryPush() {
   local status=$(git status --porcelain)
   if [[ ! -z "$status" ]]; then
     git commit -q -m "$comment"
-    git push -q origin master
+    git push -q origin main
   fi
   popd > /dev/null
 }
