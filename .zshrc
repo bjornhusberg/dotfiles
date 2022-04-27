@@ -2,8 +2,8 @@
 
 setopt histignorealldups sharehistory
 
-bindkey '\e[A' history-search-backward
-bindkey '\e[B' history-search-forward
+bindkey '\e[A' up-line-or-search
+bindkey '\e[B' down-line-or-search
 
 # Use emacs keybindings even if our EDITOR is set to vi
 bindkey -e
