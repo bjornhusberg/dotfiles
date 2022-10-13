@@ -131,7 +131,7 @@ if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
   lprompt="$lprompt$FRAME_BEGIN$ALERT_COLOR$PROMPT_EXIT$FRAME_END"
 fi
 TIME=$(date +"%H:%M:%S")
-lprompt="$lprompt$FRAME_BEGIN$TIME_COLOR$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET "
+lprompt="$lprompt$FRAME_BEGIN$TIME_COLOR$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET"
 
 # Wait for forked optionalNewLine
 wait
@@ -140,5 +140,5 @@ if [ "$SHELL_TYPE" == "zsh" ]; then
   printf "\n$uprompt\n$lprompt\t$rprompt$RESET"
 else
   RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
-  printf "\n$uprompt\n$RIGHT_ALIGN$rprompt$CURSOR_UP\n$lprompt"
+  printf "\n$uprompt\n$RIGHT_ALIGN$rprompt$CURSOR_UP\n$lprompt "
 fi
