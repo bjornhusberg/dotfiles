@@ -48,7 +48,7 @@ elif [ "$PROMPT_STYLE" == "gray" ]; then
 fi
 
 FRAME_BEGIN="$FRAME_COLOR$LINE("
-FRAME_END="$FRAME_COLOR)$LINE$LINE_COLOR$LINE"
+FRAME_END="$FRAME_COLOR)$LINE$LINE_COLOR"
 CURSOR_UP="$ESC\033[1A$CSE"
 CURSOR_DOWN="$ESC\033[1B$CSE"
 
@@ -77,16 +77,16 @@ if [ -z "$PROMPT_USER" ]; then
   PROMPT_USER="$USER@$HOSTNAME"
 fi
 
-uprompt="$CURSOR_UP$LINE_COLOR$CORNER_UL$FRAME_BEGIN$USER_COLOR$PROMPT_USER$FRAME_END"
+uprompt="$CURSOR_UP$LINE_COLOR$CORNER_UL$FRAME_BEGIN$USER_COLOR$PROMPT_USER$FRAME_END$LINE"
 padding=$(($COLUMNS - ${#PROMPT_USER} - 7))
 
 if [ -f "$HOME/.dotfiles_dirty" ]; then
-  uprompt="$uprompt$FRAME_BEGIN$ALERT_COLOR!$FRAME_END"
+  uprompt="$uprompt$FRAME_BEGIN$ALERT_COLOR!$FRAME_END$LINE"
   padding=$(($padding - 6))
 fi
 
 if [ "$DEVENV" != "" ]; then
-  uprompt="$uprompt$FRAME_BEGIN$INFO_COLOR$DEVENV$FRAME_END"
+  uprompt="$uprompt$FRAME_BEGIN$INFO_COLOR$DEVENV$FRAME_END$LINE"
   padding=$(($padding - ${#DEVENV} - 5))
 fi
 
@@ -100,7 +100,7 @@ directoryLength=$((${#directory} + 4))
 branch="$(git symbolic-ref HEAD 2>/dev/null)"
 if [[ "$branch" != "" && $(($padding - ${#branch})) -gt 5 ]]; then
   branch=${branch##refs/heads/}
-  branchPrompt="$FRAME_BEGIN$PATH_COLOR$branch$FRAME_END"
+  branchPrompt="$FRAME_BEGIN$PATH_COLOR$branch$FRAME_END$LINE"
   padding=$(($padding - ${#branch} - 5))
 else
   branchPrompt=""
@@ -110,28 +110,28 @@ if [ $padding -gt $directoryLength ]; then
   for ((i=$directoryLength; i < $padding; i++)) {
     uprompt="$uprompt$LINE"
   }
-  uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PATH_COLOR$directory$FRAME_COLOR)$LINE"
+  uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PATH_COLOR$directory$FRAME_END"
 else
   if [ $padding -lt 8 ]; then
     for ((i=0; i < padding; i++)) {
       uprompt="$uprompt$LINE"
     }
   else
-    uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PATH_COLOR...${directory:$((7-$padding))}$FRAME_COLOR)$LINE"
+    uprompt="$uprompt$branchPrompt$FRAME_BEGIN$PATH_COLOR...${directory:$((7-$padding))}$FRAME_END"
   fi
 fi
 uprompt="$uprompt$LINE_COLOR$CORNER_UR"
 
 DATE=$(date +"%Y-%m-%d")
 
-rprompt="$LINE_COLOR$LINE$FRAME_BEGIN$TIME_COLOR$DATE$FRAME_COLOR)$LINE$LINE_COLOR$CORNER_LR"
+rprompt="$FRAME_END$LINE$FRAME_BEGIN$TIME_COLOR$DATE$FRAME_END$CORNER_LR"
 
 lprompt="$LINE_COLOR$CORNER_LL"
 if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
   lprompt="$lprompt$FRAME_BEGIN$ALERT_COLOR$PROMPT_EXIT$FRAME_END"
 fi
 TIME=$(date +"%H:%M:%S")
-lprompt="$lprompt$FRAME_BEGIN$TIME_COLOR$TIME$FRAME_COLOR)$LINE$LINE_COLOR$LINE$RESET"
+lprompt="$lprompt$FRAME_BEGIN$TIME_COLOR$TIME$FRAME_END$LINE$FRAME_BEGIN$RESET"
 
 # Wait for forked optionalNewLine
 wait
@@ -139,6 +139,6 @@ wait
 if [ "$SHELL_TYPE" == "zsh" ]; then
   printf "\n$uprompt\n$lprompt\t$rprompt$RESET"
 else
-  RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
-  printf "\n$uprompt\n$RIGHT_ALIGN$rprompt$CURSOR_UP\n$lprompt "
+  RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 17))G$CSE"
+  printf "\n$uprompt\n$RIGHT_ALIGN$rprompt$CURSOR_UP\n$lprompt"
 fi
