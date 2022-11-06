@@ -124,14 +124,14 @@ uprompt="$uprompt$LINE_COLOR$CORNER_UR"
 
 DATE=$(date +"%Y-%m-%d")
 
-rprompt="$FRAME_END$LINE$FRAME_BEGIN$TIME_COLOR$DATE$FRAME_END$CORNER_LR"
+rprompt="$FRAME_BEGIN$TIME_COLOR$DATE$FRAME_END$CORNER_LR"
 
 lprompt="$LINE_COLOR$CORNER_LL"
 if [[ ! -z "$PROMPT_EXIT" && "$PROMPT_EXIT" != "0" ]]; then
   lprompt="$lprompt$FRAME_BEGIN$ALERT_COLOR$PROMPT_EXIT$FRAME_END"
 fi
 TIME=$(date +"%H:%M:%S")
-lprompt="$lprompt$FRAME_BEGIN$TIME_COLOR$TIME$FRAME_END$LINE$FRAME_BEGIN$RESET"
+lprompt="$lprompt$FRAME_BEGIN$TIME_COLOR$TIME$FRAME_END$RESET "
 
 # Wait for forked optionalNewLine
 wait
@@ -139,6 +139,6 @@ wait
 if [ "$SHELL_TYPE" == "zsh" ]; then
   printf "\n$uprompt\n$lprompt\t$rprompt$RESET"
 else
-  RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 17))G$CSE"
+  RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
   printf "\n$uprompt\n$RIGHT_ALIGN$rprompt$CURSOR_UP\n$lprompt"
 fi
