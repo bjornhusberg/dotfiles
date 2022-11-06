@@ -139,6 +139,6 @@ wait
 if [ "$SHELL_TYPE" == "zsh" ]; then
   printf "\n$uprompt\n$lprompt\t$rprompt$RESET"
 else
-  RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 15))G$CSE"
+  RIGHT_ALIGN="$ESC\033[$(($COLUMNS - 14))G$CSE"
   printf "\n$uprompt\n$RIGHT_ALIGN$rprompt$CURSOR_UP\n$lprompt"
 fi
