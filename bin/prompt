@@ -59,7 +59,7 @@ fi
 function insertOptionalNewline() {
   exec < /dev/tty
   oldstty=$(stty -g)
-  stty raw -echo min 0
+  stty raw -echo min 0 2> /dev/null
   echo -en "\033[6n" > /dev/tty
   IFS=';' read -r -d R -a pos
   stty $oldstty

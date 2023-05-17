@@ -383,8 +383,8 @@ function readPassword() {
 function calculateChecksum() {
   local password="$1"
   pushd "$dotfiles_dir" > /dev/null
-  local sums=$(listDotfiles | xargs -0 shasum -b -a 256 | xargs -I % sh -c "echo % | head -c 64")
-  echo $sums$password | shasum -b -a 256 | head -c 64
+  local sums=$(listDotfiles | xargs -0 $sha256sum -b | xargs -I % sh -c "echo % | head -c 64")
+  echo $sums$password | $sha256sum -b | head -c 64
   popd > /dev/null
 }
 
@@ -416,12 +416,13 @@ function require() {
 
 require git sort
 
-if [[ -z "$(which shasum 2>/dev/null)" ]]; then
-  if [[ -z "$(which sha256sum 2>/dev/null)" ]]; then
+sha256sum=sha256sum
+if [[ -z "$(which sha256sum 2>/dev/null)" ]]; then
+  if [[ -z "$(which shasum 2>/dev/null)" ]]; then
     echo "Please install shasum or sha256sum"
     exit 1
   fi
-  alias shasum="sha256sum"
+  shasum="shasum -a 256"
 fi
 
 run "$1" "$2"
