@@ -369,7 +369,7 @@ function readPassword() {
     cat "$dotfiles_password_file"
     return
   fi
-  if [[ -z "$message" ]]; then
+  if [[ ! -z "$message" ]]; then
     echo -n "$message: " 1>&2
   else
     echo -n "Enter password for data verification: " 1>&2
@@ -416,13 +416,13 @@ function require() {
 
 require git sort
 
-sha256sum=sha256sum
-if [[ -z "$(which sha256sum 2>/dev/null)" ]]; then
-  if [[ -z "$(which shasum 2>/dev/null)" ]]; then
+sha256sum="shasum -a 256"
+if [[ -z "$(which shasum 2>/dev/null)" ]]; then
+  if [[ -z "$(which sha256sum 2>/dev/null)" ]]; then
     echo "Please install shasum or sha256sum"
     exit 1
   fi
-  shasum="shasum -a 256"
+  sha256sum="sha256sum"
 fi
 
 run "$1" "$2"
