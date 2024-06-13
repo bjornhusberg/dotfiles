@@ -1,3 +1,6 @@
+
+export FAST_SHELL_STARTUP=$FAST_SHELL_STARTUP$VSCODE_RESOLVING_ENVIRONMENT
+
 # Paths
 export PATH=$HOME/bin:$HOME/lib/colorant:$PATH
 if [ -x /usr/libexec/path_helper ]; then
@@ -5,7 +8,9 @@ if [ -x /usr/libexec/path_helper ]; then
 fi
 
 # Start dotfiles sync
-$(~/bin/dotfiles > /dev/null &)
+if [ -z  "$FAST_SHELL_STARTUP" ]; then
+  $(~/bin/dotfiles > /dev/null &)
+fi
 
 # Colors
 export CLICOLOR=1
