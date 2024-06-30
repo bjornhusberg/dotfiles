@@ -6,8 +6,6 @@ gitrepo_https="https://github.com/bjornhusberg"
 dotfiles_dir="$HOME/.dotfiles"
 dotfiles_lib_dir="$dotfiles_dir/lib"
 dotfiles_dirty_file="$HOME/.dotfiles_dirty"
-dotfiles_password_file="$HOME/.dotfiles_password"
-dotfiles_checksum_file="$dotfiles_dir/.dotfiles_sum"
 dotfiles_lib_file="$dotfiles_dir/.dotfiles_lib"
 
 function run() {
@@ -26,14 +24,12 @@ function run() {
     add "$parameter"
   elif [[ "$command" == "rm" ]]; then
     remove "$parameter"
-  elif [[ "$command" == "checksum" ]]; then
-    checksum
   elif [[ "$command" == "diff" ]]; then
     diffFiles
   elif [[ "$command" == "" ]]; then
     status
   else
-    echo "Usage: $0 [diff|pull|push|add|rm|reset|checksum] files ..."
+    echo "Usage: $0 [diff|pull|push|add|rm|reset] files ..."
     exit 1
   fi
 }
@@ -62,14 +58,7 @@ function pull() {
     echo "Dotfiles contain local changes."
     exit
   fi
-  local password=$(readPassword "Enter password for data verification (or leave blank to skip)")
-  if [[ -z "$password" ]]; then
-    repositoryPull
-  else
-    verifyChecksum "$password"
-    repositoryPull "$password"
-    verifyChecksum "$password"
-  fi
+  repositoryPull
   diffFiles
   updateFiles
 }
@@ -87,10 +76,7 @@ function push() {
     echo "Dotfiles need to be merged."
     exit
   fi
-  local password=$(readPassword)
-  verifyChecksum "$password"
   commitFiles
-  updateChecksum "$password"
   repositoryPush "$comment"
 }
 
@@ -102,10 +88,7 @@ function add() {
     exit
   fi
   echo "Adding dotfile $path."
-  local password=$(readPassword)
-  verifyChecksum "$password"
   addFile "$path"
-  updateChecksum "$password"
   repositoryPush "Added $path."
 }
 
@@ -117,17 +100,8 @@ function remove() {
     exit
   fi
   echo "Removing dotfile $path."
-  local password=$(readPassword)
-  verifyChecksum "$password"
   deleteFile "$path"
-  updateChecksum "$password"
   repositoryPush "Removed $path."
-}
-
-function checksum() {
-  echo "Updating dotfiles checksum."
-  local password=$(readPassword)
-  updateChecksum "$password"
 }
 
 function status() {
@@ -363,47 +337,6 @@ function updateFiles() {
   done
 }
 
-function readPassword() {
-  local message="$1"
-  if [[ -f "$dotfiles_password_file" ]]; then
-    cat "$dotfiles_password_file"
-    return
-  fi
-  if [[ ! -z "$message" ]]; then
-    echo -n "$message: " 1>&2
-  else
-    echo -n "Enter password for data verification: " 1>&2
-  fi
-  stty -echo
-  read password; echo
-  stty echo
-  echo -n "$password"
-}
-
-function calculateChecksum() {
-  local password="$1"
-  pushd "$dotfiles_dir" > /dev/null
-  local sums=$(listDotfiles | xargs -0 $sha256sum | xargs -I % sh -c "echo % | head -c 64")
-  echo $sums$password | $sha256sum | head -c 64
-  popd > /dev/null
-}
-
-function updateChecksum() {
-  local password="$1"
-  local checksum=$(calculateChecksum "$password")
-  echo "$checksum" > "$dotfiles_checksum_file"
-}
-
-function verifyChecksum() {
-  local password="$1"
-  local checksum=$(calculateChecksum "$password")
-  local dotfiles_checksum=$(cat "$dotfiles_checksum_file")
-  if [[ "$checksum" != "$dotfiles_checksum" ]]; then
-    echo "*** CHECKSUM VERIFICATION FAILED ***"
-    exit 1
-  fi
-}
-
 function require() {
   while (( "$#" )); do
     if [[ -z "$(which $1 2>/dev/null)" ]]; then
@@ -415,14 +348,5 @@ function require() {
 }
 
 require git sort
-
-sha256sum="shasum -a 256 -b"
-if [[ -z "$(which shasum 2>/dev/null)" ]]; then
-  if [[ -z "$(which sha256sum 2>/dev/null)" ]]; then
-    echo "Please install shasum or sha256sum"
-    exit 1
-  fi
-  sha256sum="sha256sum -b"
-fi
 
 run "$1" "$2"
