@@ -199,7 +199,6 @@ function repositoryCheck() {
 function directoryCheck() {
   local directory="$1"
   pushd "$directory" > /dev/null
-  echo "$directory"
   git remote update > /dev/null 2>&1
   local status=$(git status --porcelain --branch | head -n 1 | grep behind)
   popd > /dev/null
