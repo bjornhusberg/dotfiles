@@ -11,7 +11,6 @@ dotfiles_lib_file="$dotfiles_dir/.dotfiles_lib"
 function run() {
   local command="$1"
   local parameter="$2"
-  rm -f $dotfiles_dirty_file
   if [[ ! -d "$dotfiles_dir" ]]; then
     init
   elif [[ "$command" == "reset" ]]; then
@@ -27,6 +26,7 @@ function run() {
   elif [[ "$command" == "diff" ]]; then
     diffFiles
   elif [[ "$command" == "" ]]; then
+    rm -f $dotfiles_dirty_file
     status
   else
     echo "Usage: $0 [diff|pull|push|add|rm|reset] files ..."
