@@ -26,7 +26,6 @@ function run() {
   elif [[ "$command" == "diff" ]]; then
     diffFiles
   elif [[ "$command" == "" ]]; then
-    rm -f $dotfiles_dirty_file
     status
   else
     echo "Usage: $0 [diff|pull|push|add|rm|reset] files ..."
@@ -42,6 +41,7 @@ function init() {
     done
   fi
   updateFiles
+  rm -f $dotfiles_dirty_file
 }
 
 function reset() {
@@ -49,6 +49,7 @@ function reset() {
   repositoryPull
   diffFiles
   updateFiles
+  rm -f $dotfiles_dirty_file
 }
 
 function pull() {
@@ -61,6 +62,7 @@ function pull() {
   repositoryPull
   diffFiles
   updateFiles
+  rm -f $dotfiles_dirty_file
 }
 
 function push() {
@@ -78,6 +80,7 @@ function push() {
   fi
   commitFiles
   repositoryPush "$comment"
+  rm -f $dotfiles_dirty_file
 }
 
 function add() {
@@ -117,6 +120,7 @@ function status() {
     touch $dotfiles_dirty_file
     exit
   fi
+  rm -f $dotfiles_dirty_file
 }
 
 function listDotfiles() {
