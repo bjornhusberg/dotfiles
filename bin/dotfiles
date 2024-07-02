@@ -20,16 +20,16 @@ function run() {
     pull
   elif [[ "$command" == "push" ]]; then
     push "$parameter"
-  elif [[ "$command" == "add" ]]; then
+  elif [[ "$command" == "add" && "$parameter" != "" ]]; then
     add "$parameter"
-  elif [[ "$command" == "rm" ]]; then
+  elif [[ "$command" == "rm" && "$parameter" != "" ]]; then
     remove "$parameter"
   elif [[ "$command" == "diff" ]]; then
     diffFiles
   elif [[ "$command" == "status" ]]; then
     status
   else
-    echo "Usage: $0 [diff|pull|push|add|rm|reset|status] files ..."
+    echo "Usage: $0 [status|reset|diff|pull|push <optional comment>|add <file>|rm <file>]"
     exit 1
   fi
 }
@@ -85,30 +85,31 @@ function push() {
 }
 
 function add() {
+  echo "Adding dotfile $path."
   local path="$1"
   repositoryCheck
   if (( $? != 0 )); then
     echo "Dotfiles need to be pulled."
     exit
   fi
-  echo "Adding dotfile $path."
   addFile "$path"
   repositoryPush "Added $path."
 }
 
 function remove() {
+  echo "Removing dotfile $path."
   local path="$1"
   repositoryCheck
   if (( $? != 0 )); then
     echo "Dotfiles need to be pulled."
     exit
   fi
-  echo "Removing dotfile $path."
   deleteFile "$path"
   repositoryPush "Removed $path."
 }
 
 function status() {
+  echo "Checking status."
   diffFiles > /dev/null 2>&1
   if (( $? != 0 )); then
     echo "Dotfiles need to be pushed."
