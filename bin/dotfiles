@@ -11,13 +11,9 @@ dotfiles_lib_file="$dotfiles_dir/.dotfiles_lib"
 function run() {
   local command="$1"
   local parameter="$2"
-  if [[ ! -d "$dotfiles_dir" ]]; then
-    init
-    if [[ "$command" == "" ]]; then
-      exit 0
-    fi
-  fi
-  if [[ "$command" == "reset" ]]; then
+  if [[ "$command" == "install" ]]; then
+    install
+  elif [[ "$command" == "reset" ]]; then
     reset
   elif [[ "$command" == "pull" ]]; then
     pull
@@ -36,7 +32,12 @@ function run() {
   fi
 }
 
-function init() {
+function install() {
+  if [[ -d "$dotfiles_dir" ]]; then
+    echo "Dotfiles already installed."
+    exit 1
+  fi
+  echo "Installing dotfiles."
   clone dotfiles "$dotfiles_dir"
   if [[ -f "$dotfiles_lib_file" ]]; then
     for lib in $(cat "$dotfiles_lib_file"); do
@@ -45,7 +46,7 @@ function init() {
   fi
   updateFiles
   rm -f "$dotfiles_dirty_file"
-  echo "Dotfiles initialized."
+  echo "Dotfiles installed."
 }
 
 function reset() {
