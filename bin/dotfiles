@@ -41,7 +41,7 @@ function init() {
     done
   fi
   updateFiles
-  rm -f $dotfiles_dirty_file
+  rm -f "$dotfiles_dirty_file"
 }
 
 function reset() {
@@ -49,7 +49,7 @@ function reset() {
   repositoryPull
   diffFiles
   updateFiles
-  rm -f $dotfiles_dirty_file
+  rm -f "$dotfiles_dirty_file"
 }
 
 function pull() {
@@ -62,7 +62,7 @@ function pull() {
   repositoryPull
   diffFiles
   updateFiles
-  rm -f $dotfiles_dirty_file
+  rm -f "$dotfiles_dirty_file"
 }
 
 function push() {
@@ -80,7 +80,7 @@ function push() {
   fi
   commitFiles
   repositoryPush "$comment"
-  rm -f $dotfiles_dirty_file
+  rm -f "$dotfiles_dirty_file"
 }
 
 function add() {
@@ -111,16 +111,16 @@ function status() {
   diffFiles > /dev/null 2>&1
   if (( $? != 0 )); then
     echo "Dotfiles need to be pushed."
-    touch $dotfiles_dirty_file
+    touch "$dotfiles_dirty_file"
     exit
   fi
   repositoryCheck
   if (( $? != 0 )); then
     echo "Dotfiles need to be pulled."
-    touch $dotfiles_dirty_file
+    touch "$dotfiles_dirty_file"
     exit
   fi
-  rm -f $dotfiles_dirty_file
+  rm -f "$dotfiles_dirty_file"
 }
 
 function listDotfiles() {
@@ -313,7 +313,7 @@ function deleteFile() {
     return
   fi
   echo "Deleting $file"
-  rm "$dotfiles_dir/$file"
+  rm -f "$dotfiles_dir/$file"
 }
 
 function commitFiles() {
