@@ -154,7 +154,7 @@ function clone() {
     local gitrepo="${gitrepo_https}"
   fi
   local url="${gitrepo}/${module}.git"
-  echo "Initializing $module from $url."
+  echo "Initializing $module from $url"
   mkdir -p "$directory"
   pushd "$directory" > /dev/null
   git clone -q "$url" .
