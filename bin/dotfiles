@@ -13,6 +13,9 @@ function run() {
   local parameter="$2"
   if [[ ! -d "$dotfiles_dir" ]]; then
     init
+    if [[ "$command" == "" ]]; then
+      exit 0
+    fi
   fi
   if [[ "$command" == "reset" ]]; then
     reset
@@ -29,8 +32,7 @@ function run() {
   elif [[ "$command" == "status" ]]; then
     status
   else
-    echo "Usage: $0 [status|reset|diff|pull|push <optional comment>|add <file>|rm <file>]"
-    exit 1
+    echo "Usage: dotfiles [status|reset|diff|pull|push <optional comment>|add <file>|rm <file>]"
   fi
 }
 
@@ -43,6 +45,7 @@ function init() {
   fi
   updateFiles
   rm -f "$dotfiles_dirty_file"
+  echo "Dotfiles initialized."
 }
 
 function reset() {
