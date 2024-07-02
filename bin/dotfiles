@@ -13,7 +13,8 @@ function run() {
   local parameter="$2"
   if [[ ! -d "$dotfiles_dir" ]]; then
     init
-  elif [[ "$command" == "reset" ]]; then
+  fi
+  if [[ "$command" == "reset" ]]; then
     reset
   elif [[ "$command" == "pull" ]]; then
     pull
@@ -25,10 +26,10 @@ function run() {
     remove "$parameter"
   elif [[ "$command" == "diff" ]]; then
     diffFiles
-  elif [[ "$command" == "" ]]; then
+  elif [[ "$command" == "status" ]]; then
     status
   else
-    echo "Usage: $0 [diff|pull|push|add|rm|reset] files ..."
+    echo "Usage: $0 [diff|pull|push|add|rm|reset|status] files ..."
     exit 1
   fi
 }

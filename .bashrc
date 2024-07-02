@@ -9,7 +9,7 @@ fi
 
 # Start dotfiles sync
 if [ -z  "$FAST_SHELL_STARTUP" ]; then
-  $(~/bin/dotfiles > /dev/null &)
+  $(~/bin/dotfiles status > /dev/null &)
 fi
 
 # Colors
