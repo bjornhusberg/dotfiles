@@ -122,6 +122,7 @@ function status() {
     exit
   fi
   rm -f "$dotfiles_dirty_file"
+  echo "Dotfiles up to date"
 }
 
 function listDotfiles() {
