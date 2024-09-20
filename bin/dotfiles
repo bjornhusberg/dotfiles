@@ -71,8 +71,8 @@ function pull() {
 }
 
 function push() {
-  echo "Pushing dotfiles."
   local comment="$1"
+  echo "Pushing dotfiles."
   diffFiles
   if (( $? == 0 )); then
     echo "Nothing to do."
@@ -89,8 +89,8 @@ function push() {
 }
 
 function add() {
-  echo "Adding dotfile $path."
   local path="$1"
+  echo "Adding dotfile $path."
   repositoryCheck
   if (( $? != 0 )); then
     echo "Dotfiles need to be pulled."
@@ -101,8 +101,8 @@ function add() {
 }
 
 function remove() {
-  echo "Removing dotfile $path."
   local path="$1"
+  echo "Removing dotfile $path."
   repositoryCheck
   if (( $? != 0 )); then
     echo "Dotfiles need to be pulled."
