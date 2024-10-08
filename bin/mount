@@ -1,0 +1,74 @@
+#!/bin/bash
+
+function getMountedPath() {
+  system=$1
+  df | grep "$system" | awk '{print $6}'
+}
+
+function status() {
+  index=$1
+  system=$2
+  path=$(getMountedPath $system)
+  if [ -z "$path" ]; then
+    echo $index $system -
+  else
+    echo $index $system $path
+  fi
+}
+
+function mount() {
+  system=$1
+  path=$(getMountedPath $system)
+  if [ -z "$path" ]; then
+    path=/mnt/${system/:/}
+    echo $system mounting on $path
+    rclone mount $system $path --daemon
+  else
+    echo $system mounted on $path
+  fi
+}
+
+function unmount() {
+  system=$1
+  path=$(getMountedPath $system)
+  if [ -z "$path" ]; then
+    echo $system unmounted
+  else
+    echo $system unmounting
+    fusermount -u $path
+  fi
+}
+
+function toggle() {
+  system=$1
+  path=$(getMountedPath $system)
+  if [ -z "$path" ]; then
+    mount $system
+  else
+    unmount $system
+  fi
+}
+
+while [ 1 ]; do
+
+  index=1
+  rclone listremotes | sort | while read system; do
+    status $index $system
+    index=$((index+1))
+  done
+
+  read -p "index, a(ll) or n(one)? " input
+
+  index=1
+  rclone listremotes | sort | while read system; do
+    if [ "$input" == "$index" ]; then
+      toggle $system
+    elif [ "$input" == "a" ]; then
+      mount $system
+    elif [ "$input" == "n" ]; then
+      unmount $system
+    fi
+    index=$((index+1))
+  done
+done
+
