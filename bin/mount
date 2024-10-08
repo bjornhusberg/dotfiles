@@ -22,7 +22,7 @@ function mount() {
   if [ -z "$path" ]; then
     path=/mnt/${system/:/}
     echo $system mounting on $path
-    rclone mount $system $path --daemon
+    nohup rclone mount $system $path --daemon &
   else
     echo $system mounted on $path
   fi
