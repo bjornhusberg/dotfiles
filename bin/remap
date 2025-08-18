@@ -1,1 +1,25 @@
-hidutil property --matching '{"ProductID":0x24f,"VendorID":0x5ac}' --set '{"UserKeyMapping":[{ "HIDKeyboardModifierMappingSrc": 0x700000035, "HIDKeyboardModifierMappingDst": 0x700000064},{ "HIDKeyboardModifierMappingSrc": 0x700000064, "HIDKeyboardModifierMappingDst": 0x700000035},{ "HIDKeyboardModifierMappingSrc": 0x7000000e2, "HIDKeyboardModifierMappingDst": 0x7000000e3},{ "HIDKeyboardModifierMappingSrc": 0x7000000e3, "HIDKeyboardModifierMappingDst": 0x7000000e2}]}'
+UserKeyMapping='
+{
+    "UserKeyMapping": [
+        { 
+            "HIDKeyboardModifierMappingSrc": 0x700000035, 
+            "HIDKeyboardModifierMappingDst": 0x700000064
+        },
+        { 
+            "HIDKeyboardModifierMappingSrc": 0x700000064, 
+            "HIDKeyboardModifierMappingDst": 0x700000035
+        },
+        { 
+            "HIDKeyboardModifierMappingSrc": 0x7000000e2,
+            "HIDKeyboardModifierMappingDst": 0x7000000e3
+        },
+        { 
+            "HIDKeyboardModifierMappingSrc": 0x7000000e3,
+            "HIDKeyboardModifierMappingDst": 0x7000000e2
+        }
+    ]
+}
+'
+hidutil property --set '{"UserKeyMapping":[]}'
+hidutil property --matching '{"ProductID": 0x24f, "VendorID": 0x5ac}' --set "$UserKeyMapping"
+hidutil property --matching '{"ProductID": 0x8008, "VendorID": 0x4d9}' --set "$UserKeyMapping"
