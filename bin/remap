@@ -20,4 +20,4 @@ hidutil property --set '
     ]
 }
 '
-hidutil property --matching '{"ProductID": 0x343, "VendorID": 0x5ac}' --set '{"UserKeyMapping":[]}'
+hidutil property --matching '{"Product": "Apple Internal Keyboard / Trackpad"}' --set '{"UserKeyMapping":[]}'
