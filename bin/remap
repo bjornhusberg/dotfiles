@@ -1,3 +1,9 @@
+# Left option: 0x7000000E2
+# Left command: 0x7000000E3
+# Grave accent and tilde: 0x700000035
+# Non US backslash: 0x700000064
+
+# Default mapping:
 hidutil property --set '
 {
     "UserKeyMapping": [
@@ -19,5 +25,8 @@ hidutil property --set '
         }
     ]
 }
-'
-hidutil property --matching '{"Product": "Apple Internal Keyboard / Trackpad"}' --set '{"UserKeyMapping":[]}'
+' > /dev/null
+
+# Exclude for internal macbook keyboard:
+hidutil property --matching '{"Product": "Apple Internal Keyboard / Trackpad"}' --set '{"UserKeyMapping":[]}' > /dev/null
+
