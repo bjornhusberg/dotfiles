@@ -1,9 +1,15 @@
-# Left option: 0x7000000E2
-# Left command: 0x7000000E3
-# Grave accent and tilde: 0x700000035
-# Non US backslash: 0x700000064
-
-# Default mapping:
+#
+# 0x7000000E2 Left option
+# 0x7000000E3 Left command
+# 0x700000035 Grave accent and tilde
+# 0x700000064 Non US backslash
+# 0x700000043 F10
+# 0x700000044 F11
+# 0x700000045 F12
+# 0xC000000E2 Mute 
+# 0xC000000EA Volume down
+# 0x700000080 Volume up
+#
 hidutil property --set '
 {
     "UserKeyMapping": [
@@ -22,6 +28,18 @@ hidutil property --set '
         { 
             "HIDKeyboardModifierMappingSrc": 0x7000000e3,
             "HIDKeyboardModifierMappingDst": 0x7000000e2
+        },
+        { 
+            "HIDKeyboardModifierMappingSrc": 0x700000043, 
+            "HIDKeyboardModifierMappingDst": 0xC000000E2
+        },
+        { 
+            "HIDKeyboardModifierMappingSrc": 0x700000044, 
+            "HIDKeyboardModifierMappingDst": 0xC000000EA
+        },
+        { 
+            "HIDKeyboardModifierMappingSrc": 0x700000045, 
+            "HIDKeyboardModifierMappingDst": 0x700000080
         }
     ]
 }
