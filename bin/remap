@@ -1,50 +1,96 @@
-#
-# 0x7000000E2 Left option
-# 0x7000000E3 Left command
-# 0x700000035 Grave accent and tilde
-# 0x700000064 Non US backslash
-# 0x700000043 F10
-# 0x700000044 F11
-# 0x700000045 F12
-# 0xC000000E2 Mute 
-# 0xC000000EA Volume down
-# 0x700000080 Volume up
-#
-hidutil property --set '
-{
-    "UserKeyMapping": [
-        { 
-            "HIDKeyboardModifierMappingSrc": 0x700000035, 
-            "HIDKeyboardModifierMappingDst": 0x700000064
-        },
-        { 
-            "HIDKeyboardModifierMappingSrc": 0x700000064, 
-            "HIDKeyboardModifierMappingDst": 0x700000035
-        },
-        { 
-            "HIDKeyboardModifierMappingSrc": 0x7000000e2,
-            "HIDKeyboardModifierMappingDst": 0x7000000e3
-        },
-        { 
-            "HIDKeyboardModifierMappingSrc": 0x7000000e3,
-            "HIDKeyboardModifierMappingDst": 0x7000000e2
-        },
-        { 
-            "HIDKeyboardModifierMappingSrc": 0x700000043, 
-            "HIDKeyboardModifierMappingDst": 0xC000000E2
-        },
-        { 
-            "HIDKeyboardModifierMappingSrc": 0x700000044, 
-            "HIDKeyboardModifierMappingDst": 0xC000000EA
-        },
-        { 
-            "HIDKeyboardModifierMappingSrc": 0x700000045, 
-            "HIDKeyboardModifierMappingDst": 0x700000080
-        }
-    ]
+SWAP_BACKTICK_NONUSBSLASH=1
+SWAP_LEFT_OPTION_COMMAND=1
+SOUND_CONTROLS=1
+SKIP_INTERNAL_KEYBOARD=1
+VERBOSE=0
+
+for arg in "$@"; do
+    case $arg in
+        -b) SWAP_BACKTICK_NONUSBSLASH=0;;
+        -o) SWAP_LEFT_OPTION_COMMAND=0;;
+        -s) SOUND_CONTROLS=0;;
+        -k) SKIP_INTERNAL_KEYBOARD=0;;
+        -v) VERBOSE=1;;
+        *)
+            echo "Usage: $0 [-b] [-o] [-s] [-v]"
+            echo "  -b  Do not swap backtick and non-US backslash"
+            echo "  -o  Do not swap left option and command"
+            echo "  -s  Do not remap sound controls"
+            echo "  -k  Do not exclude internal MacBook keyboard"
+            echo "  -v  Verbose output"
+            exit 1
+            ;;
+    esac
+done
+
+function addKeyMap() {
+    if ([ "$JSON" != "" ]); then
+        JSON="$JSON,"
+    fi
+    JSON="""$JSON
+    { 
+        \"HIDKeyboardModifierMappingSrc\": $1, 
+        \"HIDKeyboardModifierMappingDst\": $2
+    }"""
 }
-' > /dev/null
 
-# Exclude for internal macbook keyboard:
-hidutil property --matching '{"Product": "Apple Internal Keyboard / Trackpad"}' --set '{"UserKeyMapping":[]}' > /dev/null
+function addKeySwap() {
+    addKeyMap "$1" "$2"
+    addKeyMap "$2" "$1"
+}
 
+function logEnabled() {
+    echo "\033[0;32m\xE2\x9C\x94\033[0m $1"
+}
+
+function logSkipped() {
+    echo "\033[0;31m\xE2\x9C\x98\033[0m $1"
+}
+
+JSON=""
+
+if [ "$SWAP_BACKTICK_NONUSBSLASH" = 1 ]; then
+    logEnabled "Swapping backtick and non-US backslash (-b to disable)"
+    addKeySwap "0x700000035" "0x700000064"
+else
+    logSkipped "Not swapping backtick and non-US backslash (-b)"
+fi
+
+if [ "$SWAP_LEFT_OPTION_COMMAND" = 1 ]; then
+    logEnabled "Swapping left option and command (-o to disable)"
+    addKeySwap "0x7000000e2" "0x7000000e3"
+else
+    logSkipped "Not swapping left option and command (-o)"
+fi
+
+if [ "$SOUND_CONTROLS" = 1 ]; then
+    logEnabled "Remapping F10/F11/F12 to sound controls Mute/Volume Down/Volume Up (-s to disable)"
+    addKeyMap "0x700000043" "0xC000000E2"
+    addKeyMap "0x700000044" "0xC000000EA"
+    addKeyMap "0x700000045" "0xC000000E9"
+else
+    logSkipped "Not remapping F10/F11/F12 to sound controls (-s)"
+fi
+
+JSON="{\"UserKeyMapping\": [$JSON]}"
+
+if [ "$VERBOSE" = 1 ]; then
+    echo "\n--- Input ---\n\n$JSON\n\n--- Output ---\n"
+    hidutil property --set "$JSON"
+    echo
+else
+    hidutil property --set "$JSON" > /dev/null
+fi
+
+if [ "$SKIP_INTERNAL_KEYBOARD" = 1 ]; then
+    logEnabled "Excluding internal MacBook keyboard from remapping (-k to disable)"
+    if [ "$VERBOSE" = 1 ]; then
+        echo
+        hidutil property --matching '{"Product": "Apple Internal Keyboard / Trackpad"}' --set '{"UserKeyMapping":[]}'
+    else
+        hidutil property --matching '{"Product": "Apple Internal Keyboard / Trackpad"}' --set '{"UserKeyMapping":[]}' > /dev/null
+    fi
+else
+    logSkipped "Not excluding internal MacBook keyboard from remapping (-k)"
+    exit 0
+fi
