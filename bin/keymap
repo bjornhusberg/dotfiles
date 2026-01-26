@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -e
+
 SWAP_BACKTICK_NONUSBSLASH=1
 SWAP_LEFT_OPTION_COMMAND=1
 SOUND_CONTROLS=1
@@ -40,11 +44,11 @@ function addKeySwap() {
 }
 
 function logEnabled() {
-    echo "\033[0;32m\xE2\x9C\x94\033[0m $1"
+    echo -e "\033[0;32m\xE2\x9C\x94\033[0m $1"
 }
 
 function logSkipped() {
-    echo "\033[0;31m\xE2\x9C\x98\033[0m $1"
+    echo -e "\033[0;31m\xE2\x9C\x98\033[0m $1"
 }
 
 JSON=""
