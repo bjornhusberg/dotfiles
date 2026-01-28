@@ -1,2 +1,0 @@
-#!/bin/bash
-/usr/local/bin/rsync --iconv utf-8-mac,utf-8 -av -e ssh "$1" "husberg.se:/mnt/nas/Inbox/$1"
