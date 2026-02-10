@@ -5,7 +5,7 @@
    <key>Label</key>
    <string>remap</string>
    <key>ProgramArguments</key>
-   <array><string>~/bin/remap</string></array>
+   <array><string>~/bin/keymap</string></array>
    <key>RunAtLoad</key>
    <true/>
 </dict>
