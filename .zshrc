@@ -1,6 +1,9 @@
-# Set up the prompt
+# Common
+source "$HOME/.commonrc"
 
+# Set up the prompt
 setopt histignorealldups sharehistory
+unsetopt PROMPT_CR
 
 bindkey '\e[A' up-line-or-search
 bindkey '\e[B' down-line-or-search
@@ -12,7 +15,7 @@ ZLE_RPROMPT_INDENT=0
 # Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
 HISTSIZE=1000
 SAVEHIST=1000
-HISTFILE=~/.zsh_history
+HISTFILE="$HOME/.zsh_history"
 
 # Use modern completion system
 autoload -Uz compinit
@@ -36,6 +39,19 @@ zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
-source ~/.bashrc
+function precmd() {
+  export PROMPT_EXIT=$?
+  export PROMPT_USER
+  export PROMPT_STYLE
+  export COLUMNS
+  lines="$("$HOME/bin/prompt" zsh)"
+  export PROMPT="$(LC_CTYPE=C && LANG=C && echo -n -e $lines | cut -f1)"
+  export RPROMPT="$(LC_CTYPE=C && LANG=C && echo -n -e $lines | cut -s -f2)"
+}
 
-if [ -f ~/.zshrc_local ]; then source ~/.zshrc_local; fi
+export precmd_functions=(precmd)
+
+if [ -f "$HOME/.zsh_local" ]; then 
+  source "$HOME/.zsh_local"
+fi
+
