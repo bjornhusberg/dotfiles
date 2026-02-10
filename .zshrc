@@ -51,10 +51,5 @@ function precmd() {
 
 export precmd_functions=(precmd)
 
-if [ -f "$HOME/.zsh_local" ]; then 
-  source "$HOME/.zsh_local"
-fi
-if [ -f "$HOME/.zshrc_local" ]; then 
-  source "$HOME/.zshrc_local"
-fi
-
+sourceIfExists "$HOME/.zsh_local"
+sourceIfExists "$HOME/.zshrc_local"
