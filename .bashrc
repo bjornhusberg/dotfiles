@@ -1,7 +1,5 @@
-# Common
 source "$HOME/.common"
 
-# Prompt
 function promptCommand() {
   export PROMPT_EXIT=$?
   export PROMPT_USER
@@ -12,11 +10,5 @@ function promptCommand() {
 
 export PROMPT_COMMAND="promptCommand"
 
-# Local config
-if [ -f "$HOME/.bash_local" ]; then
-  source "$HOME/.bash_local"
-fi
-
-if [ -f "$HOME/.bashrc_local" ]; then
-  source "$HOME/.bashrc_local"
-fi
+sourceIfExists "$HOME/.bash_local"
+sourceIfExists "$HOME/.bashrc_local"
