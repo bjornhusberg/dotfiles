@@ -37,9 +37,9 @@ alias gbr="git checkout -b"
 
 # OS specific customizations
 if [[ "$OSTYPE" == cygwin* ]]; then
-  source "$HOME/.bash_win"
+  source "$HOME/.common_win"
 elif [[ "$OSTYPE" == darwin* ]]; then
-  source "$HOME/.bash_osx"
+  source "$HOME/.common_osx"
 fi
 
 # Dev environment
