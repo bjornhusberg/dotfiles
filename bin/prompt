@@ -64,13 +64,11 @@ function insertOptionalNewline() {
   IFS=';' read -r -d R -a pos
   stty $oldstty
   if [ "${pos[1]}" != "1" ]; then
-    export NEWLINE=true
-  else
-    export NEWLINE=false
+    printf "\n"
   fi
 }
 
-# Fork for performance (cygwin sucks)
+# Fork for performance
 insertOptionalNewline &
 
 if [ -z "$PROMPT_USER" ]; then
@@ -133,7 +131,7 @@ fi
 TIME=$(date +"%H:%M:%S")
 lprompt="$lprompt$FRAME_BEGIN$TIME_COLOR$TIME$FRAME_END$RESET "
 
-# Wait for forked optionalNewLine
+# Wait for forked insertOptionalNewline
 wait
 
 if [ "$SHELL_TYPE" == "zsh" ]; then
