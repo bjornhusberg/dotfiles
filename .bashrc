@@ -1,5 +1,5 @@
 # Common
-source "$HOME/.commonrc"
+source "$HOME/.common"
 
 # Prompt
 function promptCommand() {
