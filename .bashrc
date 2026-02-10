@@ -17,3 +17,6 @@ if [ -f "$HOME/.bash_local" ]; then
   source "$HOME/.bash_local"
 fi
 
+if [ -f "$HOME/.bashrc_local" ]; then
+  source "$HOME/.bashrc_local"
+fi
