@@ -36,16 +36,17 @@ alias gco="git checkout"
 alias gbr="git checkout -b"
 
 function sourceIfExists() {
-  if [ -f "$1" ]; then
-    source "$1"
-  fi
+  for file in "$@"; do
+    if [ -f "$HOME/$file" ]; then
+      source "$HOME/$file"
+    fi
+  done
 }
-
 # OS specific customizations
 if [[ "$OSTYPE" == cygwin* ]]; then
-  sourceIfExists "$HOME/.common_win"
+  sourceIfExists .common_win
 elif [[ "$OSTYPE" == darwin* ]]; then
-  sourceIfExists "$HOME/.common_osx"
+  sourceIfExists .common_osx
 fi
 
 # Dev environment
@@ -53,8 +54,7 @@ export DEVENV=""
 export DEVENV_HOME=$HOME
 if [ -f "$HOME/.devenv" ]; then
   export DEVENV="$(cat $HOME/.devenv)"
-  sourceIfExists "$HOME/.devenv_${DEVENV}"
+  sourceIfExists ".devenv_${DEVENV}"
 fi
 
-sourceIfExists "$HOME/.common_local"
-sourceIfExists "$HOME/.commonrc_local"
+sourceIfExists .common_local .commonrc_local
