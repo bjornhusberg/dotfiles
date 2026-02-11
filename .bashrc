@@ -10,5 +10,4 @@ function promptCommand() {
 
 export PROMPT_COMMAND="promptCommand"
 
-sourceIfExists "$HOME/.bash_local"
-sourceIfExists "$HOME/.bashrc_local"
+sourceIfExists .bash_local .bashrc_local
