@@ -33,7 +33,14 @@ PATH_COLOR="$MAGENTA"
 ALERT_COLOR="$RED"
 
 if [ "$PROMPT_LINE_COLOR" != "" ]; then
-  LINE_COLOR="$ESC\033[38;5;${PROMPT_LINE_COLOR}m$CSE"
+  r=$((16#${PROMPT_LINE_COLOR:0:2}))
+  g=$((16#${PROMPT_LINE_COLOR:2:2}))
+  b=$((16#${PROMPT_LINE_COLOR:4:2}))
+  ri=$(( (r * 5 + 127) / 255 ))
+  gi=$(( (g * 5 + 127) / 255 ))
+  bi=$(( (b * 5 + 127) / 255 ))
+  ansi=$(( 16 + 36 * ri + 6 * gi + bi ))
+  LINE_COLOR="$ESC\033[38;5;${ansi}m$CSE"
   FRAME_COLOR="$LINE_COLOR"
 fi
 
