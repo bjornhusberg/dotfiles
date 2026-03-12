@@ -39,25 +39,17 @@ WHITE="$esc\033[0;97m$cse"
 
 function hexToAnsi() {
   [[ "$1" =~ ^[0-9a-fA-F]{6}$ ]] || return
-  local light=${2:-0}
-  local r=$(( 16#${1:0:2} ))
-  local g=$(( 16#${1:2:2} ))
-  local b=$(( 16#${1:4:2} ))
-  if [[ $light -gt 0 ]]; then
-    r=$(( r + (255 - r) * light / 100 ))
-    g=$(( g + (255 - g) * light / 100 ))
-    b=$(( b + (255 - b) * light / 100 ))
-  elif [[ $light -lt 0 ]]; then
-    r=$(( r * (100 + light) / 100 ))
-    g=$(( g * (100 + light) / 100 ))
-    b=$(( b * (100 + light) / 100 ))
-  fi
-  echo "$esc\033[38;5;$((16+36*((r*5+127)/255)+6*((g*5+127)/255)+(b*5+127)/255))m$cse"
+  local fade=$((100 - ${2:-0}))
+  local ansi=$((16 +
+    36 * ((127 + 5*(16#${1:0:2}*fade/100))/255) +
+    6  * ((127 + 5*(16#${1:2:2}*fade/100))/255) +
+         ((127 + 5*(16#${1:4:2}*fade/100))/255)))
+  echo "$esc\033[38;5;${ansi}m$cse"
 }
 
 lineColor=$(hexToAnsi "$PROMPT_COLOR")
 if [[ -n "$lineColor" ]]; then
-  frameColor=$(hexToAnsi "$PROMPT_COLOR" -50)
+  frameColor=$(hexToAnsi "$PROMPT_COLOR" 50)
 else
   lineColor="$BLUE"
   frameColor="$CYAN"
