@@ -1,61 +1,5 @@
 #!/bin/bash
 
-shellType=$1
-if [[ "$shellType" == "zsh" ]]; then
-  esc="%%{"
-  cse="%%}"
-else
-  esc="\["
-  cse="\]"
-fi
-
-RESET="$esc\033[0m$cse"
-RED="$esc\033[0;91m$cse"
-GREEN="$esc\033[0;92m$cse"
-YELLOW="$esc\033[0;93m$cse"
-BLUE="$esc\033[0;94m$cse"
-MAGENTA="$esc\033[0;95m$cse"
-CYAN="$esc\033[0;96m$cse"
-WHITE="$esc\033[0;97m$cse"
-
-line="$esc\342\224$cse\200"
-cornerUL="$esc\342\225$cse\255"
-cornerLL="$esc\342\225$cse\260"
-cornerUR="$esc\342\225$cse\256"
-cornerLR="$esc\342\225$cse\257"
-
-lineColor="$BLUE"
-frameColor="$CYAN"
-timeColor="$YELLOW"
-infoColor="$YELLOW"
-userColor="$GREEN"
-pathColor="$MAGENTA"
-alertColor="$RED"
-
-function hexToAnsi() {
-  [[ "$1" =~ ^[0-9a-fA-F]{6}$ ]] || return
-  echo $((16 +
-    36*((16#${1:0:2}*5+127)/255) +
-    6*((16#${1:2:2}*5+127)/255) +
-    (16#${1:4:2}*5+127)/255))
-}
-
-lineColorAnsi=$(hexToAnsi "$PROMPT_LINE_COLOR")
-if [[ -n "$lineColorAnsi" ]]; then
-  lineColor="$esc\033[38;5;${lineColorAnsi}m$cse"
-  frameColorAnsi=$(hexToAnsi "$PROMPT_FRAME_COLOR")
-  if [[ -n "$frameColorAnsi" ]]; then
-    frameColor="$esc\033[38;5;${frameColorAnsi}m$cse"
-  else
-    frameColor="$lineColor"
-  fi
-fi
-
-frameBegin="$frameColor$line("
-frameEnd="$frameColor)$line$lineColor"
-cursorUp="$esc\033[1A$cse"
-cursorDown="$esc\033[1B$cse"
-
 if [[ "$COLUMNS" == "" ]]; then
   COLUMNS=$(tput cols)
 fi
@@ -74,6 +18,67 @@ function insertOptionalNewline() {
 
 # Fork for performance
 insertOptionalNewline &
+
+shellType=$1
+if [[ "$shellType" == "zsh" ]]; then
+  esc="%%{"
+  cse="%%}"
+else
+  esc="\["
+  cse="\]"
+fi
+
+RESET="$esc\033[0m$cse"
+RED="$esc\033[0;91m$cse"
+GREEN="$esc\033[0;92m$cse"
+YELLOW="$esc\033[0;93m$cse"
+BLUE="$esc\033[0;94m$cse"
+MAGENTA="$esc\033[0;95m$cse"
+CYAN="$esc\033[0;96m$cse"
+WHITE="$esc\033[0;97m$cse"
+
+function hexToAnsi() {
+  [[ "$1" =~ ^[0-9a-fA-F]{6}$ ]] || return
+  local light=${2:-0}
+  local r=$(( 16#${1:0:2} ))
+  local g=$(( 16#${1:2:2} ))
+  local b=$(( 16#${1:4:2} ))
+  if [[ $light -gt 0 ]]; then
+    r=$(( r + (255 - r) * light / 100 ))
+    g=$(( g + (255 - g) * light / 100 ))
+    b=$(( b + (255 - b) * light / 100 ))
+  elif [[ $light -lt 0 ]]; then
+    r=$(( r * (100 + light) / 100 ))
+    g=$(( g * (100 + light) / 100 ))
+    b=$(( b * (100 + light) / 100 ))
+  fi
+  echo "$esc\033[38;5;$((16+36*((r*5+127)/255)+6*((g*5+127)/255)+(b*5+127)/255))m$cse"
+}
+
+lineColor=$(hexToAnsi "$PROMPT_COLOR")
+if [[ -n "$lineColor" ]]; then
+  frameColor=$(hexToAnsi "$PROMPT_COLOR" -50)
+else
+  lineColor="$BLUE"
+  frameColor="$CYAN"
+fi
+
+timeColor="$YELLOW"
+infoColor="$YELLOW"
+userColor="$GREEN"
+pathColor="$MAGENTA"
+alertColor="$RED"
+
+line="$esc\342\224$cse\200"
+cornerUL="$esc\342\225$cse\255"
+cornerLL="$esc\342\225$cse\260"
+cornerUR="$esc\342\225$cse\256"
+cornerLR="$esc\342\225$cse\257"
+cursorUp="$esc\033[1A$cse"
+cursorDown="$esc\033[1B$cse"
+
+frameBegin="$frameColor$line("
+frameEnd="$frameColor)$line$lineColor"
 
 if [[ -z "$PROMPT_USER" ]]; then
   PROMPT_USER="$USER@$HOSTNAME"
