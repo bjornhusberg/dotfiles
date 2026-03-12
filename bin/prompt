@@ -52,7 +52,7 @@ if [[ -n "$lineColor" ]]; then
   frameColor=$(hexToAnsi "$PROMPT_COLOR" 50)
 else
   lineColor="$BLUE"
-  frameColor="$CYAN"
+  frameColor="$BLUE"
 fi
 
 timeColor="$YELLOW"
