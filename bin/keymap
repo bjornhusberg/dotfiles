@@ -6,6 +6,7 @@ SWAP_BACKTICK_NONUSBSLASH=1
 SWAP_LEFT_OPTION_COMMAND=1
 SOUND_CONTROLS=1
 SKIP_INTERNAL_KEYBOARD=1
+DISABLE_CAPS_LOCK=1
 VERBOSE=0
 
 for arg in "$@"; do
@@ -14,6 +15,7 @@ for arg in "$@"; do
         -o) SWAP_LEFT_OPTION_COMMAND=0;;
         -s) SOUND_CONTROLS=0;;
         -k) SKIP_INTERNAL_KEYBOARD=0;;
+        -c) DISABLE_CAPS_LOCK=0;;
         -v) VERBOSE=1;;
         *)
             echo "Usage: $0 [-b] [-o] [-s] [-v]"
@@ -21,6 +23,7 @@ for arg in "$@"; do
             echo "  -o  Do not swap left option and command"
             echo "  -s  Do not remap sound controls"
             echo "  -k  Do not exclude internal MacBook keyboard"
+            echo "  -c  Do not replace caps lock with shift"
             echo "  -v  Verbose output"
             exit 1
             ;;
@@ -67,8 +70,15 @@ else
     logSkipped "Not swapping left option and command (-o)"
 fi
 
+if [ "$DISABLE_CAPS_LOCK" = 1 ]; then
+    logEnabled "Replacing caps lock with shift (-c to disable)"
+    addKeyMap "0x700000039" "0x7000000e1"
+else
+    logSkipped "Not replacing caps lock with shift (-c)"
+fi
+
 if [ "$SOUND_CONTROLS" = 1 ]; then
-    logEnabled "Remapping F10/F11/F12 to sound controls Mute/Volume Down/Volume Up (-s to disable)"
+    logEnabled "Remapping F10/F11/F12 to sound controls (-s to disable)"
     addKeyMap "0x700000043" "0xC000000E2"
     addKeyMap "0x700000044" "0xC000000EA"
     addKeyMap "0x700000045" "0xC000000E9"
