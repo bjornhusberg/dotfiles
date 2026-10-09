@@ -51,6 +51,7 @@ function install() {
 
 function reset() {
   echo "Resetting dotfiles."
+  repositoryReset
   repositoryPull
   diffFiles
   updateFiles
@@ -180,11 +181,30 @@ function repositoryPull() {
   fi
 }
 
+function directoryReset() {
+  local directory="$1"
+  pushd "$directory" > /dev/null
+  git reset --hard origin
+  popd > /dev/null
+}
+
 function directoryPull() {
   local directory="$1"
   pushd "$directory" > /dev/null
   git pull -q origin main
   popd > /dev/null
+}
+
+function repositoryReset() {
+  directoryReset "$dotfiles_dir"
+  if [[ -f "$dotfiles_lib_file" ]]; then
+    for lib in $(cat "$dotfiles_lib_file"); do
+      local libdir="$dotfiles_lib_dir/$lib"
+      if [[ -d "$libdir" ]]; then
+        directoryReset "$libdir"
+      fi
+    done
+  fi
 }
 
 function repositoryCheck() {
