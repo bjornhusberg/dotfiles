@@ -184,7 +184,7 @@ function repositoryPull() {
 function directoryReset() {
   local directory="$1"
   pushd "$directory" > /dev/null
-  git reset --hard origin
+  git reset --hard origin > /dev/null 2>&1
   popd > /dev/null
 }
 
