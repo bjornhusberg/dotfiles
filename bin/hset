@@ -1,0 +1,36 @@
+#!/bin/bash
+
+defaultfile="$HOME/.sidetone"
+usage="Usage: $0 [0-128] (Default is read from $defaultfile)"
+
+function sidetone() 
+{
+  volume=$1
+  if ! [[ $volume =~ ^[0-9]+$ ]]; then
+    echo "Not a numeric value: $volume"
+    echo $usage
+    exit 1
+  elif (( $volume > 128 )); then
+    echo "Invalid volume: $volume"
+    echo $usage
+    exit 1
+  fi
+  echo "Setting volume $volume"
+  output=$(headsetcontrol -s $volume)
+  result=$?
+  if (( $result != 0 )); then
+    echo $output
+    exit $result
+  fi
+}
+
+
+if [ ! -z "$1" ]; then
+  sidetone $1
+elif [ -f "$defaultfile" ]; then
+  echo Reading volume from $defaultfile
+  sidetone $(cat "$defaultfile")
+else
+  echo $usage
+  exit 1
+fi
