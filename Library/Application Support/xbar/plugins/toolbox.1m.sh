@@ -50,8 +50,10 @@ fi
 # A filled gear shows that an Amphetamine session is active.
 $amph_on && ICON_FILE="$HOME/.config/xbar-toolbox/gear-on.b64"
 # While on battery, a gear+battery composite (10% steps) replaces the plain gear.
-if pmset -g batt | grep -q "'Battery Power'"; then
-  pct=$(pmset -g batt | grep -Eo '[0-9]+%' | head -1 | tr -d '%')
+pmout=$(pmset -g batt)
+pct=$(echo $pmout | grep -Eo '[0-9]+%' | head -1 | tr -d '%')
+rem=$(echo $pmout | grep -Eo '[0-9]+:[0-9]+ remaining' | head -1 | tr -d '%')
+if echo $pmout | grep -q "'Battery Power'"; then
   level=$(( (pct + 5) / 10 * 10 ))
   base=$(basename "$ICON_FILE" .b64)
   ICON_FILE="$HOME/.config/xbar-toolbox/$base-bat-$level.b64"
@@ -59,6 +61,12 @@ fi
 echo "| templateImage=$(cat "$ICON_FILE")"
 echo "---"
 
+if [[ "$rem" == "" ]]; then
+  echo "Battery: $pct% | color=gray"
+else 
+  echo "Battery: $pct% ($rem) | color=gray"
+fi
+echo "---"
 echo "Lock screen | bash='$0' param1=run param2=lock terminal=false"
 if $amph_running; then
   label="Keep awake"
