@@ -3,6 +3,13 @@
 # <xbar.desc>Gear menu: headset settings via headsetcontrol, and running keymap.</xbar.desc>
 # <xbar.dependencies>headsetcontrol</xbar.dependencies>
 
+# TODO: Render the icon row dynamically (but cached)
+# TODO: Display 'speaker' as icon when sound is unmuted
+# TODO: Render WIFI icon only when disconnected, OR when on mobile hotspot
+# TODO: Render the caffeine icon dynamically when active
+# TODO: Render Low power icon dynamically when on low power
+# TODO: Render Teams logo when online but not 'active'
+
 HSC=/opt/homebrew/bin/headsetcontrol
 KEYMAP="$HOME/bin/keymap"
 ICON_FILE="$HOME/.config/xbar-toolbox/gear.b64"
@@ -110,7 +117,7 @@ else
 fi
 
 # Keymap
-echo "Keymap | bash='$0' param1=run param2=keymap terminal=false refresh=true"
+echo "Keymap | bash='$0' param1=run param2=keymap terminal=false"
 
 # Headset
 if "$HSC" -o json 2>/dev/null | grep -q '"device_count": *[1-9]'; then
