@@ -13,6 +13,11 @@ if [ "$1" = "run" ]; then
   case "$1" in
     sidetone) "$HSC" -s "$2" ;;
     keymap) "$KEYMAP" ;;
+    wifi)
+      # The password is read from the login keychain: security add-generic-password -U -s xbar-wifi -a <ssid> -w
+      networksetup -setairportnetwork en0 "$2" "$(security find-generic-password -s xbar-wifi -a "$2" -w)" ;;
+    wifi-disconnect) swift "$HOME/.config/xbar-toolbox/disconnect.swift" ;;
+    lock) swift "$HOME/.config/xbar-toolbox/lock.swift" ;;
     amphetamine)
       if [ "$(osascript -e 'tell application "Amphetamine" to session is active')" = "true" ]; then
         osascript -e 'tell application "Amphetamine" to end session'
@@ -49,7 +54,16 @@ if $amph_running; then
   $amph_on && label="Keep awake ✓"
   echo "$label | bash='$0' param1=run param2=amphetamine terminal=false refresh=true"
 fi
-echo "Run keymap | bash='$0' param1=run param2=keymap terminal=false refresh=true"
+wifi_label="Mobile hotspot"
+wifi_action="param2=wifi param3=VIRU2"
+# iPhone hotspots hand out 172.20.10.0/28, so this gateway means we are on the hotspot.
+if [ "$(route -n get default 2>/dev/null | awk '/gateway:/ {print $2}')" = "172.20.10.1" ]; then
+  wifi_label="Mobile hotspot ✓"
+  wifi_action="param2=wifi-disconnect"
+fi
+echo "$wifi_label | bash='$0' param1=run $wifi_action terminal=false refresh=true"
+echo "Lock screen | bash='$0' param1=run param2=lock terminal=false"
+echo "Keymap | bash='$0' param1=run param2=keymap terminal=false refresh=true"
 echo "---"
 
 if "$HSC" -o json 2>/dev/null | grep -q '"device_count": *[1-9]'; then
