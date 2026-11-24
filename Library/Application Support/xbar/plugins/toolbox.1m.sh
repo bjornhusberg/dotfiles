@@ -51,21 +51,25 @@ fi
 $amph_on && ICON_FILE="$HOME/.config/xbar-toolbox/gear-on.b64"
 # While on battery, a gear+battery composite (10% steps) replaces the plain gear.
 pmout=$(pmset -g batt)
-pct=$(echo $pmout | grep -Eo '[0-9]+%' | head -1 | tr -d '%')
-rem=$(echo $pmout | grep -Eo '[0-9]+:[0-9]+ remaining' | head -1 | tr -d '%')
-if echo $pmout | grep -q "'Battery Power'"; then
-  level=$(( (pct + 5) / 10 * 10 ))
+battery_percent=$(echo $pmout | grep -Eo '[0-9]+%' | head -1 | tr -d '%')
+battery_remaining=$(echo $pmout | grep -Eo '[0-9]+:[0-9]+ remaining' | head -1 | tr -d '%')
+battery_draining=$(echo $pmout | grep -q "'Battery Power'")
+if [ -n "$battery_draining" ]; then
+  level=$(( (battery_percent + 5) / 10 * 10 ))
   base=$(basename "$ICON_FILE" .b64)
   ICON_FILE="$HOME/.config/xbar-toolbox/$base-bat-$level.b64"
 fi
 echo "| templateImage=$(cat "$ICON_FILE")"
 echo "---"
 
-if [[ "$rem" == "" ]]; then
-  echo "Battery: $pct% | color=gray"
-else 
-  echo "Battery: $pct% ($rem) | color=gray"
+if [ -z "$battery_draining" ]; then
+  echo "Battery: $battery_percent% (charging)"
+elif [ -n "$battery_remaining" ]; then
+  echo "Battery: $battery_percent% ($battery_remaining)"
+else
+  echo "Battery: $battery_percent%"
 fi
+
 echo "---"
 echo "Lock screen | bash='$0' param1=run param2=lock terminal=false"
 if $amph_running; then
@@ -73,6 +77,7 @@ if $amph_running; then
   $amph_on && label="Keep awake ✓"
   echo "$label | bash='$0' param1=run param2=amphetamine terminal=false refresh=true"
 fi
+
 wifi_label="Mobile hotspot"
 wifi_action="param2=wifi param3=VIRU2"
 # iPhone hotspots hand out 172.20.10.0/28, so this gateway means we are on the hotspot.
@@ -81,12 +86,15 @@ if [ "$(route -n get default 2>/dev/null | awk '/gateway:/ {print $2}')" = "172.
   wifi_action="param2=wifi-disconnect"
 fi
 echo "$wifi_label | bash='$0' param1=run $wifi_action terminal=false refresh=true"
+
 if pmset -g | grep -Eq 'lowpowermode[[:space:]]+1'; then
   echo "Low power mode ✓ | bash='$0' param1=run param2=lowpower param3=0 terminal=false refresh=true"
 else
   echo "Low power mode | bash='$0' param1=run param2=lowpower param3=1 terminal=false refresh=true"
 fi
+
 echo "Keymap | bash='$0' param1=run param2=keymap terminal=false refresh=true"
+
 echo "---"
 
 if "$HSC" -o json 2>/dev/null | grep -q '"device_count": *[1-9]'; then
@@ -94,5 +102,5 @@ if "$HSC" -o json 2>/dev/null | grep -q '"device_count": *[1-9]'; then
   echo "Sidetone"
   for level in 0 16 32 48 64 80 96 112 128; do item "$level" sidetone "$level"; done
 else
-  echo "Headset not connected | color=gray"
+  echo "Headset not connected"
 fi
