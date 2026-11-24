@@ -18,6 +18,9 @@ if [ "$1" = "run" ]; then
       networksetup -setairportnetwork en0 "$2" "$(security find-generic-password -s xbar-wifi -a "$2" -w)" ;;
     wifi-disconnect) swift "$HOME/.config/xbar-toolbox/disconnect.swift" ;;
     lock) swift "$HOME/.config/xbar-toolbox/lock.swift" ;;
+    lowpower)
+      # pmset needs root, so macOS asks for the password each time.
+      osascript -e "do shell script \"pmset -a lowpowermode $2\" with administrator privileges" ;;
     amphetamine)
       if [ "$(osascript -e 'tell application "Amphetamine" to session is active')" = "true" ]; then
         osascript -e 'tell application "Amphetamine" to end session'
@@ -46,9 +49,17 @@ fi
 
 # A filled gear shows that an Amphetamine session is active.
 $amph_on && ICON_FILE="$HOME/.config/xbar-toolbox/gear-on.b64"
+# While on battery, a gear+battery composite (10% steps) replaces the plain gear.
+if pmset -g batt | grep -q "'Battery Power'"; then
+  pct=$(pmset -g batt | grep -Eo '[0-9]+%' | head -1 | tr -d '%')
+  level=$(( (pct + 5) / 10 * 10 ))
+  base=$(basename "$ICON_FILE" .b64)
+  ICON_FILE="$HOME/.config/xbar-toolbox/$base-bat-$level.b64"
+fi
 echo "| templateImage=$(cat "$ICON_FILE")"
 echo "---"
 
+echo "Lock screen | bash='$0' param1=run param2=lock terminal=false"
 if $amph_running; then
   label="Keep awake"
   $amph_on && label="Keep awake ✓"
@@ -62,7 +73,11 @@ if [ "$(route -n get default 2>/dev/null | awk '/gateway:/ {print $2}')" = "172.
   wifi_action="param2=wifi-disconnect"
 fi
 echo "$wifi_label | bash='$0' param1=run $wifi_action terminal=false refresh=true"
-echo "Lock screen | bash='$0' param1=run param2=lock terminal=false"
+if pmset -g | grep -Eq 'lowpowermode[[:space:]]+1'; then
+  echo "Low power mode ✓ | bash='$0' param1=run param2=lowpower param3=0 terminal=false refresh=true"
+else
+  echo "Low power mode | bash='$0' param1=run param2=lowpower param3=1 terminal=false refresh=true"
+fi
 echo "Keymap | bash='$0' param1=run param2=keymap terminal=false refresh=true"
 echo "---"
 
