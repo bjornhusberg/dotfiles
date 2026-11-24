@@ -45,8 +45,8 @@ echo "| templateImage=$(cat "$ICON_FILE")"
 echo "---"
 
 if $amph_running; then
-  label="Amphetamine: off"
-  $amph_on && label="Amphetamine: on"
+  label="Keep awake"
+  $amph_on && label="Keep awake ✓"
   echo "$label | bash='$0' param1=run param2=amphetamine terminal=false refresh=true"
 fi
 echo "Run keymap | bash='$0' param1=run param2=keymap terminal=false refresh=true"
