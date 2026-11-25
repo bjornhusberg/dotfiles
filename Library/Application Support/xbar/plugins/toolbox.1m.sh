@@ -3,6 +3,8 @@
 # <xbar.desc>Gear menu: headset settings via headsetcontrol, and running keymap.</xbar.desc>
 # <xbar.dependencies>headsetcontrol</xbar.dependencies>
 
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 SIDETONE="$HOME/bin/sidetone"
 KEYMAP="$HOME/bin/keymap"
 COPILOT="$HOME/bin/copilot-aic"
@@ -92,6 +94,7 @@ get_audio_state() {
     cat "$AUDIO_DEVICE_CACHE"
     ("$CONFIG_DIR/get-audio-device" > "${AUDIO_DEVICE_CACHE}.tmp" \
       && mv "${AUDIO_DEVICE_CACHE}.tmp" "$AUDIO_DEVICE_CACHE") &
+    disown $!
   else
     # First run: block
     "$CONFIG_DIR/get-audio-device" | tee "$AUDIO_DEVICE_CACHE"
@@ -110,7 +113,7 @@ get_copilot_data() {
   [ -f "$COPILOT_STATS_CACHE" ] || printf '' > "$COPILOT_STATS_CACHE"
   (
     local output first_line percentage icon
-    output=$(python3 "$COPILOT" --xbar 2>/dev/null)
+    output=$("$COPILOT" --xbar 2>/dev/null)
     first_line=$(echo "$output" | head -1)
     if [[ "$first_line" == percentage=* ]]; then
       percentage="${first_line#percentage=}"
@@ -128,6 +131,7 @@ get_copilot_data() {
     fi
     find "$CACHE_DIR" -name "*-copilot-*.b64" -mmin +11 -delete 2>/dev/null
   ) &
+  disown $!
 }
 
 # Returns composite icon as base64. Uses stale-while-revalidate (TTL 15 min).
@@ -160,6 +164,7 @@ get_icon() {
     ("$CONFIG_DIR/render-icon" "$amph_active" "$battery_state" "$wifi_state" \
         "$audio_state" "$copilot_active" \
       > "${cache_file}.tmp" && mv "${cache_file}.tmp" "$cache_file") &
+    disown $!
   else
     # First run: block until generated
     local icon_b64=$("$CONFIG_DIR/render-icon" "$amph_active" "$battery_state" \
