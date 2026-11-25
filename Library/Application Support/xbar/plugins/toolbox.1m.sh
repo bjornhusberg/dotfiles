@@ -299,7 +299,7 @@ fi
 if [ -n "$teams_availability" ]; then
   output=$(echo "$teams_availability" | sed -E 's/([a-z])([A-Z])/\1 \2/g')
   if [ "$output" = "Available" ]; then
-    if (( teams_unread > 0 )); then
+    if [ "$teams_unread" -gt "0" ]; then
       echo "Teams ($teams_unread) | refresh=true"
     fi
   else
