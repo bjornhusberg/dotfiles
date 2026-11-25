@@ -2,6 +2,7 @@
 # <xbar.title>Toolbox</xbar.title>
 # <xbar.desc>Gear menu: headset settings via headsetcontrol, and running keymap.</xbar.desc>
 # <xbar.dependencies>headsetcontrol</xbar.dependencies>
+# <xbar.var>string(VAR_GHE_HOST=""): GitHub Enterprise host for the notification badge. Leave empty to disable.</xbar.var>
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
@@ -16,6 +17,9 @@ AUDIO_DEVICE_TTL=30  # audio device name: 30 seconds
 COPILOT_ICON_CACHE="$CACHE_DIR/copilot.b64"
 COPILOT_STATS_CACHE="$CACHE_DIR/copilot_stats.txt"
 AUDIO_DEVICE_CACHE="$CACHE_DIR/audio_device"
+NOTIF_CACHE="$CACHE_DIR/notifications.tsv"
+NOTIF_TTL=60         # unread GHE notifications: 1 minute
+NOTIF_HOST="${VAR_GHE_HOST:-}"
 
 mkdir -p "$CACHE_DIR"
 
@@ -33,7 +37,7 @@ if [ "$1" = "run" ]; then
     unmute) osascript -e "set volume without output muted" ;;
     lowpower)
       osascript -e "do shell script \"pmset -a lowpowermode $2\" with administrator privileges" ;;
-    amphetamine)
+    awake)
       if [ "$(osascript -e 'tell application "Amphetamine" to session is active')" = "true" ]; then
         osascript -e 'tell application "Amphetamine" to end session'
       else
@@ -134,12 +138,60 @@ get_copilot_data() {
   disown $!
 }
 
+# Unread GitHub Enterprise notifications, cached as "title<TAB>repo<TAB>web url".
+# Non-blocking: refreshes in the background when the cache is stale.
+get_notifications() {
+  [ -n "$NOTIF_HOST" ] || return
+  if [ -f "$NOTIF_CACHE" ] \
+      && [ $(( $(date +%s) - $(stat -f%m "$NOTIF_CACHE") )) -lt $NOTIF_TTL ]; then
+    return  # fresh
+  fi
+  [ -f "$NOTIF_CACHE" ] || printf '' > "$NOTIF_CACHE"
+  (
+    local out
+    if out=$(GH_HOST="$NOTIF_HOST" gh api notifications --jq \
+        '.[] | [.subject.title, .repository.full_name, (.subject.url // "")] | @tsv' 2>/dev/null); then
+      echo "$out" | sed -E 's#https://[^/]+/(api/v3/)?repos/([^/]+/[^/]+)/pulls/#https://'"$NOTIF_HOST"'/\2/pull/#; s#https://[^/]+/(api/v3/)?repos/([^/]+/[^/]+)/issues/#https://'"$NOTIF_HOST"'/\2/issues/#' \
+        | sed '/^$/d' > "${NOTIF_CACHE}.tmp" \
+        && mv "${NOTIF_CACHE}.tmp" "$NOTIF_CACHE"
+    else
+      touch "$NOTIF_CACHE"  # keep the old list, retry after the TTL
+    fi
+  ) &
+  disown $!
+}
+
+# Prints "<availability><TAB><unread count>" for the signed-in Teams account, or nothing.
+# Read from the latest Teams log, where the first account entry is the main one.
+get_teams_state() {
+  pgrep -x MSTeams >/dev/null 2>&1 || return
+  local logdir="$HOME/Library/Group Containers/UBF8T346G9.com.microsoft.teams/Library/Application Support/Logs"
+  local log line
+  while IFS= read -r log; do
+    line=$(tail -c 300000 "$log" 2>/dev/null | grep "BroadcastGlobalState" | tail -1)
+    [ -n "$line" ] && break
+  done < <(ls -t "$logdir"/MSTeams_*.log 2>/dev/null | head -2)
+  [ -n "$line" ] || return
+  # Teams logs the state at least every 5 minutes, so anything older is stale. Its log timestamps do not
+  # match the system clock, so compare the state line with the last line of the same file, and use the
+  # file's mtime to see that Teams is still writing.
+  local logged last
+  [ $(( $(date +%s) - $(stat -f%m "$log") )) -lt 600 ] || return
+  last=$(tail -n 1 "$log" | cut -c1-19)
+  logged=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${line:0:19}" +%s 2>/dev/null) || return
+  last=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$last" +%s 2>/dev/null) || return
+  [ $(( last - logged )) -lt 600 ] || return
+  echo "$line" | sed -nE 's/^[^{]*\{ availability: ([A-Za-z]+), unread notification count: ([0-9]+) \}.*/\1\t\2/p'
+}
+
 # Returns composite icon as base64. Uses stale-while-revalidate (TTL 15 min).
 get_icon() {
   local amph_active="$1" battery_state="$2" wifi_state="$3" \
-        audio_state="$4" copilot_active="$5"
+        audio_state="$4" copilot_active="$5" notif_active="$6" away_active="$7"
   local cache_key="gear"
 
+  [ "$away_active"   = "true"         ] && cache_key="${cache_key}-away"
+  [ "$notif_active"  = "true"         ] && cache_key="${cache_key}-notif"
   [ "$amph_active"   = "true"         ] && cache_key="${cache_key}-coffee"
   [ "$wifi_state"    = "disconnected" ] && cache_key="${cache_key}-wifi"
   [ "$wifi_state"    = "hotspot"      ] && cache_key="${cache_key}-hotspot"
@@ -162,13 +214,13 @@ get_icon() {
     # Stale: serve immediately, regenerate in background
     cat "$cache_file"
     ("$CONFIG_DIR/render-icon" "$amph_active" "$battery_state" "$wifi_state" \
-        "$audio_state" "$copilot_active" \
+        "$audio_state" "$copilot_active" "$notif_active" "$away_active" \
       > "${cache_file}.tmp" && mv "${cache_file}.tmp" "$cache_file") &
     disown $!
   else
     # First run: block until generated
     local icon_b64=$("$CONFIG_DIR/render-icon" "$amph_active" "$battery_state" \
-                 "$wifi_state" "$audio_state" "$copilot_active")
+                 "$wifi_state" "$audio_state" "$copilot_active" "$notif_active" "$away_active")
     if [ -n "$icon_b64" ]; then
       echo "$icon_b64" > "$cache_file"
       echo "$icon_b64"
@@ -192,7 +244,21 @@ get_copilot_data
 copilot_active=false
 [ -s "$COPILOT_ICON_CACHE" ] && copilot_active=true
 
-icon_b64=$(get_icon "$amph_active" "$battery_state" "$wifi_state" "$audio_state" "$copilot_active")
+get_notifications
+notif_active=false
+[ -n "$NOTIF_HOST" ] && [ -s "$NOTIF_CACHE" ] && notif_active=true
+
+teams_state=$(get_teams_state)
+IFS=$'\t' read -r teams_availability teams_unread <<< "$teams_state"
+away_active=false
+case "$teams_availability" in
+  ""|Available|AvailableIdle) ;;
+  *) away_active=true ;;
+esac
+# A red GitHub badge takes priority over the amber Teams one.
+$notif_active && away_active=false
+
+icon_b64=$(get_icon "$amph_active" "$battery_state" "$wifi_state" "$audio_state" "$copilot_active" "$notif_active" "$away_active")
 echo "| image=$icon_b64"
 
 echo "---"
@@ -211,9 +277,39 @@ else
   echo "Battery: $battery_percent% (charging) | refresh=true"
 fi
 
+echo "---"
+
+# GitHub
+if $notif_active; then
+  echo "GitHub ($(wc -l < "$NOTIF_CACHE" | tr -d ' '))"
+  while IFS=$'\t' read -r title repo url; do
+    [ -n "$title" ] || continue
+    title=${title//|/¦}
+    if [ -n "$url" ]; then
+      echo "--${repo##*/}: ${title:0:60} | href=$url"
+    else
+      echo "--${repo##*/}: ${title:0:60} | href=https://$NOTIF_HOST/notifications"
+    fi
+  done < "$NOTIF_CACHE"
+  echo "--Open all | href=https://$NOTIF_HOST/notifications"
+  echo "---"
+fi
+
+# Teams info row
+if [ -n "$teams_availability" ]; then
+  output=$(echo "$teams_availability" | sed -E 's/([a-z])([A-Z])/\1 \2/g')
+  if [ "$output" = "Available" ]; then
+    if (( teams_unread > 0 )); then
+      echo "Teams ($teams_unread) | refresh=true"
+    fi
+  else
+    echo "Teams ($teams_unread) - $(echo "$teams_availability" | sed -E 's/([a-z])([A-Z])/\1 \2/g') | refresh=true"
+  fi
+fi
+
 # Copilot AIC
 if $copilot_active; then
-  echo "Copilot AIC"
+  echo "Copilot"
   while IFS= read -r line; do
     if [ "$line" = "---" ]; then echo "-----"
     elif [ -n "$line" ]; then echo "--$line | refresh=true"
@@ -238,7 +334,7 @@ fi
 if $amph_running; then
   label="Keep awake"
   $amph_active && label="Keep awake ✓"
-  echo "$label | bash='$0' param1=run param2=amphetamine terminal=false refresh=true"
+  echo "$label | bash='$0' param1=run param2=awake terminal=false refresh=true"
 fi
 
 # Mobile hotspot

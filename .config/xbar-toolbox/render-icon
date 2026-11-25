@@ -10,6 +10,8 @@ battery_state="$2"
 wifi_state="$3"
 audio_state="$4"
 copilot_active="$5"
+notif_active="$6"
+away_active="$7"
 
 swift - <<SWIFT 2>/dev/null
 import AppKit
@@ -21,6 +23,8 @@ let batteryState = "$battery_state"
 let wifiState = "$wifi_state"
 let audioState = "$audio_state"
 let copilotActive = $([[ "$copilot_active" == "true" ]] && echo "true" || echo "false")
+let notifActive = $([[ "$notif_active" == "true" ]] && echo "true" || echo "false")
+let awayActive = $([[ "$away_active" == "true" ]] && echo "true" || echo "false")
 let isDark = UserDefaults.standard.string(forKey: "AppleInterfaceStyle") == "Dark"
 let iconColor = isDark ? NSColor.white : NSColor.black
 let wifiColor = NSColor(red: 144/255, green: 152/255, blue: 158/255, alpha: 1.0)
@@ -157,6 +161,29 @@ if batteryState != "none" {
     if fillW > 0 {
         NSBezierPath(roundedRect: NSRect(x: xPos + 5, y: by + 5, width: max(fillW, 3), height: 14), xRadius: 2, yRadius: 2).fill()
     }
+}
+
+func drawBadge(_ rect: NSRect, fill: NSColor, border: NSColor) {
+    let path = NSBezierPath(ovalIn: rect.insetBy(dx: 1, dy: 1))
+    fill.setFill()
+    path.fill()
+    border.setStroke()
+    path.lineWidth = 2
+    path.stroke()
+}
+
+if notifActive {
+    let r = 9.0
+    let badge = NSRect(x: Double(gearW) - 2 * r - 1, y: Double(gearH) - 2 * r - 1, width: 2 * r, height: 2 * r)
+    drawBadge(badge, fill: NSColor(red: 230/255, green: 40/255, blue: 40/255, alpha: 1),
+              border: NSColor(red: 140/255, green: 15/255, blue: 15/255, alpha: 1))
+}
+
+if awayActive {
+    let r = 9.0
+    let badge = NSRect(x: Double(gearW) - 2 * r - 1, y: 1, width: 2 * r, height: 2 * r)
+    drawBadge(badge, fill: NSColor(red: 240/255, green: 170/255, blue: 20/255, alpha: 1),
+              border: NSColor(red: 140/255, green: 90/255, blue: 0, alpha: 1))
 }
 
 NSGraphicsContext.restoreGraphicsState()
