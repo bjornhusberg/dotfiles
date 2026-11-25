@@ -120,12 +120,46 @@ def fmt_remaining(remaining: float) -> str:
     return f"{remaining:,.0f} AIC"
 
 
+def _main_xbar(monthly_budget: int) -> None:
+    """Machine-readable output for toolbox: percentage=<float> on line 1, then --- + stats."""
+    if not DB_PATH.exists():
+        print("percentage=100")
+        return
+
+    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    try:
+        u = compute_usage(conn, monthly_budget, date.today())
+        if u["used_today"] <= 0:
+            return  # no output = copilot icon hidden
+        print(f"percentage={u['percentage']:.6f}")
+        print("---")
+        print(f"{u['month']} · working day {u['worked_days']} of {u['days_total']}")
+        print("---")
+        print(f"Monthly budget: {monthly_budget:,} AIC")
+        print(f"Used this month: {u['used_month']:,.0f} AIC ({u['used_month'] / monthly_budget * 100:.0f}%)")
+        print(f"Remaining: {fmt_remaining(monthly_budget - u['used_month'])}")
+        print("---")
+        print(f"Baseline per working day: {u['ideal_daily']:,.0f} AIC")
+        print(f"Today's budget: {max(u['max_today'], 0):,.0f} AIC")
+        print(f"Used today: {u['used_today']:,.0f} AIC ({u['percentage']:.0f}%)")
+        print(f"Remaining: {fmt_remaining(u['max_today'] - u['used_today'])}")
+    except Exception:
+        print("percentage=100")
+    finally:
+        conn.close()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Show GitHub Copilot AIC usage statistics.")
     parser.add_argument("--budget", type=int, default=None, help="Monthly AIC budget (overrides env var)")
+    parser.add_argument("--xbar", action="store_true", help="Machine-readable output for xbar toolbox plugin")
     args = parser.parse_args()
 
     monthly_budget = args.budget if args.budget and args.budget > 0 else parse_budget(os.environ.get("AIC_MONTHLY_BUDGET"))
+
+    if args.xbar:
+        _main_xbar(monthly_budget)
+        return
 
     if not DB_PATH.exists():
         print(f"Error: session store not found at {DB_PATH}", file=sys.stderr)

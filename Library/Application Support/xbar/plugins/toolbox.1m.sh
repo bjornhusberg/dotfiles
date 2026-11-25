@@ -109,17 +109,16 @@ get_copilot_data() {
   [ -f "$COPILOT_ICON_CACHE" ]  || printf '' > "$COPILOT_ICON_CACHE"
   [ -f "$COPILOT_STATS_CACHE" ] || printf '' > "$COPILOT_STATS_CACHE"
   (
-    local output=$(python3 "$COPILOT" 2>/dev/null)
-    local ok=false
-    if [ -n "$output" ]; then
-      local third_line
-      third_line=$(echo "$output" | sed -n '3p')
-      echo "$third_line" | grep -qiE "error|not found" || ok=true
-    fi
-    if $ok; then
-      echo "$output" | head -1 | sed 's/.* image=//' \
-        > "${COPILOT_ICON_CACHE}.tmp" \
-        && mv "${COPILOT_ICON_CACHE}.tmp" "$COPILOT_ICON_CACHE"
+    local output first_line percentage icon
+    output=$(python3 "$COPILOT" --xbar 2>/dev/null)
+    first_line=$(echo "$output" | head -1)
+    if [[ "$first_line" == percentage=* ]]; then
+      percentage="${first_line#percentage=}"
+      icon=$(swift "$CONFIG_DIR/gen-icons.swift" copilot "$percentage" 2>/dev/null)
+      if [ -n "$icon" ]; then
+        echo "$icon" > "${COPILOT_ICON_CACHE}.tmp" \
+          && mv "${COPILOT_ICON_CACHE}.tmp" "$COPILOT_ICON_CACHE"
+      fi
       echo "$output" | tail -n +3 \
         > "${COPILOT_STATS_CACHE}.tmp" \
         && mv "${COPILOT_STATS_CACHE}.tmp" "$COPILOT_STATS_CACHE"
