@@ -1,0 +1,164 @@
+#!/bin/bash
+# Generates the composite toolbar icon and prints base64 PNG to stdout.
+# Usage: render-icon <amph_active> <battery_state> <wifi_state> <audio_state> <copilot_active>
+
+CONFIG_DIR="$(cd "$(dirname "$0")" && pwd)"
+CACHE_DIR="$CONFIG_DIR/cache"
+
+amph_active="$1"
+battery_state="$2"
+wifi_state="$3"
+audio_state="$4"
+copilot_active="$5"
+
+swift - <<SWIFT 2>/dev/null
+import AppKit
+
+let dir = "$CONFIG_DIR"
+let cacheDir = "$CACHE_DIR"
+let amphetamineActive = $([[ "$amph_active" == "true" ]] && echo "true" || echo "false")
+let batteryState = "$battery_state"
+let wifiState = "$wifi_state"
+let audioState = "$audio_state"
+let copilotActive = $([[ "$copilot_active" == "true" ]] && echo "true" || echo "false")
+let isDark = UserDefaults.standard.string(forKey: "AppleInterfaceStyle") == "Dark"
+let iconColor = isDark ? NSColor.white : NSColor.black
+let wifiColor = NSColor(red: 144/255, green: 152/255, blue: 158/255, alpha: 1.0)
+
+func loadIcon(_ name: String) -> NSBitmapImageRep {
+    let b64 = try! String(contentsOfFile: "\(dir)/\(name).b64", encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines)
+    return NSBitmapImageRep(data: Data(base64Encoded: b64)!)!
+}
+
+func recolor(_ bmp: NSBitmapImageRep, to color: NSColor) {
+    let rgb = color.usingColorSpace(.deviceRGB)!
+    var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0
+    rgb.getRed(&r, green: &g, blue: &b, alpha: nil)
+    guard let data = bmp.bitmapData else { return }
+    let stride = bmp.bytesPerRow
+    for y in 0..<bmp.pixelsHigh {
+        for x in 0..<bmp.pixelsWide {
+            let o = y * stride + x * 4
+            if data[o + 3] > 0 {
+                data[o]     = UInt8(r * 255)
+                data[o + 1] = UInt8(g * 255)
+                data[o + 2] = UInt8(b * 255)
+            }
+        }
+    }
+}
+
+let gear = loadIcon("gear")
+let gearW = gear.pixelsWide, gearH = gear.pixelsHigh
+
+var coffee: NSBitmapImageRep? = nil
+var coffeeW = 0
+if amphetamineActive {
+    coffee = loadIcon("coffee")
+    coffeeW = coffee?.pixelsWide ?? 0
+}
+
+var wifi: NSBitmapImageRep? = nil
+var wifiW = 0
+if wifiState == "disconnected" {
+    wifi = loadIcon("wifi")
+    wifiW = wifi?.pixelsWide ?? 0
+} else if wifiState == "hotspot" {
+    wifi = loadIcon("hotspot")
+    wifiW = wifi?.pixelsWide ?? 0
+}
+
+var audio: NSBitmapImageRep? = nil
+var audioW = 0
+if audioState != "none" {
+    audio = loadIcon("audio-\(audioState)")
+    audioW = audio?.pixelsWide ?? 0
+}
+
+var copilot: NSBitmapImageRep? = nil
+var copilotW = 0
+if copilotActive,
+   let b64 = try? String(contentsOfFile: "\(cacheDir)/copilot.b64", encoding: .utf8)
+                  .trimmingCharacters(in: .whitespacesAndNewlines),
+   !b64.isEmpty,
+   let data = Data(base64Encoded: b64),
+   let rep = NSBitmapImageRep(data: data) {
+    copilot = rep
+    copilotW = rep.pixelsWide
+}
+
+let batteryW = (batteryState != "none") ? 51 : 0
+let gap = 32
+
+var totalW = gearW + coffeeW + wifiW + audioW + copilotW + batteryW
+if coffeeW > 0 { totalW += gap }
+if wifiW > 0 { totalW += gap }
+if audioW > 0 { totalW += gap }
+if copilotW > 0 { totalW += gap }
+if batteryW > 0 { totalW += gap }
+
+let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: totalW, pixelsHigh: gearH, bitsPerSample: 8,
+                           samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                           colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+rep.size = NSSize(width: Double(totalW) / 2, height: Double(gearH) / 2)
+
+NSGraphicsContext.saveGraphicsState()
+NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+let scale = NSAffineTransform(); scale.scale(by: 0.5); scale.concat()
+
+recolor(gear, to: iconColor)
+var xPos = 0
+
+gear.draw(in: NSRect(x: xPos, y: 0, width: gearW, height: gearH))
+xPos += gearW
+
+if let coffee = coffee, coffeeW > 0 {
+    xPos += gap
+    recolor(coffee, to: iconColor)
+    let coffeeY = (gearH - coffee.pixelsHigh) / 2
+    coffee.draw(in: NSRect(x: xPos, y: coffeeY, width: coffee.pixelsWide, height: coffee.pixelsHigh))
+    xPos += coffeeW
+}
+
+if let wifi = wifi, wifiW > 0 {
+    xPos += gap
+    recolor(wifi, to: wifiState == "hotspot" ? iconColor : wifiColor)
+    let wifiY = (gearH - wifi.pixelsHigh) / 2
+    wifi.draw(in: NSRect(x: xPos, y: wifiY, width: wifi.pixelsWide, height: wifi.pixelsHigh))
+    xPos += wifiW
+}
+
+if let audio = audio, audioW > 0 {
+    xPos += gap
+    recolor(audio, to: iconColor)
+    let audioY = (gearH - audio.pixelsHigh) / 2
+    audio.draw(in: NSRect(x: xPos, y: audioY, width: audio.pixelsWide, height: audio.pixelsHigh))
+    xPos += audioW
+}
+
+if let copilot = copilot, copilotW > 0 {
+    xPos += gap
+    let copilotY = (gearH - copilot.pixelsHigh) / 2
+    copilot.draw(in: NSRect(x: xPos, y: copilotY, width: copilot.pixelsWide, height: copilot.pixelsHigh))
+    xPos += copilotW
+}
+
+if batteryState != "none" {
+    xPos += gap
+    let level = Int(batteryState.split(separator: "-").last ?? "0") ?? 0
+    let batH = 24, by = (gearH - batH) / 2
+    iconColor.setStroke(); iconColor.setFill()
+    let body = NSRect(x: xPos + 1, y: by + 1, width: 44, height: 22)
+    let outline = NSBezierPath(roundedRect: body, xRadius: 6, yRadius: 6)
+    outline.lineWidth = 2
+    outline.stroke()
+    NSBezierPath(roundedRect: NSRect(x: xPos + 47, y: by + 8, width: 4, height: 8), xRadius: 2, yRadius: 2).fill()
+    let fillW = Int(36.0 * Double(level) / 100)
+    if fillW > 0 {
+        NSBezierPath(roundedRect: NSRect(x: xPos + 5, y: by + 5, width: max(fillW, 3), height: 14), xRadius: 2, yRadius: 2).fill()
+    }
+}
+
+NSGraphicsContext.restoreGraphicsState()
+print(rep.representation(using: .png, properties: [:])!.base64EncodedString())
+SWIFT
