@@ -93,13 +93,13 @@ if copilotActive,
 
 let batteryW = (batteryState != "none") ? 51 : 0
 let gap = 32
+let hasBadges = batteryW > 0 || coffeeW > 0 || wifiW > 0 || audioW > 0 || copilotW > 0
+let showGear = !hasBadges
 
-var totalW = gearW + coffeeW + wifiW + audioW + copilotW + batteryW
-if coffeeW > 0 { totalW += gap }
-if wifiW > 0 { totalW += gap }
-if audioW > 0 { totalW += gap }
-if copilotW > 0 { totalW += gap }
-if batteryW > 0 { totalW += gap }
+var totalW = showGear ? gearW : 0
+func addW(_ w: Int) { if w > 0 { totalW += (totalW > 0 ? gap : 0) + w } }
+// Battery is drawn right after gear
+addW(batteryW); addW(coffeeW); addW(wifiW); addW(audioW); addW(copilotW)
 
 let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: totalW, pixelsHigh: gearH, bitsPerSample: 8,
                            samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
@@ -110,45 +110,16 @@ NSGraphicsContext.saveGraphicsState()
 NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
 let scale = NSAffineTransform(); scale.scale(by: 0.5); scale.concat()
 
-recolor(gear, to: iconColor)
 var xPos = 0
 
-gear.draw(in: NSRect(x: xPos, y: 0, width: gearW, height: gearH))
-xPos += gearW
-
-if let coffee = coffee, coffeeW > 0 {
-    xPos += gap
-    recolor(coffee, to: iconColor)
-    let coffeeY = (gearH - coffee.pixelsHigh) / 2
-    coffee.draw(in: NSRect(x: xPos, y: coffeeY, width: coffee.pixelsWide, height: coffee.pixelsHigh))
-    xPos += coffeeW
-}
-
-if let wifi = wifi, wifiW > 0 {
-    xPos += gap
-    recolor(wifi, to: wifiState == "hotspot" ? iconColor : wifiColor)
-    let wifiY = (gearH - wifi.pixelsHigh) / 2
-    wifi.draw(in: NSRect(x: xPos, y: wifiY, width: wifi.pixelsWide, height: wifi.pixelsHigh))
-    xPos += wifiW
-}
-
-if let audio = audio, audioW > 0 {
-    xPos += gap
-    recolor(audio, to: iconColor)
-    let audioY = (gearH - audio.pixelsHigh) / 2
-    audio.draw(in: NSRect(x: xPos, y: audioY, width: audio.pixelsWide, height: audio.pixelsHigh))
-    xPos += audioW
-}
-
-if let copilot = copilot, copilotW > 0 {
-    xPos += gap
-    let copilotY = (gearH - copilot.pixelsHigh) / 2
-    copilot.draw(in: NSRect(x: xPos, y: copilotY, width: copilot.pixelsWide, height: copilot.pixelsHigh))
-    xPos += copilotW
+if showGear {
+    recolor(gear, to: iconColor)
+    gear.draw(in: NSRect(x: xPos, y: 0, width: gearW, height: gearH))
+    xPos += gearW
 }
 
 if batteryState != "none" {
-    xPos += gap
+    if xPos > 0 { xPos += gap }
     let level = Int(batteryState.split(separator: "-").last ?? "0") ?? 0
     let batH = 24, by = (gearH - batH) / 2
     iconColor.setStroke(); iconColor.setFill()
@@ -161,6 +132,38 @@ if batteryState != "none" {
     if fillW > 0 {
         NSBezierPath(roundedRect: NSRect(x: xPos + 5, y: by + 5, width: max(fillW, 3), height: 14), xRadius: 2, yRadius: 2).fill()
     }
+    xPos += batteryW
+}
+
+if let coffee = coffee, coffeeW > 0 {
+    if xPos > 0 { xPos += gap }
+    recolor(coffee, to: iconColor)
+    let coffeeY = (gearH - coffee.pixelsHigh) / 2
+    coffee.draw(in: NSRect(x: xPos, y: coffeeY, width: coffee.pixelsWide, height: coffee.pixelsHigh))
+    xPos += coffeeW
+}
+
+if let wifi = wifi, wifiW > 0 {
+    if xPos > 0 { xPos += gap }
+    recolor(wifi, to: wifiState == "hotspot" ? iconColor : wifiColor)
+    let wifiY = (gearH - wifi.pixelsHigh) / 2
+    wifi.draw(in: NSRect(x: xPos, y: wifiY, width: wifi.pixelsWide, height: wifi.pixelsHigh))
+    xPos += wifiW
+}
+
+if let audio = audio, audioW > 0 {
+    if xPos > 0 { xPos += gap }
+    recolor(audio, to: iconColor)
+    let audioY = (gearH - audio.pixelsHigh) / 2
+    audio.draw(in: NSRect(x: xPos, y: audioY, width: audio.pixelsWide, height: audio.pixelsHigh))
+    xPos += audioW
+}
+
+if let copilot = copilot, copilotW > 0 {
+    if xPos > 0 { xPos += gap }
+    let copilotY = (gearH - copilot.pixelsHigh) / 2
+    copilot.draw(in: NSRect(x: xPos, y: copilotY, width: copilot.pixelsWide, height: copilot.pixelsHigh))
+    xPos += copilotW
 }
 
 func drawBadge(_ rect: NSRect, fill: NSColor, border: NSColor) {
