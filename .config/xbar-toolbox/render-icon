@@ -94,7 +94,7 @@ if copilotActive,
 let batteryW = (batteryState != "none") ? 51 : 0
 let gap = 32
 let hasBadges = batteryW > 0 || coffeeW > 0 || wifiW > 0 || audioW > 0 || copilotW > 0
-let showGear = !hasBadges
+let showGear = !hasBadges || notifActive || awayActive
 
 var totalW = showGear ? gearW : 0
 func addW(_ w: Int) { if w > 0 { totalW += (totalW > 0 ? gap : 0) + w } }

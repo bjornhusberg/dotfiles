@@ -300,10 +300,10 @@ if [ -n "$teams_availability" ]; then
   output=$(echo "$teams_availability" | sed -E 's/([a-z])([A-Z])/\1 \2/g')
   if [ "$output" = "Available" ]; then
     if [ "$teams_unread" -gt "0" ]; then
-      echo "Teams ($teams_unread) | refresh=true"
+      echo "Teams ($teams_unread) | bash=/usr/bin/open param1=-a param2='Microsoft Teams' terminal=false"
     fi
   else
-    echo "Teams ($teams_unread) - $(echo "$teams_availability" | sed -E 's/([a-z])([A-Z])/\1 \2/g') | refresh=true"
+    echo "Teams ($teams_unread) - $(echo "$teams_availability" | sed -E 's/([a-z])([A-Z])/\1 \2/g') | bash=/usr/bin/open param1=-a param2='Microsoft Teams' terminal=false"
   fi
 fi
 
