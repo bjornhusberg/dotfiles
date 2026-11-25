@@ -1,24 +1,24 @@
 #!/bin/bash
 
 export PATH="/opt/homebrew/bin:$PATH"
-file="$HOME/.sidetone"
+statefile="$HOME/.sidetone"
 default=96
 step=16
-usage="Usage: $0 [0-128|up|down] (no argument re-applies the level saved in $file)"
+usage="Usage: $0 [0-128|up|down]"
 
 sidetone() {
   local volume=$(( $1 > 128 ? 128 : $1 ))
   (( volume < 0 )) && volume=0
-  echo "Setting volume $volume"
-  echo -n "$volume" > "$file"
+  echo "$volume"
+  echo -n "$volume" > "$statefile"
   if ! output=$(headsetcontrol -s "$volume" 2>&1); then
     echo "$output"
-    exit 0
+    exit 1
   fi
 }
 
 current() {
-  local value=$(cat "$file" 2>/dev/null)
+  local value=$(cat "$statefile" 2>/dev/null)
   if [[ $value =~ ^[0-9]+$ ]]; then
     echo "$value"
   else
@@ -32,6 +32,6 @@ case "$1" in
     sidetone "$1" ;;
   up)   sidetone $(( $(current) + step )) ;;
   down) sidetone $(( $(current) - step )) ;;
-  "")   sidetone "$(current)" ;;
+  "")   sidetone $(current) ;;
   *)    echo "$usage"; exit 1 ;;
 esac
