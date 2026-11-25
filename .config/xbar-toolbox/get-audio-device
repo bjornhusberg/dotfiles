@@ -1,0 +1,21 @@
+#!/bin/bash
+# Detects the current audio output device.
+# Prints: speaker | airpods | headphones
+
+device=$(swift - <<'SWIFT' 2>/dev/null
+import CoreAudio
+var addr = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultOutputDevice,
+    mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+var id: AudioDeviceID = 0; var sz = UInt32(MemoryLayout<AudioDeviceID>.size)
+AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &addr, 0, nil, &sz, &id)
+addr.mSelector = kAudioObjectPropertyName; sz = UInt32(MemoryLayout<CFString>.size)
+var ref: Unmanaged<CFString>? = nil
+AudioObjectGetPropertyData(id, &addr, 0, nil, &sz, &ref)
+print(ref?.takeRetainedValue() as String? ?? "")
+SWIFT
+)
+case "$device" in
+  *AirPod*) echo "airpods" ;;
+  *MacBook*|*Built*in*|*Speaker*|"") echo "speaker" ;;
+  *) echo "headphones" ;;
+esac
