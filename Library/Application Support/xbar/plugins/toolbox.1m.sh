@@ -3,8 +3,9 @@
 # <xbar.desc>Gear menu: headset settings via headsetcontrol, and running keymap.</xbar.desc>
 # <xbar.dependencies>headsetcontrol</xbar.dependencies>
 
-HSC=/opt/homebrew/bin/headsetcontrol
+SIDETONE="$HOME/bin/sidetone"
 KEYMAP="$HOME/bin/keymap"
+COPILOT="$HOME/bin/copilot-aic"
 CONFIG_DIR="$HOME/.config/xbar-toolbox"
 CACHE_DIR="$CONFIG_DIR/cache"
 CACHE_TTL=900        # composite icon: 15 minutes
@@ -20,7 +21,7 @@ mkdir -p "$CACHE_DIR"
 if [ "$1" = "run" ]; then
   shift
   case "$1" in
-    sidetone) "$HSC" -s "$2" ;;
+    sidetone) "$SIDETONE" "$2" ;;
     keymap) "$KEYMAP" ;;
     wifi)
       networksetup -setairportnetwork en0 "$2" "$(security find-generic-password -s xbar-wifi -a "$2" -w)" ;;
@@ -36,7 +37,6 @@ if [ "$1" = "run" ]; then
       else
         osascript -e 'tell application "Amphetamine" to start new session'
       fi ;;
-    *) "$HSC" "$@" ;;
   esac >/dev/null 2>&1
   exit 0
 fi
@@ -108,10 +108,8 @@ get_copilot_data() {
   # Ensure cache files exist so callers can read them while we refresh
   [ -f "$COPILOT_ICON_CACHE" ]  || printf '' > "$COPILOT_ICON_CACHE"
   [ -f "$COPILOT_STATS_CACHE" ] || printf '' > "$COPILOT_STATS_CACHE"
-  local plugin="$HOME/Library/Application Support/xbar/plugins/copilot_aic.5m.py"
   (
-    local output
-    output=$(python3 "$plugin" 2>/dev/null)
+    local output=$(python3 "$COPILOT" 2>/dev/null)
     local ok=false
     if [ -n "$output" ]; then
       local third_line
@@ -148,7 +146,7 @@ get_icon() {
     copilot_mtime=$(stat -f%m "$COPILOT_ICON_CACHE" 2>/dev/null || echo "0")
     cache_key="${cache_key}-copilot-${copilot_mtime}"
   fi
-  [ "$battery_state" != "none"        ] && cache_key="${cache_key}-${battery_state}"
+  [ "$battery_state" != "none" ] && cache_key="${cache_key}-${battery_state}"
 
   local cache_file="$CACHE_DIR/${cache_key}.b64"
   local age
@@ -165,8 +163,7 @@ get_icon() {
       > "${cache_file}.tmp" && mv "${cache_file}.tmp" "$cache_file") &
   else
     # First run: block until generated
-    local icon_b64
-    icon_b64=$("$CONFIG_DIR/render-icon" "$amph_active" "$battery_state" \
+    local icon_b64=$("$CONFIG_DIR/render-icon" "$amph_active" "$battery_state" \
                  "$wifi_state" "$audio_state" "$copilot_active")
     if [ -n "$icon_b64" ]; then
       echo "$icon_b64" > "$cache_file"
@@ -244,6 +241,8 @@ else
   echo "Low power mode | bash='$0' param1=run param2=lowpower param3=1 terminal=false refresh=true"
 fi
 
+echo "---"
+
 # Keymap
 echo "Keymap | bash='$0' param1=run param2=keymap terminal=false"
 
@@ -258,14 +257,13 @@ if $copilot_active; then
 fi
 
 # Headset
-if "$HSC" -o json 2>/dev/null | grep -q '"device_count": *[1-9]'; then
+sidetone=$($SIDETONE)
+if ! $?; then
   echo "---"
   echo "Headset sidetone"
-  item() {
-    local label="$1"; shift
-    local i=1 params=""
-    for a in "$@"; do params="$params param$((i+1))=$a"; i=$((i+1)); done
-    echo "--$label | bash='$0' param1=run$params terminal=false refresh=true"
-  }
-  for level in 0 16 32 48 64 80 96 112 128; do item "$level" sidetone "$level"; done
+  for level in 0 16 32 48 64 80 96 112 128; do
+    tick=
+    (( $level == $sidetone )) && tick=✓
+    echo "--$level $tick| bash='$0' param1=run param2=sidetone param3=$level terminal=false refresh=true"
+  done
 fi
