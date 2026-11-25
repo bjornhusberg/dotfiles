@@ -252,7 +252,7 @@ echo "Keymap | bash='$0' param1=run param2=keymap terminal=false"
 
 # Copilot AIC
 if $copilot_active; then
-  echo "Copilot AIC | image=$(cat "$COPILOT_ICON_CACHE")"
+  echo "Copilot AIC"
   while IFS= read -r line; do
     if [ "$line" = "---" ]; then echo "-----"
     elif [ -n "$line" ]; then echo "--$line"
