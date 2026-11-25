@@ -194,6 +194,7 @@ copilot_active=false
 
 icon_b64=$(get_icon "$amph_active" "$battery_state" "$wifi_state" "$audio_state" "$copilot_active")
 echo "| image=$icon_b64"
+
 echo "---"
 
 # Battery status
@@ -209,6 +210,17 @@ if echo "$pmout" | grep -q "'Battery Power'"; then
 else
   echo "Battery: $battery_percent% (charging) | refresh=true"
 fi
+
+# Copilot AIC
+if $copilot_active; then
+  echo "Copilot AIC"
+  while IFS= read -r line; do
+    if [ "$line" = "---" ]; then echo "-----"
+    elif [ -n "$line" ]; then echo "--$line | refresh=true"
+    fi
+  done < "$COPILOT_STATS_CACHE"
+fi
+
 echo "---"
 
 # Lock screen
@@ -249,16 +261,6 @@ echo "---"
 
 # Keymap
 echo "Keymap | bash='$0' param1=run param2=keymap terminal=false"
-
-# Copilot AIC
-if $copilot_active; then
-  echo "Copilot AIC"
-  while IFS= read -r line; do
-    if [ "$line" = "---" ]; then echo "-----"
-    elif [ -n "$line" ]; then echo "--$line"
-    fi
-  done < "$COPILOT_STATS_CACHE"
-fi
 
 # Headset
 if sidetone=$("$SIDETONE" 2>/dev/null); then
