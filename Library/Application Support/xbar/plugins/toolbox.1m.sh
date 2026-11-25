@@ -256,13 +256,12 @@ if $copilot_active; then
 fi
 
 # Headset
-sidetone=$($SIDETONE)
-if ! $?; then
+if sidetone=$("$SIDETONE" 2>/dev/null); then
   echo "---"
   echo "Headset sidetone"
   for level in 0 16 32 48 64 80 96 112 128; do
     tick=
-    (( $level == $sidetone )) && tick=✓
+    (( level == sidetone )) && tick=✓
     echo "--$level $tick| bash='$0' param1=run param2=sidetone param3=$level terminal=false refresh=true"
   done
 fi
