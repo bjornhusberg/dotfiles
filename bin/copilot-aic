@@ -1,0 +1,157 @@
+#!/usr/bin/env python3
+"""
+CLI tool: shows GitHub Copilot AI-credit (AIC) usage statistics.
+Reads from ~/.copilot/session-store.db.
+
+Usage:
+  copilot-aic [--budget N]   # N overrides the monthly AIC budget
+
+The monthly budget defaults to the AIC_MONTHLY_BUDGET env var, or 25000.
+"""
+
+import argparse
+import calendar
+import os
+import sqlite3
+import sys
+from calendar import monthrange
+from datetime import date, timedelta
+from pathlib import Path
+from typing import Optional
+
+DB_PATH = Path.home() / ".copilot" / "session-store.db"
+DEFAULT_MONTHLY_BUDGET = 25000
+
+
+def parse_budget(value: Optional[str]) -> int:
+    try:
+        budget = int(float(value)) if value is not None else 0
+    except (ValueError, OverflowError):
+        return DEFAULT_MONTHLY_BUDGET
+    return budget if budget > 0 else DEFAULT_MONTHLY_BUDGET
+
+
+def aic_used(conn: sqlite3.Connection, date_prefix: str) -> float:
+    row = conn.execute(
+        """
+        SELECT COALESCE(SUM(total_nano_aiu), 0)
+        FROM assistant_usage_events
+        WHERE substr(datetime(created_at, 'localtime'), 1, ?) = ?
+        """,
+        (len(date_prefix), date_prefix),
+    ).fetchone()
+    return (row[0] or 0) / 1e9
+
+
+def aic_used_between(conn: sqlite3.Connection, start: date, end: date) -> float:
+    row = conn.execute(
+        """
+        SELECT COALESCE(SUM(total_nano_aiu), 0)
+        FROM assistant_usage_events
+        WHERE date(created_at, 'localtime') >= ? AND date(created_at, 'localtime') < ?
+        """,
+        (start.isoformat(), end.isoformat()),
+    ).fetchone()
+    return (row[0] or 0) / 1e9
+
+
+def last_working_day(day: date) -> date:
+    while day.weekday() >= 5:
+        day -= timedelta(days=1)
+    return day
+
+
+def _count_working_days(start: date, end: date) -> int:
+    count = 0
+    day = start
+    while day <= end:
+        if day.weekday() < 5:
+            count += 1
+        day += timedelta(days=1)
+    return count
+
+
+def total_working_days(today: date) -> int:
+    last_day = monthrange(today.year, today.month)[1]
+    return _count_working_days(date(today.year, today.month, 1), date(today.year, today.month, last_day))
+
+
+def worked_working_days(today: date) -> int:
+    return _count_working_days(date(today.year, today.month, 1), today)
+
+
+def compute_usage(conn: sqlite3.Connection, monthly_budget: int, real_today: date) -> dict:
+    today = last_working_day(real_today)
+    new_month_weekend = today.month != real_today.month
+    if new_month_weekend:
+        today = real_today
+
+    used_this_month = aic_used(conn, today.strftime("%Y-%m"))
+    used_before_today = 0.0 if new_month_weekend else aic_used_between(conn, today.replace(day=1), today)
+    used_today = used_this_month if new_month_weekend else aic_used(conn, today.isoformat())
+
+    days_total = total_working_days(today)
+    worked_days_incl_today = worked_working_days(today)
+    target_to_date = (
+        (monthly_budget / days_total) * worked_days_incl_today if days_total > 0 else monthly_budget
+    )
+
+    max_today = target_to_date - used_before_today
+    if max_today > 0:
+        percentage = used_today / max_today * 100
+    else:
+        percentage = 100 if used_today > 0 else 0
+
+    return {
+        "month": calendar.month_name[today.month],
+        "worked_days": worked_days_incl_today,
+        "days_total": days_total,
+        "used_month": used_this_month,
+        "used_today": used_today,
+        "max_today": max_today,
+        "ideal_daily": monthly_budget / days_total if days_total > 0 else 0,
+        "percentage": percentage,
+    }
+
+
+def fmt_remaining(remaining: float) -> str:
+    if round(remaining) < 0:
+        return f"over budget by {-remaining:,.0f} AIC"
+    return f"{remaining:,.0f} AIC"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Show GitHub Copilot AIC usage statistics.")
+    parser.add_argument("--budget", type=int, default=None, help="Monthly AIC budget (overrides env var)")
+    args = parser.parse_args()
+
+    monthly_budget = args.budget if args.budget and args.budget > 0 else parse_budget(os.environ.get("AIC_MONTHLY_BUDGET"))
+
+    if not DB_PATH.exists():
+        print(f"Error: session store not found at {DB_PATH}", file=sys.stderr)
+        sys.exit(1)
+
+    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    try:
+        u = compute_usage(conn, monthly_budget, date.today())
+    except Exception as e:
+        print(f"Error reading usage data: {e}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        conn.close()
+
+    W = 24  # label column width
+    print(f"{u['month']} · working day {u['worked_days']} of {u['days_total']}")
+    print()
+    print(f"{'Monthly budget:':<{W}} {monthly_budget:>10,} AIC")
+    print(f"{'Used this month:':<{W}} {u['used_month']:>10,.0f} AIC  ({u['used_month'] / monthly_budget * 100:.0f}%)")
+    print(f"{'Remaining:':<{W}} {fmt_remaining(monthly_budget - u['used_month']):>10}")
+    print()
+    print(f"{'Baseline per day:':<{W}} {u['ideal_daily']:>10,.0f} AIC")
+    print(f"{'Today\'s budget:':<{W}} {max(u['max_today'], 0):>10,.0f} AIC")
+    print(f"{'Used today:':<{W}} {u['used_today']:>10,.0f} AIC  ({u['percentage']:.0f}%)")
+    print(f"{'Remaining today:':<{W}} {fmt_remaining(u['max_today'] - u['used_today']):>10}")
+
+
+if __name__ == "__main__":
+    main()
