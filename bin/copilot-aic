@@ -132,16 +132,16 @@ def _main_xbar(monthly_budget: int) -> None:
             return  # no output = copilot icon hidden
         print(f"percentage={u['percentage']:.6f}")
         print(f"Copilot AIC ({u['percentage']:.0f}% used)")
-        print(f"--{u['month']} · working day {u['worked_days']} of {u['days_total']}")
-        print("-- ---")
-        print(f"--Monthly budget: {monthly_budget:,} AIC")
-        print(f"--Used this month: {u['used_month']:,.0f} AIC ({u['used_month'] / monthly_budget * 100:.0f}%)")
-        print(f"--Remaining: {fmt_remaining(monthly_budget - u['used_month'])}")
-        print("-- ---")
-        print(f"--Baseline per working day: {u['ideal_daily']:,.0f} AIC")
-        print(f"--Today's budget: {max(u['max_today'], 0):,.0f} AIC")
-        print(f"--Used today: {u['used_today']:,.0f} AIC ({u['percentage']:.0f}%)")
-        print(f"--Remaining: {fmt_remaining(u['max_today'] - u['used_today'])}")
+        print(f"--{u['month']} · working day {u['worked_days']} of {u['days_total']} | refresh=true")
+        print("-- --- | refresh=true")
+        print(f"--Monthly budget: {monthly_budget:,} AIC | refresh=true")
+        print(f"--Used this month: {u['used_month']:,.0f} AIC ({u['used_month'] / monthly_budget * 100:.0f}%) | refresh=true")
+        print(f"--Remaining: {fmt_remaining(monthly_budget - u['used_month'])} | refresh=true")
+        print("-- --- | refresh=true")
+        print(f"--Baseline per working day: {u['ideal_daily']:,.0f} AIC | refresh=true")
+        print(f"--Today's budget: {max(u['max_today'], 0):,.0f} AIC | refresh=true")
+        print(f"--Used today: {u['used_today']:,.0f} AIC ({u['percentage']:.0f}%) | refresh=true")
+        print(f"--Remaining: {fmt_remaining(u['max_today'] - u['used_today'])} | refresh=true")
     except Exception:
         return
     finally:
